@@ -3,10 +3,15 @@
 #include <gazebo/transport/transport.hh>
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include <iostream>
+#include <stdio.h>
 
 static boost::mutex mutex;
+int cent;
 
 void statCallback(ConstWorldStatisticsPtr &_msg) {
   (void)_msg;
@@ -22,14 +27,14 @@ void poseCallback(ConstPosesStampedPtr &_msg) {
   for (int i = 0; i < _msg->pose_size(); i++) {
     if (_msg->pose(i).name() == "pioneer2dx") {
 
-      std::cout << std::setprecision(2) << std::fixed << std::setw(6)
-                << _msg->pose(i).position().x() << std::setw(6)
-                << _msg->pose(i).position().y() << std::setw(6)
-                << _msg->pose(i).position().z() << std::setw(6)
-                << _msg->pose(i).orientation().w() << std::setw(6)
-                << _msg->pose(i).orientation().x() << std::setw(6)
-                << _msg->pose(i).orientation().y() << std::setw(6)
-                << _msg->pose(i).orientation().z() << std::endl;
+     // std::cout << std::setprecision(2) << std::fixed << std::setw(6)
+               // << _msg->pose(i).position().x() << std::setw(6)
+                //<< _msg->pose(i).position().y() << std::setw(6)
+                //<< _msg->pose(i).position().z() << std::setw(6)
+               // << _msg->pose(i).orientation().w() << std::setw(6)
+               // << _msg->pose(i).orientation().x() << std::setw(6)
+               // << _msg->pose(i).orientation().y() << std::setw(6)
+              //  << _msg->pose(i).orientation().z() << std::endl;
     }
   }
 }
@@ -41,16 +46,58 @@ void cameraCallback(ConstImageStampedPtr &msg) {
   const char *data = msg->image().data().c_str();
   cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
 
-  im = im.clone();
-  cv::cvtColor(im, im, CV_BGR2RGB);
+  cv::Mat kombi;
+  cv::Mat mask;
+  cv::Mat cirkler;
+  cv::Mat cirkler_gray;
+
+
+  kombi = im.clone();
+  cv::cvtColor(im,im,CV_BGR2RGB);
+
+
+  cv::cvtColor(kombi, kombi, CV_BGR2HSV);
+  cv::inRange(kombi,cv::Scalar(0,0,50),cv::Scalar(80,220,200),mask);
+
+  kombi.setTo(cv::Scalar(255), mask); // Set area of mask to value 255
+
+  for(int i=0; i<kombi.rows;i++){
+       for(int j=0; j<kombi.cols;j++){
+           if(kombi.at<cv::Vec3b>(i,j)[0]==0){
+               kombi.at<cv::Vec3b>(i,j)[0]=255;
+               kombi.at<cv::Vec3b>(i,j)[1]=0;
+               kombi.at<cv::Vec3b>(i,j)[2]=255;
+           }
+       }
+   }
+
+  cv::cvtColor(kombi, kombi, CV_HSV2RGB);
+  cirkler = kombi.clone();
+  std::vector<cv::Vec3f> circles;
+  cv::cvtColor(cirkler, cirkler_gray, CV_RGB2GRAY);
+
+  cv::HoughCircles(cirkler_gray,circles,CV_HOUGH_GRADIENT,1,cirkler_gray.rows/8,100,15,0,0);
+
+  for( size_t i = 0; i < circles.size(); i++ )
+  {
+      cv::Vec3i c = circles[i];
+      cent =c[0];
+      cv::Point center = cv::Point(c[0], c[1]);
+      // circle center
+      cv::circle( cirkler, center, 1, cv::Scalar(0,100,100), 3, cv::LINE_AA);
+      // circle outline
+      int radius = c[2];
+      cv::circle( cirkler, center, radius, cv::Scalar(255,0,255), 3, cv::LINE_AA);
+  }
 
   mutex.lock();
   cv::imshow("camera", im);
+  cv::imshow("komb", kombi);
+  cv::imshow( "Hough Circle Transform Demo", cirkler );
   mutex.unlock();
+
 }
-// Jeg har bygget en kommentar af lort
-// lort
-// Hest kommentar
+
 void lidarCallback(ConstLaserScanStampedPtr &msg) {
 
   //  std::cout << ">> " << msg->DebugString() << std::endl;
@@ -119,6 +166,7 @@ int main(int _argc, char **_argv) {
   gazebo::transport::SubscriberPtr lidarSubscriber =
       node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidarCallback);
 
+
   // Publish to the robot vel_cmd topic
   gazebo::transport::PublisherPtr movementPublisher =
       node->Advertise<gazebo::msgs::Pose>("~/pioneer2dx/vel_cmd");
@@ -142,6 +190,7 @@ int main(int _argc, char **_argv) {
 
   // Loop
   while (true) {
+    std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
 
     mutex.lock();
@@ -151,19 +200,29 @@ int main(int _argc, char **_argv) {
     if (key == key_esc)
       break;
 
+    if(cent>=150 && cent<=170){
+        speed= 0.15;
+        dir=0;
+  }
+    else if (cent > 170)
+        dir =0.15;
+    else if (cent < 150 && cent > 0)
+        dir =-0.15;
+
+
     if ((key == key_up) && (speed <= 1.2f))
       speed += 0.05;
     else if ((key == key_down) && (speed >= -1.2f))
-      speed -= 0.05;
+     speed -= 0.05;
     else if ((key == key_right) && (dir <= 0.4f))
       dir += 0.05;
     else if ((key == key_left) && (dir >= -0.4f))
       dir -= 0.05;
-    else {
+//    else {
       // slow down
       //      speed *= 0.1;
       //      dir *= 0.1;
-    }
+    //}
 
     // Generate a pose
     ignition::math::Pose3d pose(double(speed), 0, 0, 0, 0, double(dir));

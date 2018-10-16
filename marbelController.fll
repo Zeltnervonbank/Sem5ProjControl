@@ -1,0 +1,58 @@
+#File: fuzzybugcontroller.fll
+Engine: ObstacleAvoidance
+InputVariable: ObstacleDirection
+  enabled: true
+  range: -1.6 1.6
+  lock-range: false
+  term: right Ramp 160 300
+  term: center Triangle 150 160 170
+  term: left Ramp 0 150
+
+InputVariable: ObstacleDistance
+  enabled: true
+  range: 0 10
+  lock-range: false
+  term: farrigth Ramp 200 300
+  term: rigth Ramp 170 200
+  term: straigt Triangle 150 160 170
+  term: left Ramp 100 150
+  term: farleft Ramp 0 100
+
+//OutputVariable: SteerDirection
+  //enabled: true
+  //range: -1.57 1.57
+  //lock-range: false
+  //aggregation: Maximum
+  //defuzzifier: Centroid 100
+  //default: 0
+  //lock-previous: false
+  //term: sharpright Ramp -1 -1.57
+  //term: right      Triangle -1.2 -0.600 0
+  //term: straight   Triangle -0.2 0.000 0.2
+  //term: left       Triangle 0 0.6 1.2
+  //term: sharpleft  Ramp  1 1.57
+
+OutputVariable: Speed
+  enabled: true
+  range: -1 1
+  lock-range: false
+  aggregation: Maximum
+  defuzzifier: Centroid 100
+  default: 0
+  lock-previous: false
+  term: backward Ramp  0.1 -1
+  term: forward  Ramp  -0.1 1
+
+
+RuleBlock: mamdani
+  enabled: true
+  conjunction: Minimum
+  disjunction: Maximum
+  implication: Minimum
+  activation: General
+  rule: if ObstacleDistance is straigth then SteerDirection is straight
+  rule: if ObstacleDistance is left then SteerDirection is right
+  rule: if ObstacleDistance is farleft then SteerDirection is sharpright
+  rule: if ObstacleDistance is rigth then SteerDirection is left
+  rule: if ObstacleDistance is farrigth then SteerDirection is sharpleft
+  rule: if ObstacleDistance is straigth then Speed is forward

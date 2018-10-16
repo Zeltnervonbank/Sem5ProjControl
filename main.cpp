@@ -9,6 +9,8 @@
 
 #include <iostream>
 #include <stdio.h>
+#include "camera.h"
+//#include "marbel_controller.h"
 
 static boost::mutex mutex;
 int cent;
@@ -40,66 +42,17 @@ void poseCallback(ConstPosesStampedPtr &_msg) {
 }
 
 void cameraCallback(ConstImageStampedPtr &msg) {
+    std::size_t width = msg->image().width();
+    std::size_t height = msg->image().height();
+    const char *data = msg->image().data().c_str();
+    cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
 
-  std::size_t width = msg->image().width();
-  std::size_t height = msg->image().height();
-  const char *data = msg->image().data().c_str();
-  cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
+    Camera cam;
+    cam.getMarbelCenter(im);
 
-  cv::Mat kombi;
-  cv::Mat mask;
-  cv::Mat cirkler;
-  cv::Mat cirkler_gray;
-
-
-  kombi = im.clone();
-  cv::cvtColor(im,im,CV_BGR2RGB);
-
-
-  cv::cvtColor(kombi, kombi, CV_BGR2HSV);
-  cv::inRange(kombi,cv::Scalar(0,0,50),cv::Scalar(80,220,200),mask);
-
-  kombi.setTo(cv::Scalar(255), mask); // Set area of mask to value 255
-
-  for(int i=0; i<kombi.rows;i++){
-       for(int j=0; j<kombi.cols;j++){
-           if(kombi.at<cv::Vec3b>(i,j)[0]==0){
-               kombi.at<cv::Vec3b>(i,j)[0]=255;
-               kombi.at<cv::Vec3b>(i,j)[1]=0;
-               kombi.at<cv::Vec3b>(i,j)[2]=255;
-           }
-       }
-   }
-
-  cv::cvtColor(kombi, kombi, CV_HSV2RGB);
-  cirkler = kombi.clone();
-  std::vector<cv::Vec3f> circles;
-  cv::cvtColor(cirkler, cirkler_gray, CV_RGB2GRAY);
-
-  cv::HoughCircles(cirkler_gray,circles,CV_HOUGH_GRADIENT,1,cirkler_gray.rows/8,110,17,0,0);
-  int radius =0;
-  for( size_t i = 0; i < circles.size(); i++ )
-  {
-      cv::Vec3i c = circles[i];
-      if(c[2]>=radius){
-      cent =c[0];
-      cv::Point center = cv::Point(c[0], c[1]);
-      // circle center
-      cv::circle( cirkler, center, 1, cv::Scalar(0,100,100), 3, cv::LINE_AA);
-      // circle outline
-
-      radius = c[2];
-      cv::circle( cirkler, center, radius, cv::Scalar(255,0,255), 3, cv::LINE_AA);
-  }
-  }
-
-  mutex.lock();
-  std::cout << radius << std::endl;
-  cv::imshow("camera", im);
-  cv::imshow("komb", kombi);
-  cv::imshow( "Hough Circle Transform Demo", cirkler );
-  mutex.unlock();
-
+    mutex.lock();
+    cv::imshow("camera", im);
+    mutex.unlock();
 }
 
 void lidarCallback(ConstLaserScanStampedPtr &msg) {
@@ -157,18 +110,20 @@ int main(int _argc, char **_argv) {
   gazebo::transport::NodePtr node(new gazebo::transport::Node());
   node->Init();
 
+
+
   // Listen to Gazebo topics
   gazebo::transport::SubscriberPtr statSubscriber =
       node->Subscribe("~/world_stats", statCallback);
 
   gazebo::transport::SubscriberPtr poseSubscriber =
-      node->Subscribe("~/pose/info", poseCallback);
-
-  gazebo::transport::SubscriberPtr cameraSubscriber =
-      node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
+      node->Subscribe("~/pose/info", poseCallback); 
 
   gazebo::transport::SubscriberPtr lidarSubscriber =
       node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidarCallback);
+
+  gazebo::transport::SubscriberPtr cameraSubscriber =
+  node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
 
 
   // Publish to the robot vel_cmd topic

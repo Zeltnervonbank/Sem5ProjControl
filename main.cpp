@@ -27,14 +27,14 @@ void poseCallback(ConstPosesStampedPtr &_msg) {
   for (int i = 0; i < _msg->pose_size(); i++) {
     if (_msg->pose(i).name() == "pioneer2dx") {
 
-     // std::cout << std::setprecision(2) << std::fixed << std::setw(6)
-               // << _msg->pose(i).position().x() << std::setw(6)
-                //<< _msg->pose(i).position().y() << std::setw(6)
-                //<< _msg->pose(i).position().z() << std::setw(6)
+      //std::cout << std::setprecision(2) << std::fixed << std::setw(6)
+               //<< _msg->pose(i).position().x() << std::setw(6)
+               //<< _msg->pose(i).position().y() << std::setw(6)
+               //<< _msg->pose(i).position().z() << std::endl;
                // << _msg->pose(i).orientation().w() << std::setw(6)
                // << _msg->pose(i).orientation().x() << std::setw(6)
                // << _msg->pose(i).orientation().y() << std::setw(6)
-              //  << _msg->pose(i).orientation().z() << std::endl;
+               // << _msg->pose(i).orientation().z() << std::endl;
     }
   }
 }
@@ -76,21 +76,25 @@ void cameraCallback(ConstImageStampedPtr &msg) {
   std::vector<cv::Vec3f> circles;
   cv::cvtColor(cirkler, cirkler_gray, CV_RGB2GRAY);
 
-  cv::HoughCircles(cirkler_gray,circles,CV_HOUGH_GRADIENT,1,cirkler_gray.rows/8,100,15,0,0);
-
+  cv::HoughCircles(cirkler_gray,circles,CV_HOUGH_GRADIENT,1,cirkler_gray.rows/8,110,17,0,0);
+  int radius =0;
   for( size_t i = 0; i < circles.size(); i++ )
   {
       cv::Vec3i c = circles[i];
+      if(c[2]>=radius){
       cent =c[0];
       cv::Point center = cv::Point(c[0], c[1]);
       // circle center
       cv::circle( cirkler, center, 1, cv::Scalar(0,100,100), 3, cv::LINE_AA);
       // circle outline
-      int radius = c[2];
+
+      radius = c[2];
       cv::circle( cirkler, center, radius, cv::Scalar(255,0,255), 3, cv::LINE_AA);
+  }
   }
 
   mutex.lock();
+  std::cout << radius << std::endl;
   cv::imshow("camera", im);
   cv::imshow("komb", kombi);
   cv::imshow( "Hough Circle Transform Demo", cirkler );
@@ -184,13 +188,14 @@ int main(int _argc, char **_argv) {
   const int key_down = 84;
   const int key_right = 83;
   const int key_esc = 27;
+  const int key_shift = 17;
 
   float speed = 0.0;
   float dir = 0.0;
 
   // Loop
   while (true) {
-    std::cout << cent << std::endl;
+    //std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
 
     mutex.lock();
@@ -200,8 +205,12 @@ int main(int _argc, char **_argv) {
     if (key == key_esc)
       break;
 
-    if(cent>=150 && cent<=170){
-        speed= 0.15;
+    if (cent==0){
+        speed-=0.1;
+        dir=0.5;
+  }
+    else if(cent>=150 && cent<=170 && cent != 0){
+        speed= 1;
         dir=0;
   }
     else if (cent > 170)
@@ -209,8 +218,11 @@ int main(int _argc, char **_argv) {
     else if (cent < 150 && cent > 0)
         dir =-0.15;
 
-
-    if ((key == key_up) && (speed <= 1.2f))
+    if(key==key_shift){
+        speed = 0;
+        dir = 0;
+    }
+    else if ((key == key_up) && (speed <= 1.2f))
       speed += 0.05;
     else if ((key == key_down) && (speed >= -1.2f))
      speed -= 0.05;

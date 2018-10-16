@@ -48,7 +48,7 @@ void cameraCallback(ConstImageStampedPtr &msg) {
     cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
 
     Camera cam;
-    cam.getMarbelCenter(im);
+    cent=cam.getMarbelCenter(im);
 
     mutex.lock();
     cv::imshow("camera", im);
@@ -110,8 +110,6 @@ int main(int _argc, char **_argv) {
   gazebo::transport::NodePtr node(new gazebo::transport::Node());
   node->Init();
 
-
-
   // Listen to Gazebo topics
   gazebo::transport::SubscriberPtr statSubscriber =
       node->Subscribe("~/world_stats", statCallback);
@@ -143,14 +141,13 @@ int main(int _argc, char **_argv) {
   const int key_down = 84;
   const int key_right = 83;
   const int key_esc = 27;
-  const int key_shift = 17;
 
   float speed = 0.0;
   float dir = 0.0;
 
   // Loop
   while (true) {
-    //std::cout << cent << std::endl;
+    std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
 
     mutex.lock();
@@ -161,11 +158,11 @@ int main(int _argc, char **_argv) {
       break;
 
     if (cent==0){
-        speed-=0.1;
-        dir=0.5;
+        speed=0.5;
+        dir=0;
   }
     else if(cent>=150 && cent<=170 && cent != 0){
-        speed= 1;
+        speed= 0.5;
         dir=0;
   }
     else if (cent > 170)
@@ -173,11 +170,8 @@ int main(int _argc, char **_argv) {
     else if (cent < 150 && cent > 0)
         dir =-0.15;
 
-    if(key==key_shift){
-        speed = 0;
-        dir = 0;
-    }
-    else if ((key == key_up) && (speed <= 1.2f))
+
+    if ((key == key_up) && (speed <= 1.2f))
       speed += 0.05;
     else if ((key == key_down) && (speed >= -1.2f))
      speed -= 0.05;

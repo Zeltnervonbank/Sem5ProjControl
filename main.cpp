@@ -10,7 +10,7 @@
 #include <iostream>
 #include <stdio.h>
 #include "camera.h"
-//#include "marbel_controller.h"
+#include "marbel_controller.h"
 
 static boost::mutex mutex;
 int cent;
@@ -46,7 +46,6 @@ void cameraCallback(ConstImageStampedPtr &msg) {
     std::size_t height = msg->image().height();
     const char *data = msg->image().data().c_str();
     cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
-
     Camera cam;
     cent=cam.getMarbelCenter(im);
 
@@ -144,31 +143,34 @@ int main(int _argc, char **_argv) {
 
   float speed = 0.0;
   float dir = 0.0;
+  marbel_Controller fuzzy;
 
-  // Loop
+
+    // Loop
   while (true) {
     std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
 
+    dir=fuzzy.buildController(cent);
     mutex.lock();
     int key = cv::waitKey(1);
     mutex.unlock();
 
+
     if (key == key_esc)
       break;
 
+
     if (cent==0){
         speed=0.5;
-        dir=0;
   }
     else if(cent>=150 && cent<=170 && cent != 0){
         speed= 0.5;
-        dir=0;
   }
-    else if (cent > 170)
-        dir =0.15;
-    else if (cent < 150 && cent > 0)
-        dir =-0.15;
+//    else if (cent > 170)
+//        dir =0.15;
+//    else if (cent < 150 && cent > 0)
+//        dir =-0.15;
 
 
     if ((key == key_up) && (speed <= 1.2f))

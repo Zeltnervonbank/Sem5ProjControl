@@ -4,6 +4,7 @@
 #include <fl/Headers.h>
 #include "camera.h"
 
+
 struct ControlOutput
 {
     float direction;
@@ -15,8 +16,8 @@ class marbel_Controller
 public:
     marbel_Controller();
     virtual ~marbel_Controller() = default;
-    virtual void buildController();
-    virtual ControlOutput getControlOutput();
+    virtual float buildController(float cent);
+    virtual ControlOutput getControlOutput(float cent);
 protected:
     //LaserScanner*        m_pcLaserScanner;
 
@@ -25,6 +26,7 @@ protected:
     fl::InputVariable*   m_pflObstacleDistance;
     fl::OutputVariable*  m_pflSteerDirection;
     fl::OutputVariable*  m_pflSpeed;
+    float center;
 };
 
 

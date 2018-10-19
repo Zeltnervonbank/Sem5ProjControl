@@ -13,7 +13,8 @@
 #include "marbel_controller.h"
 
 static boost::mutex mutex;
-int cent;
+    int cent;
+    float dir =0.0;
 
 void statCallback(ConstWorldStatisticsPtr &_msg) {
   (void)_msg;
@@ -48,6 +49,9 @@ void cameraCallback(ConstImageStampedPtr &msg) {
     cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
     Camera cam;
     cent=cam.getMarbelCenter(im);
+
+    marbel_Controller fuzzy;
+    dir=fuzzy.buildController(cent);
 
     mutex.lock();
     cv::imshow("camera", im);
@@ -142,8 +146,6 @@ int main(int _argc, char **_argv) {
   const int key_esc = 27;
 
   float speed = 0.0;
-  float dir = 0.0;
-  marbel_Controller fuzzy;
 
 
     // Loop
@@ -151,7 +153,8 @@ int main(int _argc, char **_argv) {
     std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
 
-    dir=fuzzy.buildController(cent);
+
+
     mutex.lock();
     int key = cv::waitKey(1);
     mutex.unlock();

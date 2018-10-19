@@ -23,5 +23,4 @@ HEADERS += \
     marbel_controller.h \
     camera.h
 
-DISTFILES += \
-    marbelController.fll
+DISTFILES +=

@@ -5,10 +5,10 @@ marbel_Controller::marbel_Controller()
 
 }
 
-float marbel_Controller::buildController(float cent)
+float marbel_Controller::buildController(int cent)
 {
 
-    float cente = cent;
+    std::cout << "cent" << cent << std::endl;
     //Create fuzzy
     fl::Engine* engine = new fl::Engine;
     engine->setName("FindBall");
@@ -37,11 +37,11 @@ float marbel_Controller::buildController(float cent)
     outputVariable1->setDefuzzifier(new fl::Centroid(100));
     outputVariable1->setAggregation(new fl::Maximum);
     outputVariable1->setDefaultValue(fl::nan);
-    outputVariable1->addTerm(new fl::Ramp("ssharprigth", -1.570,-1.000));
+    outputVariable1->addTerm(new fl::Ramp("ssharprigth", -1.000, -1.570));
     outputVariable1->addTerm(new fl::Triangle("srigth", -1.200, -0.600, 0.000));
     outputVariable1->addTerm(new fl::Triangle("sstraight", -0.200, 0.000, 0.200));
     outputVariable1->addTerm(new fl::Triangle("sleft", 0.000, 0.600, 1.200));
-    outputVariable1->addTerm(new fl::Ramp("ssharpleft", 1.000, 1.570));
+    outputVariable1->addTerm(new fl::Ramp("ssharpleft", 1.570, 1.000));
     engine->addOutputVariable(outputVariable1);
 
     //Membership functions of outputspeed
@@ -85,16 +85,16 @@ float marbel_Controller::buildController(float cent)
       engine->process();
 
       //Defuzzification
-      float out1 = outputVariable1->getValue();
+      float out1 = ((int)(outputVariable1->getValue() * 100 + .5) / 100.0);
 
-      std::cout << "out1" << out1 << std::endl;
+      std::cout << "out1" <<std::setprecision(2) << out1 << std::endl;
 
       return out1;
 
 }
 
 
-ControlOutput marbel_Controller::getControlOutput(float cent)
+ControlOutput marbel_Controller::getControlOutput(int cent)
 {
     m_pflObstacleDistance->setValue(cent);
 

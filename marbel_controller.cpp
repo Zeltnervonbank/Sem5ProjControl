@@ -20,7 +20,8 @@ float marbel_Controller::buildController(int cent)
     inputVariable1->setName("BallDirection");
     inputVariable1->setRange(0.000, 300.000);
     inputVariable1->setLockValueInRange(false);
-    inputVariable1->addTerm(new fl::Ramp("farrigth", 200.000, 300.000));
+    inputVariable1->addTerm(new fl::Ramp("noball", 20000.000, 40000.000));
+    inputVariable1->addTerm(new fl::Ramp("farrigth", 200.000, 320.000));
     inputVariable1->addTerm(new fl::Triangle("rigth", 170.000, 185.000, 200.000));
     inputVariable1->addTerm(new fl::Triangle("center", 150.000, 160.000, 170.000));
     inputVariable1->addTerm(new fl::Triangle("left", 150.000,125.000, 100.000));
@@ -70,6 +71,7 @@ float marbel_Controller::buildController(int cent)
     mamdani->addRule(fl::Rule::parse("if BallDirection is rigth then direction is sleft", engine));
     mamdani->addRule(fl::Rule::parse("if BallDirection is left then direction is srigth", engine));
     mamdani->addRule(fl::Rule::parse("if BallDirection is farleft then direction is ssharprigth", engine));
+    mamdani->addRule(fl::Rule::parse("if BallDirection is noball then direction is sstraight", engine));
     engine->addRuleBlock(mamdani);
 
     std::string status;

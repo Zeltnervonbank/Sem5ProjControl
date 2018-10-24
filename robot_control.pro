@@ -39,3 +39,10 @@ INCLUDEPATH += $$PWD/../../fuzzylite-6.0/fuzzylite/release/bin
 DEPENDPATH += $$PWD/../../fuzzylite-6.0/fuzzylite/release/bin
 @LIBS += -L$$PWD/../../fuzzylite-6.0/fuzzylite/release/bin
 INCLUDEPATH +=$$PWD/../../fuzzylite-6.0/fuzzylite/
+
+unix:!macx: LIBS += -L$$PWD/../../../../fuzzylite-6.0/fuzzylite/release/bin/ -lfuzzylite
+
+INCLUDEPATH += $$PWD/../../../../fuzzylite-6.0/fuzzylite/release/bin
+DEPENDPATH += $$PWD/../../../../fuzzylite-6.0/fuzzylite/release/bin
+@LIBS += -L$$PWD/../../../../fuzzylite-6.0/fuzzylite/release/bin
+INCLUDEPATH +=$$PWD/../../../../fuzzylite-6.0/fuzzylite

@@ -5,7 +5,7 @@ Camera::Camera()
 
 }
 
-float Camera::getMarbelCenter(cv::Mat im)
+MarbleLocation Camera::getMarbelCenter(cv::Mat im)
 {
     cv::Mat kombi;
     cv::Mat mask;
@@ -38,27 +38,28 @@ float Camera::getMarbelCenter(cv::Mat im)
     cv::cvtColor(cirkler, cirkler_gray, CV_RGB2GRAY);
 
     cv::HoughCircles(cirkler_gray,circles,CV_HOUGH_GRADIENT,1,cirkler_gray.rows/8,110,17,0,0);
-    int radius =0;
-    int cent;
+
+    MarbleLocation mLoc;
+
     for( size_t i = 0; i < circles.size(); i++ )
     {
         cv::Vec3i c = circles[i];
-        if(c[2]>=radius){
-        cent =c[0];
+        if(c[2]>=mLoc.radius){
+        mLoc.center =c[0];
         cv::Point center = cv::Point(c[0], c[1]);
         // circle center
         cv::circle( cirkler, center, 1, cv::Scalar(0,100,100), 3, cv::LINE_AA);
         // circle outline
 
-        radius = c[2];
-        cv::circle( cirkler, center, radius, cv::Scalar(255,0,255), 3, cv::LINE_AA);
+        mLoc.radius = c[2];
+        cv::circle( cirkler, center, mLoc.radius, cv::Scalar(255,0,255), 3, cv::LINE_AA);
     }
     }
 
 
-    std::cout << radius << std::endl;
+    std::cout << mLoc.radius << std::endl;
     cv::imshow("komb", kombi);
     cv::imshow( "Hough Circle Transform Demo", cirkler );
 
-    return cent;
+    return mLoc;
 }

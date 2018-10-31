@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <stdio.h>
+#include "datatypes.h"
 
 #include "marbel_controller.h"
 
@@ -15,7 +16,7 @@ class Camera
 {
 public:
     Camera();
-    float getMarbelCenter(cv::Mat im);
+    MarbleLocation getMarbelCenter(cv::Mat im);
 };
 
 #endif // CAMERA_H

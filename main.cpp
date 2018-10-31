@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "camera.h"
 #include "marbel_controller.h"
+#include "datatypes.h"
 
 static boost::mutex mutex;
     int cent;
@@ -48,10 +49,10 @@ void cameraCallback(ConstImageStampedPtr &msg) {
     const char *data = msg->image().data().c_str();
     cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
     Camera cam;
-    cent=cam.getMarbelCenter(im);
+    MarbleLocation mLoc = cam.getMarbelCenter(im);
 
     marbel_Controller fuzzy;
-    dir=fuzzy.buildController(cent);
+    dir=fuzzy.buildController(mLoc.center);
 
     mutex.lock();
     cv::imshow("camera", im);

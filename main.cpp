@@ -54,6 +54,7 @@ void cameraCallback(ConstImageStampedPtr &msg) {
     marbel_Controller fuzzy;
     dir=fuzzy.buildController(mLoc.center);
 
+
     mutex.lock();
     cv::imshow("camera", im);
     mutex.unlock();
@@ -145,6 +146,7 @@ int main(int _argc, char **_argv) {
   const int key_down = 84;
   const int key_right = 83;
   const int key_esc = 27;
+  marbel_Controller fuzzy;
 
   float speed = 0.0;
 
@@ -164,6 +166,7 @@ int main(int _argc, char **_argv) {
     if (key == key_esc)
       break;
 
+    dir=fuzzy.buildController(cent);
 
     if (cent==0){
         speed=0.5;

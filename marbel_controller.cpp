@@ -8,7 +8,7 @@ marbel_Controller::marbel_Controller()
 float marbel_Controller::buildController(int cent)
 {
 
-    std::cout << "cent" << cent << std::endl;
+    //std::cout << "cent" << cent << std::endl;
     //Create fuzzy
     fl::Engine* engine = new fl::Engine;
     engine->setName("FindBall");
@@ -89,7 +89,7 @@ float marbel_Controller::buildController(int cent)
       //Defuzzification
       float out1 = ((int)(outputVariable1->getValue() * 100 + .5) / 100.0);
 
-      std::cout << "out1" <<std::setprecision(2) << out1 << std::endl;
+      //std::cout << "out1" <<std::setprecision(2) << out1 << std::endl;
 
       return out1;
 

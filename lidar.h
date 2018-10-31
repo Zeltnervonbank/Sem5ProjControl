@@ -13,13 +13,26 @@
 #ifndef LIDAR_H
 #define LIDAR_H
 
+#define STRAIGHT 0
+#define CURVED 1
+
 
 class lidar
 {
 public:
     lidar();
-    static void doSomething();
-    float GetCollinearity(cv::Point2f points[3]);
+    static void lidarCallback(ConstLaserScanStampedPtr &msg);
+
+private:
+    struct ScanSegment
+    {
+        std::vector<cv::Point2f> points;
+        int type;
+    };
+
+    static float GetCollinearity(cv::Point2f points[3]);
+    static std::vector<ScanSegment> GetSegmentsOfScan(std::vector<cv::Point2f> points);
+
 };
 
 #endif // LIDAR_H

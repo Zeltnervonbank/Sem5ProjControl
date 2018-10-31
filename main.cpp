@@ -60,6 +60,17 @@ void cameraCallback(ConstImageStampedPtr &msg) {
     mutex.unlock();
 }
 
+float GetCollinearity(cv::Point2f points[3])
+{
+    cv::Point2f A = points[0];
+    cv::Point2f B = points[1];
+    cv::Point2f C = points[2];
+
+    float area = A.x * (B.y - C.y) + B.x * (C.y - A.y) + C.x * (A.y - B.y);
+
+    return area;
+}
+
 void lidarCallback(ConstLaserScanStampedPtr &msg) {
 
   //  std::cout << ">> " << msg->DebugString() << std::endl;
@@ -78,26 +89,112 @@ void lidarCallback(ConstLaserScanStampedPtr &msg) {
 
   assert(nranges == nintensities);
 
-  int width = 400;
-  int height = 400;
+  int width = 600;
+  int height = 600;
   float px_per_m = 200 / range_max;
 
   cv::Mat im(height, width, CV_8UC3);
   im.setTo(0);
+
+  std::vector<cv::Point2f> detectedPoints;
+
+  struct ScanSegment
+  {
+      std::vector<cv::Point2f> points;
+      int type;
+  };
+
   for (int i = 0; i < nranges; i++) {
     float angle = angle_min + i * angle_increment;
     float range = std::min(float(msg->scan().ranges(i)), range_max);
     //    double intensity = msg->scan().intensities(i);
-    cv::Point2f startpt(200.5f + range_min * px_per_m * std::cos(angle),
-                        200.5f - range_min * px_per_m * std::sin(angle));
-    cv::Point2f endpt(200.5f + range * px_per_m * std::cos(angle),
-                      200.5f - range * px_per_m * std::sin(angle));
-    cv::line(im, startpt * 16, endpt * 16, cv::Scalar(255, 255, 255, 255), 1,
-             cv::LINE_AA, 4);
+
+    // Get start point
+    cv::Point2f startpt(300.5f + range_min * px_per_m * std::cos(angle),
+                        300.5f - range_min * px_per_m * std::sin(angle));
+
+    // Get end point
+    cv::Point2f endpt(300.5f + range * px_per_m * std::cos(angle),
+                      300.5f - range * px_per_m * std::sin(angle));
+
+    detectedPoints.push_back(endpt);
+
+    // Create line from start to end
+    //cv::line(im, startpt * 16, endpt * 16, cv::Scalar(255, 255, 255, 255), 1, cv::LINE_AA, 4);
 
     //    std::cout << angle << " " << range << " " << intensity << std::endl;
   }
-  cv::circle(im, cv::Point(200, 200), 2, cv::Scalar(0, 0, 255));
+
+  std::vector<ScanSegment> segments;
+#define STRAIGHT 0
+#define CURVED 1
+
+  ScanSegment currentSegment;
+  int segmentType = 0;
+
+  for(uint i = 0; i < detectedPoints.size(); i++)
+  {
+      // Break out before out of bounds exception
+      if(i == detectedPoints.size() - 1)
+      {
+          break;
+      }
+
+      // Get three points needed for collinearity calculation
+      cv::Point2f points [3] = {detectedPoints[i], detectedPoints[i+1], detectedPoints[i+2]};
+
+      // Determine collinearity of points
+      float collinearity = GetCollinearity(points);
+
+      //std::cout << collinearity << " ";
+
+      // If linear draw line from first point to second point
+
+      currentSegment.points.push_back(detectedPoints[i]);
+
+      if(collinearity < 0.01f && segmentType == CURVED)
+      {
+          //currentSegment.points.push_back(detectedPoints[i + 1]);
+          currentSegment.type = CURVED;
+          segments.push_back(currentSegment);
+
+          segmentType = STRAIGHT;
+
+          currentSegment.points.clear();
+          //cv::line(im, points[0] * 16, points[1] * 16, cv::Scalar(255, 255, 0, 255), 1, cv::LINE_AA, 4);
+      }
+
+      // If not linear, draw different colour line
+      else if(collinearity > 0.01f && segmentType == STRAIGHT)
+      {
+          currentSegment.points.push_back(detectedPoints[i + 1]);
+          currentSegment.type = STRAIGHT;
+          segments.push_back(currentSegment);
+
+          segmentType = CURVED;
+
+          currentSegment.points.clear();
+          //cv::line(im, points[0] * 16, points[1] * 16, cv::Scalar(0, 0, 255, 255), 1, cv::LINE_AA, 4);
+      }
+  }
+
+  for(uint i = 0; i < segments.size(); i++)
+  {
+      ScanSegment segment = segments[i];
+      for(uint j = 0; j < segment.points.size() - 1; j++)
+      {
+          if(segment.type == STRAIGHT)
+          {
+              cv::line(im, segment.points[j] * 16, segment.points[j + 1] * 16, cv::Scalar(0, 0, 255, 255), 1, cv::LINE_AA, 4);
+          }
+          else if(segment.type == CURVED)
+          {
+              cv::line(im, segment.points[j] * 16, segment.points[j + 1] * 16, cv::Scalar(0, 255, 255, 255), 1, cv::LINE_AA, 4);
+          }
+      }
+  }
+
+  cv::circle(im, cv::Point(300, 300), 2, cv::Scalar(0, 0, 255));
   cv::putText(im, std::to_string(sec) + ":" + std::to_string(nsec),
               cv::Point(10, 20), cv::FONT_HERSHEY_PLAIN, 1.0,
               cv::Scalar(255, 0, 0));

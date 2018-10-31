@@ -12,6 +12,7 @@
 #include "camera.h"
 #include "marbel_controller.h"
 #include "datatypes.h"
+#include "lidar.h"
 
 static boost::mutex mutex;
     int cent;
@@ -60,7 +61,7 @@ void cameraCallback(ConstImageStampedPtr &msg) {
     mutex.unlock();
 }
 
-float GetCollinearity(cv::Point2f points[3])
+/*float GetCollinearity(cv::Point2f points[3])
 {
     cv::Point2f A = points[0];
     cv::Point2f B = points[1];
@@ -69,7 +70,7 @@ float GetCollinearity(cv::Point2f points[3])
     float area = A.x * (B.y - C.y) + B.x * (C.y - A.y) + C.x * (A.y - B.y);
 
     return area;
-}
+}*/
 
 void lidarCallback(ConstLaserScanStampedPtr &msg) {
 
@@ -144,7 +145,7 @@ void lidarCallback(ConstLaserScanStampedPtr &msg) {
       cv::Point2f points [3] = {detectedPoints[i], detectedPoints[i+1], detectedPoints[i+2]};
 
       // Determine collinearity of points
-      float collinearity = GetCollinearity(points);
+      /*float collinearity = lidar::GetCollinearity(points);
 
       //std::cout << collinearity << " ";
 
@@ -175,7 +176,7 @@ void lidarCallback(ConstLaserScanStampedPtr &msg) {
 
           currentSegment.points.clear();
           //cv::line(im, points[0] * 16, points[1] * 16, cv::Scalar(0, 0, 255, 255), 1, cv::LINE_AA, 4);
-      }
+      }*/
   }
 
   for(uint i = 0; i < segments.size(); i++)
@@ -205,6 +206,7 @@ void lidarCallback(ConstLaserScanStampedPtr &msg) {
 }
 
 int main(int _argc, char **_argv) {
+    lidar::doSomething();
   // Load gazebo
   gazebo::client::setup(_argc, _argv);
 

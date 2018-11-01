@@ -23,17 +23,26 @@ public:
     lidar();
     static void lidarCallback(ConstLaserScanStampedPtr &msg);
 
-private:
+private:    
+    struct LidarRay
+    {
+        cv::Point2f startPoint;
+        cv::Point2f endPoint;
+        float range;
+        bool isMaxRange;
+        float angle;
+    };
+
     struct ScanSegment
     {
-        std::vector<cv::Point2f> points;
+        std::vector<LidarRay> points;
         int type;
     };
 
     static float GetCollinearity(cv::Point2f points[3]);
-    static std::vector<ScanSegment> GetSegmentsOfScan(std::vector<cv::Point2f> points);
-    static std::vector<cv::Point2f> GetLidarPoints(ConstLaserScanStampedPtr &msg);
-    static cv::Mat DisplayLidarPoints(cv::Mat im, std::vector<cv::Point2f> points);
+    static std::vector<ScanSegment> GetSegmentsOfScan(std::vector<LidarRay> points);
+    static std::vector<LidarRay> GetLidarPoints(ConstLaserScanStampedPtr &msg);
+    static cv::Mat DisplayLidarPoints(cv::Mat im, std::vector<LidarRay> points, bool displayMaxRange);
     static cv::Mat DisplayScanSegments(cv::Mat im, std::vector<lidar::ScanSegment> segments);
     static cv::Mat DisplayCircles(cv::Mat im, std::vector<cv::Vec3f> circles);
     static cv::Mat DisplayLines(cv::Mat im, std::vector<cv::Vec4i> lines);

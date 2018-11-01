@@ -143,6 +143,11 @@ int main(int _argc, char **_argv) {
       dir += 0.05;
     else if ((key == key_left) && (dir >= -0.4f))
       dir -= 0.05;
+    else
+    {
+        speed *= 0.99f;
+        dir *= 0.99f;
+    }
 //    else {
       // slow down
       //      speed *= 0.1;

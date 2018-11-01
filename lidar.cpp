@@ -1,5 +1,8 @@
 #include "lidar.h"
 
+#define IM_WIDTH 600
+#define IM_HEIGHT 600
+
 static boost::mutex mutex;
 
 lidar::lidar()
@@ -9,118 +12,146 @@ lidar::lidar()
 
 void lidar::lidarCallback(ConstLaserScanStampedPtr &msg)
 {
+    // Get timing
+    int sec = msg->time().sec();
+    int nsec = msg->time().nsec();
 
-  //  std::cout << ">> " << msg->DebugString() << std::endl;
-  float angle_min = float(msg->scan().angle_min());
-  //  double angle_max = msg->scan().angle_max();
-  float angle_increment = float(msg->scan().angle_step());
+    // Create empty image
+    cv::Mat im(IM_HEIGHT, IM_WIDTH, CV_8UC3);
+    im.setTo(0);
 
-  float range_min = float(msg->scan().range_min());
-  float range_max = float(msg->scan().range_max());
+    // Get points from lidar sweep
+    std::vector<cv::Point2f> detectedPoints = GetLidarPoints(msg);
 
-  int sec = msg->time().sec();
-  int nsec = msg->time().nsec();
-
-  int nranges = msg->scan().ranges_size();
-  int nintensities = msg->scan().intensities_size();
-
-  assert(nranges == nintensities);
-
-  int width = 600;
-  int height = 600;
-  float px_per_m = 200 / range_max;
-
-  cv::Mat im(height, width, CV_8UC3);
-  im.setTo(0);
-
-  std::vector<cv::Point2f> detectedPoints;
+    // Display lines on image
+    im = DisplayLidarPoints(im, detectedPoints);
 
 
 
-  for (int i = 0; i < nranges; i++) {
-    float angle = angle_min + i * angle_increment;
-    float range = std::min(float(msg->scan().ranges(i)), range_max);
-    //    double intensity = msg->scan().intensities(i);
+    std::vector<ScanSegment> segments = GetSegmentsOfScan(detectedPoints);
 
-    // Get start point
-    cv::Point2f startpt(300.5f + range_min * px_per_m * std::cos(angle),
-                        300.5f - range_min * px_per_m * std::sin(angle));
 
-    // Get end point
-    cv::Point2f endpt(300.5f + range * px_per_m * std::cos(angle),
-                      300.5f - range * px_per_m * std::sin(angle));
+    //im = DisplayScanSegments(im, segments);
+    // Create new empty image and copy a grayscale version of original image into it
+    cv::Mat im_gray;
+    cv::cvtColor(im, im_gray, CV_RGB2GRAY);
 
-    detectedPoints.push_back(endpt);
+    // Use Hough transform to find lines in image
+    std::vector<cv::Vec4i> lines;
+    cv::HoughLinesP(im_gray, lines, 1, CV_PI/180, 80, 10, 10);
 
-    // Create line from start to end
-    //cv::line(im, startpt * 16, endpt * 16, cv::Scalar(255, 255, 255, 255), 1, cv::LINE_AA, 4);
+    // Display the found lines on the image
+    im = DisplayLines(im, lines);
 
-    //    std::cout << angle << " " << range << " " << intensity << std::endl;
-  }
+    // Add a little blur
+    GaussianBlur( im_gray, im_gray, cv::Size(9, 9), 2, 2 );
 
-  std::vector<ScanSegment> segments = GetSegmentsOfScan(detectedPoints);
+    // Use Hough transform to find circles in the image
+    std::vector<cv::Vec3f> circles;
+    cv::HoughCircles(im_gray, circles, cv::HOUGH_GRADIENT, 1, im_gray.rows/8, 30, 8, 0, 8);
+    std::cout << "There are: " << circles.size() << " circles." << std::endl;
 
-  for(uint i = 0; i < segments.size(); i++)
-  {
-      ScanSegment segment = segments[i];
-      for(uint j = 0; j < segment.points.size() - 2; j++)
+    im = DisplayCircles(im, circles);
+
+    // Add robot location and time overlay
+    cv::circle(im, cv::Point(300, 300), 2, cv::Scalar(0, 0, 255));
+    cv::putText(im, std::to_string(sec) + ":" + std::to_string(nsec), cv::Point(10, 20), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(255, 0, 0));
+
+    // Display images
+    mutex.lock();
+    cv::imshow("lidar", im);
+    //cv::imshow("circles", circleMat);
+    cv::imshow("Gray", im_gray);
+    mutex.unlock();
+}
+
+std::vector<cv::Point2f> lidar::GetLidarPoints(ConstLaserScanStampedPtr &msg)
+{
+    float angle_min = float(msg->scan().angle_min());
+    float angle_increment = float(msg->scan().angle_step());
+
+    float range_min = float(msg->scan().range_min());
+    float range_max = float(msg->scan().range_max());
+
+    float px_per_m = 200 / range_max;
+
+    std::vector<cv::Point2f> detectedPoints;
+
+    for (size_t i = 0; i < msg->scan().ranges_size(); i++)
+    {
+      float angle = angle_min + i * angle_increment;
+      float range = std::min(float(msg->scan().ranges(i)), range_max);
+      if(range == range_max)
       {
-          if(segment.type == STRAIGHT)
-          {
-              //cv::circle(im, segment.points[j], 1, cv::Scalar(0, 0, 255));
-              cv::line(im, segment.points[j] * 16, segment.points[j + 1] * 16, cv::Scalar(0, 0, 255, 255), 1, cv::LINE_AA, 4);
-          }
-          else if(segment.type == CURVED)
-          {
-              //cv::circle(im, segment.points[j], 1, cv::Scalar(0, 255, 0));
-              cv::line(im, segment.points[j] * 16, segment.points[j + 1] * 16, cv::Scalar(0, 255, 255, 255), 1, cv::LINE_AA, 4);
-          }
+          //continue;
       }
-  }
+      // Get start point
+      cv::Point2f startpt(300.5f + range_min * px_per_m * std::cos(angle),
+                          300.5f - range_min * px_per_m * std::sin(angle));
 
-  cv::Mat im_gray;
-  cv::cvtColor(im, im_gray, CV_RGB2GRAY);
+      // Get end point
+      cv::Point2f endpt(300.5f + range * px_per_m * std::cos(angle),
+                        300.5f - range * px_per_m * std::sin(angle));
 
-  std::vector<cv::Vec4i> lines;
-  cv::HoughLinesP(im_gray, lines, 1, CV_PI/180, 80, 10, 10);
+      detectedPoints.push_back(endpt);
+    }
 
-  GaussianBlur( im_gray, im_gray, cv::Size(9, 9), 2, 2 );
+    return detectedPoints;
+}
 
-  std::vector<cv::Vec3f> circles;
-  cv::HoughCircles(im_gray, circles, cv::HOUGH_GRADIENT, 1, im_gray.rows/8, 30, 8, 0, 0);
+cv::Mat lidar::DisplayLidarPoints(cv::Mat im, std::vector<cv::Point2f> points)
+{
+    for(size_t i = 0; i < points.size() - 1; i++)
+    {
+        cv::line(im, points[i] * 16, points[i + 1] * 16, cv::Scalar(255, 255, 255, 255), 1, cv::LINE_AA, 4);
+    }
 
+    return im;
+}
 
+cv::Mat lidar::DisplayScanSegments(cv::Mat im, std::vector<lidar::ScanSegment> segments)
+{
+    for( size_t i = 0; i < segments.size(); i++)
+    {
+        ScanSegment segment = segments[i];
+        for(uint j = 0; j < segment.points.size() - 2; j++)
+        {
+            if(segment.type == STRAIGHT)
+            {
+                cv::line(im, segment.points[j] * 16, segment.points[j + 1] * 16, cv::Scalar(255, 255, 255, 255), 1, cv::LINE_AA, 4);
+            }
+            else if(segment.type == CURVED)
+            {
+                cv::line(im, segment.points[j] * 16, segment.points[j + 1] * 16, cv::Scalar(255, 255, 255, 255), 1, cv::LINE_AA, 4);
+            }
+        }
+    }
 
-  cv::Mat circleMat(height, width, CV_8UC3);
-  circleMat.setTo(0);
-  std::cout << "There are: " << circles.size() << " circles." << std::endl;
+    return im;
+}
 
-  for( size_t i = 0; i < circles.size(); i++ )
-  {
-     cv::Vec3i c = circles[i];
-     cv::Point2f center(circles[i][0], circles[i][1]);
-     float radius = circles[i][2];
-     // circle outline
-     cv::circle( im, center, radius, cv::Scalar(255, 0, 0), 2, 8, 0 );
-  }
+cv::Mat lidar::DisplayCircles(cv::Mat im, std::vector<cv::Vec3f> circles)
+{
+    for( size_t i = 0; i < circles.size(); i++ )
+    {
+       cv::Point2f center(circles[i][0], circles[i][1]);
+       float radius = circles[i][2];
+       // circle outline
+       cv::circle( im, center, radius, cv::Scalar(255, 0, 0), 2, 8, 0 );
+    }
 
-  for( size_t i = 0; i < lines.size(); i++)
-  {
-      cv::Vec4i l = lines[i];
-      cv::line( im, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,255,0), 1, CV_AA);
-  }
+    return im;
+}
 
+cv::Mat lidar::DisplayLines(cv::Mat im, std::vector<cv::Vec4i> lines)
+{
+    for( size_t i = 0; i < lines.size(); i++)
+    {
+        cv::Vec4i l = lines[i];
+        cv::line( im, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,255,0), 1, CV_AA);
+    }
 
-
-  cv::circle(im, cv::Point(300, 300), 2, cv::Scalar(0, 0, 255));
-  cv::putText(im, std::to_string(sec) + ":" + std::to_string(nsec),
-              cv::Point(10, 20), cv::FONT_HERSHEY_PLAIN, 1.0,
-              cv::Scalar(255, 0, 0));
-
-  mutex.lock();
-  cv::imshow("lidar", im);
-  //cv::imshow("circles", circleMat);
-  mutex.unlock();
+    return im;
 }
 
 std::vector<lidar::ScanSegment> lidar::GetSegmentsOfScan(std::vector<cv::Point2f> points)

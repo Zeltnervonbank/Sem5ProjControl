@@ -32,7 +32,11 @@ private:
 
     static float GetCollinearity(cv::Point2f points[3]);
     static std::vector<ScanSegment> GetSegmentsOfScan(std::vector<cv::Point2f> points);
-
+    static std::vector<cv::Point2f> GetLidarPoints(ConstLaserScanStampedPtr &msg);
+    static cv::Mat DisplayLidarPoints(cv::Mat im, std::vector<cv::Point2f> points);
+    static cv::Mat DisplayScanSegments(cv::Mat im, std::vector<lidar::ScanSegment> segments);
+    static cv::Mat DisplayCircles(cv::Mat im, std::vector<cv::Vec3f> circles);
+    static cv::Mat DisplayLines(cv::Mat im, std::vector<cv::Vec4i> lines);
 };
 
 #endif // LIDAR_H

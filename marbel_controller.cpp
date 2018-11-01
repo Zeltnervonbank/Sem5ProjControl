@@ -22,10 +22,11 @@ float marbel_Controller::buildController(int cent)
     inputVariable1->setLockValueInRange(false);
     inputVariable1->addTerm(new fl::Ramp("noball", 20000.000, 40000.000));
     inputVariable1->addTerm(new fl::Ramp("farrigth", 200.000, 320.000));
-    inputVariable1->addTerm(new fl::Triangle("rigth", 170.000, 185.000, 200.000));
+    inputVariable1->addTerm(new fl::Triangle("rigth", 165.000, 185.000, 200.000));
     inputVariable1->addTerm(new fl::Triangle("center", 150.000, 160.000, 170.000));
-    inputVariable1->addTerm(new fl::Triangle("left", 150.000,125.000, 100.000));
-    inputVariable1->addTerm(new fl::Ramp("farleft", 100.000, 0.000));
+    inputVariable1->addTerm(new fl::Triangle("left", 120.000,135.000, 155.000));
+    inputVariable1->addTerm(new fl::Ramp("farleft", 120.000, 0.000));
+    inputVariable1->addTerm(new fl::Ramp("mnoball", -0.000, -400000000.000));
     engine->addInputVariable(inputVariable1);
 
 
@@ -38,25 +39,26 @@ float marbel_Controller::buildController(int cent)
     outputVariable1->setDefuzzifier(new fl::Centroid(100));
     outputVariable1->setAggregation(new fl::Maximum);
     outputVariable1->setDefaultValue(fl::nan);
-    outputVariable1->addTerm(new fl::Ramp("ssharprigth", -1.000, -1.570));
-    outputVariable1->addTerm(new fl::Triangle("srigth", -1.200, -0.600, 0.000));
-    outputVariable1->addTerm(new fl::Triangle("sstraight", -0.200, 0.000, 0.200));
-    outputVariable1->addTerm(new fl::Triangle("sleft", 0.000, 0.600, 1.200));
-    outputVariable1->addTerm(new fl::Ramp("ssharpleft", 1.570, 1.000));
+    outputVariable1->addTerm(new fl::Ramp("ssharprigth", -0.300, -0.500));
+    outputVariable1->addTerm(new fl::Triangle("srigth", -0.300, -0.150, -0.000));
+    outputVariable1->addTerm(new fl::Triangle("sstraight", -0.050, 0.000, 0.0500));
+    outputVariable1->addTerm(new fl::Triangle("sleft", 0.000, 0.050, 0.300));
+    outputVariable1->addTerm(new fl::Ramp("ssharpleft", 0.300,0.500));
     engine->addOutputVariable(outputVariable1);
 
     //Membership functions of outputspeed
-//    fl::OutputVariable* outputVariable2 = new fl::OutputVariable;
-//    outputVariable2->setEnabled(true);
-//    outputVariable2->setName("speed");
-//    outputVariable2->setRange(-1, 1);
-//    outputVariable2->setLockValueInRange(false);
-//    outputVariable2->setAggregation(new fl::Maximum);
-//    outputVariable2->setDefaultValue(fl::nan);
-//    outputVariable2->setDefuzzifier(new fl::Centroid(100));
-//    outputVariable2->addTerm(new fl::Ramp("forward", 1.000, 0.000));
-//   outputVariable2->addTerm(new fl::Ramp("backward", 0.000,-1.000));
-//    engine->addOutputVariable(outputVariable2);
+    fl::OutputVariable* outputVariable2 = new fl::OutputVariable;
+    outputVariable2->setEnabled(true);
+    outputVariable2->setName("speed");
+    outputVariable2->setRange(-1, 1);
+    outputVariable2->setLockValueInRange(false);
+    outputVariable2->setAggregation(new fl::Maximum);
+    outputVariable2->setDefaultValue(fl::nan);
+    outputVariable2->setDefuzzifier(new fl::Centroid(100));
+    outputVariable2->addTerm(new fl::Ramp("forward", 1.000, 0.000));
+    outputVariable2->addTerm(new fl::Ramp("backward", 0.000,-1.000));
+    outputVariable2->addTerm(new fl::Triangle("still", 0.010,-0.010));
+    engine->addOutputVariable(outputVariable2);
 
     //Rules
     fl::RuleBlock* mamdani = new fl::RuleBlock;
@@ -71,7 +73,8 @@ float marbel_Controller::buildController(int cent)
     mamdani->addRule(fl::Rule::parse("if BallDirection is rigth then direction is sleft", engine));
     mamdani->addRule(fl::Rule::parse("if BallDirection is left then direction is srigth", engine));
     mamdani->addRule(fl::Rule::parse("if BallDirection is farleft then direction is ssharprigth", engine));
-    mamdani->addRule(fl::Rule::parse("if BallDirection is noball then direction is sstraight", engine));
+    mamdani->addRule(fl::Rule::parse("if BallDirection is noball then direction is sstraight and speed is still", engine));
+    mamdani->addRule(fl::Rule::parse("if BallDirection is mnoball then direction is sstraight and speed is still", engine));
     engine->addRuleBlock(mamdani);
 
     std::string status;
@@ -90,6 +93,7 @@ float marbel_Controller::buildController(int cent)
       float out1 = ((int)(outputVariable1->getValue() * 100 + .5) / 100.0);
 
       std::cout << "out1" <<std::setprecision(2) << out1 << std::endl;
+      std::cout << "speed out" << outputVariable2->getValue() << std::endl;
 
       return out1;
 

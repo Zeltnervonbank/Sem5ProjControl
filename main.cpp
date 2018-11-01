@@ -16,6 +16,7 @@
 static boost::mutex mutex;
     int cent;
     float dir =0.0;
+    int radius;
 
 void statCallback(ConstWorldStatisticsPtr &_msg) {
   (void)_msg;
@@ -50,10 +51,11 @@ void cameraCallback(ConstImageStampedPtr &msg) {
     cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
     Camera cam;
     MarbleLocation mLoc = cam.getMarbelCenter(im);
+    radius=mLoc.radius;
+    cent=mLoc.center;
 
-    marbel_Controller fuzzy;
-    dir=fuzzy.buildController(mLoc.center);
-
+    std::cout << "rad:" << radius << std::endl;
+    std::cout << "cent:" << mLoc.center << std::endl;
 
     mutex.lock();
     cv::imshow("camera", im);
@@ -146,6 +148,7 @@ int main(int _argc, char **_argv) {
   const int key_down = 84;
   const int key_right = 83;
   const int key_esc = 27;
+  const int key_c = 99;
   marbel_Controller fuzzy;
 
   float speed = 0.0;
@@ -153,7 +156,7 @@ int main(int _argc, char **_argv) {
 
     // Loop
   while (true) {
-    std::cout << cent << std::endl;
+    //std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
 
 
@@ -166,14 +169,25 @@ int main(int _argc, char **_argv) {
     if (key == key_esc)
       break;
 
+    if(radius>0 && radius < 35){
     dir=fuzzy.buildController(cent);
+    }
+    if(radius>36){
+        dir=0;
+        speed=0;
+        for(int i=0; i<100;i++){
 
-    if (cent==0){
+        }
+  }
+    //std::cout << "key" << key << std::endl;
+
+    //dir=0.5; Højre er positiv retning
+    //dir=-0.5; Venstre er negativ retning
+
+
         speed=0.5;
-  }
-    else if(cent>=150 && cent<=170 && cent != 0){
-        speed= 0.5;
-  }
+
+
 //    else if (cent > 170)
 //        dir =0.15;
 //    else if (cent < 150 && cent > 0)
@@ -188,6 +202,10 @@ int main(int _argc, char **_argv) {
       dir += 0.05;
     else if ((key == key_left) && (dir >= -0.4f))
       dir -= 0.05;
+    else if (key == key_c){
+        dir = 0.00;
+        speed = 0.00;
+    }
 //    else {
       // slow down
       //      speed *= 0.1;

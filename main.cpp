@@ -150,6 +150,7 @@ int main(int _argc, char **_argv) {
   const int key_esc = 27;
   const int key_c = 99;
   marbel_Controller fuzzy;
+  fuzzy.buildController();
 
   float speed = 0.0;
 
@@ -170,8 +171,9 @@ int main(int _argc, char **_argv) {
       break;
 
     if(radius>0 && radius < 35){
-    dir=fuzzy.buildController(cent);
+    dir= fuzzy.getControlOutput(cent).direction;
     }
+
     if(radius>36){
         dir=0;
         speed=0;

@@ -5,14 +5,13 @@ marbel_Controller::marbel_Controller()
 
 }
 
-float marbel_Controller::buildController(int cent)
+void marbel_Controller::buildController()
 {
 
-    std::cout << "cent" << cent << std::endl;
     //Create fuzzy
-    fl::Engine* engine = new fl::Engine;
-    engine->setName("FindBall");
-    engine->setDescription("");
+    m_pcFLEngine = new fl::Engine;
+    m_pcFLEngine->setName("FindBall");
+    m_pcFLEngine->setDescription("");
 
     //Membership functions of input error
     fl::InputVariable* inputVariable1 = new fl::InputVariable;
@@ -21,13 +20,13 @@ float marbel_Controller::buildController(int cent)
     inputVariable1->setRange(0.000, 300.000);
     inputVariable1->setLockValueInRange(false);
     inputVariable1->addTerm(new fl::Ramp("noball", 20000.000, 40000.000));
-    inputVariable1->addTerm(new fl::Ramp("farrigth", 200.000, 320.000));
-    inputVariable1->addTerm(new fl::Triangle("rigth", 165.000, 185.000, 200.000));
+    inputVariable1->addTerm(new fl::Ramp("farrigth", 195.000, 320.000));
+    inputVariable1->addTerm(new fl::Triangle("rigth", 165.000, 185.000, 205.000));
     inputVariable1->addTerm(new fl::Triangle("center", 150.000, 160.000, 170.000));
     inputVariable1->addTerm(new fl::Triangle("left", 120.000,135.000, 155.000));
     inputVariable1->addTerm(new fl::Ramp("farleft", 120.000, 0.000));
     inputVariable1->addTerm(new fl::Ramp("mnoball", -0.000, -400000000.000));
-    engine->addInputVariable(inputVariable1);
+    m_pcFLEngine->addInputVariable(inputVariable1);
 
 
     //Membership functions of outputdirr
@@ -39,12 +38,12 @@ float marbel_Controller::buildController(int cent)
     outputVariable1->setDefuzzifier(new fl::Centroid(100));
     outputVariable1->setAggregation(new fl::Maximum);
     outputVariable1->setDefaultValue(fl::nan);
-    outputVariable1->addTerm(new fl::Ramp("ssharprigth", -1.000, -1.570));
-    outputVariable1->addTerm(new fl::Triangle("srigth", -1.200, -0.600, 0.000));
-    outputVariable1->addTerm(new fl::Triangle("sstraight", -0.200, 0.000, 0.200));
-    outputVariable1->addTerm(new fl::Triangle("sleft", 0.000, 0.600, 1.200));
-    outputVariable1->addTerm(new fl::Ramp("ssharpleft", 1.570, 1.000));
-    engine->addOutputVariable(outputVariable1);
+    outputVariable1->addTerm(new fl::Ramp("ssharprigth", -1.570, -1.000));
+    outputVariable1->addTerm(new fl::Triangle("srigth",-1.000, -0.600, -0.100 ));
+    outputVariable1->addTerm(new fl::Triangle("sstraight", -0.100, 0.000, 0.100));
+    outputVariable1->addTerm(new fl::Triangle("sleft", 0.100, 0.600, 1.000));
+    outputVariable1->addTerm(new fl::Ramp("ssharpleft",1.570, 1.000));
+    m_pcFLEngine->addOutputVariable(outputVariable1);
 
     //Membership functions of outputspeed
     fl::OutputVariable* outputVariable2 = new fl::OutputVariable;
@@ -58,7 +57,7 @@ float marbel_Controller::buildController(int cent)
     outputVariable2->addTerm(new fl::Ramp("forward", 1.000, 0.000));
     outputVariable2->addTerm(new fl::Ramp("backward", 0.000,-1.000));
     outputVariable2->addTerm(new fl::Triangle("still", 0.010,-0.010));
-    engine->addOutputVariable(outputVariable2);
+    m_pcFLEngine->addOutputVariable(outputVariable2);
 
     //Rules
     fl::RuleBlock* mamdani = new fl::RuleBlock;
@@ -68,47 +67,37 @@ float marbel_Controller::buildController(int cent)
     mamdani->setDisjunction(fl::null);
     mamdani->setImplication(new fl::AlgebraicProduct);
     mamdani->setActivation(new fl::General);
-    mamdani->addRule(fl::Rule::parse("if BallDirection is center then direction is sstraight", engine));
-    mamdani->addRule(fl::Rule::parse("if BallDirection is farrigth then direction is ssharpleft", engine));
-    mamdani->addRule(fl::Rule::parse("if BallDirection is rigth then direction is sleft", engine));
-    mamdani->addRule(fl::Rule::parse("if BallDirection is left then direction is srigth", engine));
-    mamdani->addRule(fl::Rule::parse("if BallDirection is farleft then direction is ssharprigth", engine));
-    engine->addRuleBlock(mamdani);
+    mamdani->addRule(fl::Rule::parse("if BallDirection is center then direction is sstraight", m_pcFLEngine));
+    mamdani->addRule(fl::Rule::parse("if BallDirection is rigth then direction is srigth", m_pcFLEngine));
+    mamdani->addRule(fl::Rule::parse("if BallDirection is farrigth then direction is ssharprigth", m_pcFLEngine));
+    mamdani->addRule(fl::Rule::parse("if BallDirection is left then direction is sleft", m_pcFLEngine));
+    mamdani->addRule(fl::Rule::parse("if BallDirection is farleft then direction is ssharpleft", m_pcFLEngine));
+    m_pcFLEngine->addRuleBlock(mamdani);
 
     std::string status;
-    if (not engine->isReady(&status))
+    if (not m_pcFLEngine->isReady(&status))
         throw fl::Exception("[engine error] engine is not ready:\n" + status, FL_AT);
 
 
     //Set inputs
-   inputVariable1->setValue(cent);;
-
-
-      //Start fuzzy
-      engine->process();
-
-      //Defuzzification
-      float out1 = ((int)(outputVariable1->getValue() * 100 + .5) / 100.0);
-
-      std::cout << "out1" <<std::setprecision(2) << out1 << std::endl;
-      std::cout << "speed out" << outputVariable2->getValue() << std::endl;
-
-      return out1;
-
+    m_pflObstacleDirection = m_pcFLEngine->getInputVariable("BallDirection");
+    //m_pflObstacleDistance  = m_pcFLEngine->getInputVariable("ObstacleDistance");
+    m_pflSteerDirection    = m_pcFLEngine->getOutputVariable("direction");
+    //m_pflSpeed             = m_pcFLEngine->getOutputVariable("Speed");
 }
 
 
 ControlOutput marbel_Controller::getControlOutput(int cent)
 {
-    m_pflObstacleDistance->setValue(cent);
-
-    // std::cout << "FL - Distance " << m_pcLaserScanner->getClosestDistance(-1.57, 1.57) << ", direction " << m_pcLaserScanner->getClosestDirection(-1.57, 1.57) << std::endl;
+    m_pflObstacleDirection->setValue(cent);
 
     m_pcFLEngine->process();
 
     ControlOutput out;
-    out.direction = m_pflSteerDirection->getValue();
-    out.speed     = m_pflSpeed->getValue();
+    out.direction = ((int)(m_pflSteerDirection->getValue() * 100 + .5) / 100.0);
+   //out.speed     = m_pflSpeed->getValue();
+
+
 
     return out;
 }

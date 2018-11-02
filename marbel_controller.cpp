@@ -39,11 +39,11 @@ float marbel_Controller::buildController(int cent)
     outputVariable1->setDefuzzifier(new fl::Centroid(100));
     outputVariable1->setAggregation(new fl::Maximum);
     outputVariable1->setDefaultValue(fl::nan);
-    outputVariable1->addTerm(new fl::Ramp("ssharprigth", -0.300, -0.500));
-    outputVariable1->addTerm(new fl::Triangle("srigth", -0.300, -0.150, -0.000));
-    outputVariable1->addTerm(new fl::Triangle("sstraight", -0.050, 0.000, 0.0500));
-    outputVariable1->addTerm(new fl::Triangle("sleft", 0.000, 0.050, 0.300));
-    outputVariable1->addTerm(new fl::Ramp("ssharpleft", 0.300,0.500));
+    outputVariable1->addTerm(new fl::Ramp("ssharprigth", -1.000, -1.570));
+    outputVariable1->addTerm(new fl::Triangle("srigth", -1.200, -0.600, 0.000));
+    outputVariable1->addTerm(new fl::Triangle("sstraight", -0.200, 0.000, 0.200));
+    outputVariable1->addTerm(new fl::Triangle("sleft", 0.000, 0.600, 1.200));
+    outputVariable1->addTerm(new fl::Ramp("ssharpleft", 1.570, 1.000));
     engine->addOutputVariable(outputVariable1);
 
     //Membership functions of outputspeed
@@ -73,8 +73,6 @@ float marbel_Controller::buildController(int cent)
     mamdani->addRule(fl::Rule::parse("if BallDirection is rigth then direction is sleft", engine));
     mamdani->addRule(fl::Rule::parse("if BallDirection is left then direction is srigth", engine));
     mamdani->addRule(fl::Rule::parse("if BallDirection is farleft then direction is ssharprigth", engine));
-    mamdani->addRule(fl::Rule::parse("if BallDirection is noball then direction is sstraight and speed is still", engine));
-    mamdani->addRule(fl::Rule::parse("if BallDirection is mnoball then direction is sstraight and speed is still", engine));
     engine->addRuleBlock(mamdani);
 
     std::string status;

@@ -5,7 +5,8 @@ CONFIG -= qt
 
 SOURCES += main.cpp \
     marbel_controller.cpp \
-    camera.cpp
+    camera.cpp \
+    lidar.cpp
 
 CONFIG += link_pkgconfig
 PKGCONFIG += gazebo
@@ -22,7 +23,8 @@ INCLUDEPATH +=/home/alex/Hentet/fuzzylite-6.0-linux64/fuzzylite-6.0/fuzzylite/
 HEADERS += \
     marbel_controller.h \
     camera.h \
-    datatypes.h
+    datatypes.h \
+    lidar.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../fuzzylite-6.0-linux64/fuzzylite-6.0/fuzzylite/release/bin/release/ -lfuzzylite
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../fuzzylite-6.0-linux64/fuzzylite-6.0/fuzzylite/release/bin/debug/ -lfuzzylite
@@ -47,3 +49,10 @@ INCLUDEPATH += $$PWD/../../../../fuzzylite-6.0/fuzzylite/release/bin
 DEPENDPATH += $$PWD/../../../../fuzzylite-6.0/fuzzylite/release/bin
 @LIBS += -L$$PWD/../../../../fuzzylite-6.0/fuzzylite/release/bin
 INCLUDEPATH +=$$PWD/../../../../fuzzylite-6.0/fuzzylite
+
+unix:!macx: LIBS += -L$$PWD/../../../../fuzzylite-6.0/fuzzylite/release/bin/ -lfuzzylite
+
+INCLUDEPATH += $$PWD/../../fuzzylite-6.0/fuzzylite/release/bin
+DEPENDPATH += $$PWD/../../fuzzylite-6.0/fuzzylite/release/bin
+@LIBS += -L$$PWD/../../fuzzylite-6.0/fuzzylite/release/bin
+INCLUDEPATH +=$$PWD/../../fuzzylite-6.0/fuzzylite

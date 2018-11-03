@@ -12,6 +12,12 @@
 #include "camera.h"
 #include "marbel_controller.h"
 #include "datatypes.h"
+#include "lidar.h"
+
+bool lidar::marblesPresent = false;
+std::vector<LidarMarble> lidar::detectedMarbles;
+std::vector<LidarRay> lidar::lidarRays;
+LidarRay lidar::nearestPoint;
 
 static boost::mutex mutex;
     int cent;
@@ -56,60 +62,16 @@ void cameraCallback(ConstImageStampedPtr &msg) {
 
     std::cout << "rad:" << radius << std::endl;
     std::cout << "cent:" << mLoc.center << std::endl;
+    marbel_Controller fuzzy;
+    //dir=fuzzy.buildController(mLoc.center);
 
     mutex.lock();
     cv::imshow("camera", im);
     mutex.unlock();
 }
 
-void lidarCallback(ConstLaserScanStampedPtr &msg) {
-
-  //  std::cout << ">> " << msg->DebugString() << std::endl;
-  float angle_min = float(msg->scan().angle_min());
-  //  double angle_max = msg->scan().angle_max();
-  float angle_increment = float(msg->scan().angle_step());
-
-  float range_min = float(msg->scan().range_min());
-  float range_max = float(msg->scan().range_max());
-
-  int sec = msg->time().sec();
-  int nsec = msg->time().nsec();
-
-  int nranges = msg->scan().ranges_size();
-  int nintensities = msg->scan().intensities_size();
-
-  assert(nranges == nintensities);
-
-  int width = 400;
-  int height = 400;
-  float px_per_m = 200 / range_max;
-
-  cv::Mat im(height, width, CV_8UC3);
-  im.setTo(0);
-  for (int i = 0; i < nranges; i++) {
-    float angle = angle_min + i * angle_increment;
-    float range = std::min(float(msg->scan().ranges(i)), range_max);
-    //    double intensity = msg->scan().intensities(i);
-    cv::Point2f startpt(200.5f + range_min * px_per_m * std::cos(angle),
-                        200.5f - range_min * px_per_m * std::sin(angle));
-    cv::Point2f endpt(200.5f + range * px_per_m * std::cos(angle),
-                      200.5f - range * px_per_m * std::sin(angle));
-    cv::line(im, startpt * 16, endpt * 16, cv::Scalar(255, 255, 255, 255), 1,
-             cv::LINE_AA, 4);
-
-    //    std::cout << angle << " " << range << " " << intensity << std::endl;
-  }
-  cv::circle(im, cv::Point(200, 200), 2, cv::Scalar(0, 0, 255));
-  cv::putText(im, std::to_string(sec) + ":" + std::to_string(nsec),
-              cv::Point(10, 20), cv::FONT_HERSHEY_PLAIN, 1.0,
-              cv::Scalar(255, 0, 0));
-
-  mutex.lock();
-  cv::imshow("lidar", im);
-  mutex.unlock();
-}
-
 int main(int _argc, char **_argv) {
+  //lidar::doSomething();
   // Load gazebo
   gazebo::client::setup(_argc, _argv);
 
@@ -125,7 +87,7 @@ int main(int _argc, char **_argv) {
       node->Subscribe("~/pose/info", poseCallback); 
 
   gazebo::transport::SubscriberPtr lidarSubscriber =
-      node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidarCallback);
+      node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidar::lidarCallback);
 
   gazebo::transport::SubscriberPtr cameraSubscriber =
   node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
@@ -160,6 +122,11 @@ int main(int _argc, char **_argv) {
     //std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
 
+    // Display lidar info
+    std::cout << "Marbles have been detected: " << lidar::marblesPresent << std::endl;
+    std::cout << "Range to nearest detected point: " << lidar::nearestPoint.range << std::endl;
+    std::cout << "Total number of detected marbles: " << lidar::detectedMarbles.size() << std::endl;
+    std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;
 
 
     mutex.lock();
@@ -188,8 +155,10 @@ int main(int _argc, char **_argv) {
 
 
         speed=0.5;
-
-
+  }
+    else if(cent>=150 && cent<=170 && cent != 0){
+        speed= 0.5;
+  }
 //    else if (cent > 170)
 //        dir =0.15;
 //    else if (cent < 150 && cent > 0)

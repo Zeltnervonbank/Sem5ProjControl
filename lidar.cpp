@@ -47,8 +47,9 @@ void lidar::lidarCallback(ConstLaserScanStampedPtr &msg)
     // Use Hough transform to find circles in the image
     std::vector<cv::Vec3f> circles;
     cv::HoughCircles(im_gray, circles, cv::HOUGH_GRADIENT, 1, im_gray.rows/8, 40, 8, 4, 8);
-    std::cout << "There are: " << circles.size() << " circles." << std::endl;
+    //std::cout << "There are: " << circles.size() << " circles." << std::endl;
 
+    ConvertCirclesToLidarMarbles(circles);
     cvMat = DisplayCircles(cvMat, circles);
 
     // Add robot location and time overlay
@@ -63,7 +64,7 @@ void lidar::lidarCallback(ConstLaserScanStampedPtr &msg)
     mutex.unlock();
 }
 
-std::vector<lidar::LidarRay> lidar::GetLidarPoints(ConstLaserScanStampedPtr &msg)
+std::vector<LidarRay> lidar::GetLidarPoints(ConstLaserScanStampedPtr &msg)
 {
     // Get some basic information
     float angleMin = float(msg->scan().angle_min());
@@ -77,13 +78,18 @@ std::vector<lidar::LidarRay> lidar::GetLidarPoints(ConstLaserScanStampedPtr &msg
     // Declare empty return vector
     std::vector<LidarRay> detectedPoints;
 
+    // Reset the nearest point to a high value
+    nearestPoint.range = 100.0f;
+
+    // Clear last sweep
+    lidarRays.clear();
+
     // Loop through each scan ray
     for (size_t i = 0; i < msg->scan().ranges_size(); i++)
     {
         // Get angle and distance of the ray
         float angle = angleMin + i * angleIncrement;
         float range = std::min(float(msg->scan().ranges(i)), rangeMax); // Gets the lower of the scan ray and max range
-
         // Get start point
         cv::Point2f startpt(300.5f + rangeMin * pxPerM * std::cos(angle), 300.5f - rangeMin * pxPerM * std::sin(angle));
 
@@ -102,6 +108,13 @@ std::vector<lidar::LidarRay> lidar::GetLidarPoints(ConstLaserScanStampedPtr &msg
 
         // Adds that ray to return vector
         detectedPoints.push_back(ray);
+        lidarRays.push_back(ray);
+
+        // If this ray is shorter than the previous nearest point, replace it
+        if(ray.range < nearestPoint.range)
+        {
+            nearestPoint = ray;
+        }
     }
 
     return detectedPoints;
@@ -156,6 +169,50 @@ cv::Mat lidar::DisplayScanSegments(cv::Mat im, std::vector<lidar::ScanSegment> s
     }
 
     return im;
+}
+
+std::vector<LidarMarble> lidar::ConvertCirclesToLidarMarbles(std::vector<cv::Vec3f> circles)
+{
+    // Declare return vector
+    std::vector<LidarMarble> marbles;
+
+    // Determine whether marbles have been detected
+    lidar::marblesPresent = circles.size() != 0;
+    if(circles.size() == 0)
+    {
+        return marbles;
+    }
+
+    // Clear static marble vector - might be a good idea to put a mutex around this. TODO
+    detectedMarbles.clear();
+
+    // Loop through detected circles
+    for(size_t i = 0; i < circles.size(); i++)
+    {
+        // Get relevant points
+        cv::Point center(circles[i][0], circles[i][1]);
+        cv::Point robPos(300, 300); // Manually set based on image size
+        cv::Point diffPoint = center - robPos;
+
+        // Get euclidean distance from center to the center of the circle
+        float distance = sqrt(pow(diffPoint.x, 2.0) + pow(diffPoint.y, 2.0));
+
+        // Get the angle between the robot's forward axis and the center of the circle,
+        float angle = atan2(diffPoint.x, diffPoint.y) - 90.0f * M_PI/180.0f;
+
+        // Print distance and angle
+        //std::cout << "Distance to Marble: " << i << " - " << distance << std::endl;
+        //std::cout << "Angle to Marble: " << i << " - " << angle << std::endl;
+
+        // Create marble object from data
+        LidarMarble marble = {distance, angle, circles[i][2]};
+
+        // Add that object to return vector and static vector
+        marbles.push_back(marble);
+        detectedMarbles.push_back(marble);
+    }
+
+    return marbles;
 }
 
 cv::Mat lidar::DisplayCircles(cv::Mat im, std::vector<cv::Vec3f> circles)

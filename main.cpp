@@ -14,6 +14,11 @@
 #include "datatypes.h"
 #include "lidar.h"
 
+bool lidar::marblesPresent = false;
+std::vector<LidarMarble> lidar::detectedMarbles;
+std::vector<LidarRay> lidar::lidarRays;
+LidarRay lidar::nearestPoint;
+
 static boost::mutex mutex;
     int cent;
     float dir =0.0;
@@ -111,6 +116,11 @@ int main(int _argc, char **_argv) {
     //std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
 
+    // Display lidar info
+    std::cout << "Marbles have been detected: " << lidar::marblesPresent << std::endl;
+    std::cout << "Range to nearest detected point: " << lidar::nearestPoint.range << std::endl;
+    std::cout << "Total number of detected marbles: " << lidar::detectedMarbles.size() << std::endl;
+    std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;
 
 
     mutex.lock();

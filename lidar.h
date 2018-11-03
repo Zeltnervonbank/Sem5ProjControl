@@ -9,6 +9,9 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <stdlib.h>
+#include "datatypes.h"
+#include <cmath>
 
 #ifndef LIDAR_H
 #define LIDAR_H
@@ -22,17 +25,12 @@ class lidar
 public:
     lidar();
     static void lidarCallback(ConstLaserScanStampedPtr &msg);
+    static bool marblesPresent;
+    static std::vector<LidarMarble> detectedMarbles;
+    static std::vector<LidarRay> lidarRays;
+    static LidarRay nearestPoint;
 
-private:    
-    struct LidarRay
-    {
-        cv::Point2f startPoint;
-        cv::Point2f endPoint;
-        float range;
-        bool isMaxRange;
-        float angle;
-    };
-
+private:
     struct ScanSegment
     {
         std::vector<LidarRay> points;
@@ -44,8 +42,10 @@ private:
     static std::vector<LidarRay> GetLidarPoints(ConstLaserScanStampedPtr &msg);
     static cv::Mat DisplayLidarPoints(cv::Mat im, std::vector<LidarRay> points, bool displayMaxRange);
     static cv::Mat DisplayScanSegments(cv::Mat im, std::vector<lidar::ScanSegment> segments);
+    static std::vector<LidarMarble> ConvertCirclesToLidarMarbles(std::vector<cv::Vec3f> circles);
     static cv::Mat DisplayCircles(cv::Mat im, std::vector<cv::Vec3f> circles);
     static cv::Mat DisplayLines(cv::Mat im, std::vector<cv::Vec4i> lines);
 };
+
 
 #endif // LIDAR_H

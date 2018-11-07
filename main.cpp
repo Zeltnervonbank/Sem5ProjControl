@@ -125,12 +125,11 @@ int main(int _argc, char **_argv) {
 
     // Display lidar info
     std::cout << "Marbles have been detected: " << lidar::marblesPresent << std::endl;
-    std::cout << "angle to nearest detected point: " << lidar::nearestPoint.angle << std::endl;
-    std::cout << "distance to nearest detected point: " << lidar::nearestPoint.range << std::endl;
+    std::cout << "angle to nearest detected point: " << lidar::nearestMarble.angle << std::endl;
+    std::cout << "distance to nearest detected point: " << lidar::nearestMarble.distance << std::endl;
     //std::cout << "Total number of detected marbles: " << lidar::detectedMarbles.size() << std::endl;
     //std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;
 
-    int i=0;
     mutex.lock();
     int key = cv::waitKey(1);
     mutex.unlock();
@@ -139,9 +138,15 @@ int main(int _argc, char **_argv) {
     if (key == key_esc)
       break;
 
-    if(lidar::marblesPresent==1){
-    dir= fuzzy.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).direction;
-    speed = fuzzy.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).speed;
+    if(lidar::nearestMarble.angle>-4.00){
+    if(lidar::marblesPresent==1 && lidar::nearestMarble.distance<100){
+    dir= fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).direction;
+    speed = fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).speed;
+    }
+  }
+    else{
+        dir= 0;
+        speed = 0.0;
     }
 
     //if(radius>36){

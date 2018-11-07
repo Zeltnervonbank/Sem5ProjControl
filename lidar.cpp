@@ -186,6 +186,9 @@ std::vector<LidarMarble> lidar::ConvertCirclesToLidarMarbles(std::vector<cv::Vec
     // Clear static marble vector - might be a good idea to put a mutex around this. TODO
     detectedMarbles.clear();
 
+    // Sets nearestMarble to high value
+    nearestMarble.distance = 100.0f;
+
     // Loop through detected circles
     for(size_t i = 0; i < circles.size(); i++)
     {
@@ -206,6 +209,12 @@ std::vector<LidarMarble> lidar::ConvertCirclesToLidarMarbles(std::vector<cv::Vec
 
         // Create marble object from data
         LidarMarble marble = {distance, angle, circles[i][2]};
+
+        // Replaces nearestMarble if this marble is closer
+        if(marble.distance < nearestMarble.distance)
+        {
+            nearestMarble = marble;
+        }
 
         // Add that object to return vector and static vector
         marbles.push_back(marble);

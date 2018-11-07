@@ -27,6 +27,7 @@ public:
     static void lidarCallback(ConstLaserScanStampedPtr &msg);
     static bool marblesPresent;
     static std::vector<LidarMarble> detectedMarbles;
+    static LidarMarble nearestMarble;
     static std::vector<LidarRay> lidarRays;
     static LidarRay nearestPoint;
 

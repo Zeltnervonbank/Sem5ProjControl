@@ -30,3 +30,5 @@
 # QT Creator Files
 *.pro.user
 *.pro.user.*
+
+*.autosave

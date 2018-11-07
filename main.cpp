@@ -16,6 +16,7 @@
 
 bool lidar::marblesPresent = false;
 std::vector<LidarMarble> lidar::detectedMarbles;
+LidarMarble lidar::nearestMarble;
 std::vector<LidarRay> lidar::lidarRays;
 LidarRay lidar::nearestPoint;
 

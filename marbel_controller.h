@@ -17,7 +17,7 @@ public:
     marbel_Controller();
     virtual ~marbel_Controller() = default;
     virtual void buildController();
-    virtual ControlOutput getControlOutput(int cent);
+    virtual ControlOutput getControlOutput(float cent, float dist);
 protected:
     //LaserScanner*        m_pcLaserScanner;
 

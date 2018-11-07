@@ -61,8 +61,8 @@ MarbleLocation Camera::getMarbelCenter(cv::Mat im)
 
 
     //std::cout << mLoc.radius << std::endl;
-    cv::imshow("komb", kombi);
-    cv::imshow( "Hough Circle Transform Demo", cirkler );
+    //cv::imshow("komb", kombi);
+    //cv::imshow( "Hough Circle Transform Demo", cirkler );
 
     return mLoc;
 }

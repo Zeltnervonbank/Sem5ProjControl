@@ -21,7 +21,6 @@ LidarRay lidar::nearestPoint;
 
 static boost::mutex mutex;
     int cent;
-    float dir =0.0;
     int radius;
 
 void statCallback(ConstWorldStatisticsPtr &_msg) {
@@ -60,8 +59,8 @@ void cameraCallback(ConstImageStampedPtr &msg) {
     radius=mLoc.radius;
     cent=mLoc.center;
 
-    std::cout << "rad:" << radius << std::endl;
-    std::cout << "cent:" << mLoc.center << std::endl;
+    //std::cout << "rad:" << radius << std::endl;
+    //std::cout << "cent:" << mLoc.center << std::endl;
     marbel_Controller fuzzy;
     //dir=fuzzy.buildController(mLoc.center);
 
@@ -114,7 +113,8 @@ int main(int _argc, char **_argv) {
   marbel_Controller fuzzy;
   fuzzy.buildController();
 
-  float speed = 0.0;
+  float speed;
+  float dir;
 
 
     // Loop
@@ -124,11 +124,12 @@ int main(int _argc, char **_argv) {
 
     // Display lidar info
     std::cout << "Marbles have been detected: " << lidar::marblesPresent << std::endl;
-    std::cout << "Range to nearest detected point: " << lidar::nearestPoint.range << std::endl;
-    std::cout << "Total number of detected marbles: " << lidar::detectedMarbles.size() << std::endl;
-    std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;
+    std::cout << "angle to nearest detected point: " << lidar::nearestPoint.angle << std::endl;
+    std::cout << "distance to nearest detected point: " << lidar::nearestPoint.range << std::endl;
+    //std::cout << "Total number of detected marbles: " << lidar::detectedMarbles.size() << std::endl;
+    //std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;
 
-
+    int i=0;
     mutex.lock();
     int key = cv::waitKey(1);
     mutex.unlock();
@@ -137,28 +138,26 @@ int main(int _argc, char **_argv) {
     if (key == key_esc)
       break;
 
-    if(radius>0 && radius < 35){
-    dir= fuzzy.getControlOutput(cent).direction;
+    if(lidar::marblesPresent==1){
+    dir= fuzzy.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).direction;
+    speed = fuzzy.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).speed;
     }
 
-    if(radius>36){
-        dir=0;
-        speed=0;
-        for(int i=0; i<100;i++){
+    //if(radius>36){
+    //    dir=0;
+    //    speed=0;
+    //    for(int i=0; i<100;i++){
 
-        }
-  }
+     //   }
+  //}
     //std::cout << "key" << key << std::endl;
 
     //dir=0.5; Højre er positiv retning
     //dir=-0.5; Venstre er negativ retning
 
-
-        speed=0.5;
-  }
-    else if(cent>=150 && cent<=170 && cent != 0){
-        speed= 0.5;
-  }
+    //else if(cent>=150 && cent<=170 && cent != 0){
+  //      speed= 0.5;
+ // }
 //    else if (cent > 170)
 //        dir =0.15;
 //    else if (cent < 150 && cent > 0)

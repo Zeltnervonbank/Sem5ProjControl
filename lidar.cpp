@@ -46,7 +46,7 @@ void lidar::lidarCallback(ConstLaserScanStampedPtr &msg)
 
     // Use Hough transform to find circles in the image
     std::vector<cv::Vec3f> circles;
-    cv::HoughCircles(im_gray, circles, cv::HOUGH_GRADIENT, 1, im_gray.rows/8, 40, 8, 4, 8);
+    cv::HoughCircles(im_gray, circles, cv::HOUGH_GRADIENT, 1, im_gray.rows/8, 40, 8, 10, 8);
     //std::cout << "There are: " << circles.size() << " circles." << std::endl;
 
     ConvertCirclesToLidarMarbles(circles);

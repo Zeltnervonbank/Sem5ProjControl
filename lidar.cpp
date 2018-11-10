@@ -59,8 +59,8 @@ void lidar::lidarCallback(ConstLaserScanStampedPtr &msg)
     // Display images
     mutex.lock();
     cv::imshow("Lidar", im);
-    cv::imshow("Gray", im_gray);
-    cv::imshow("CV", cvMat);
+    //cv::imshow("Gray", im_gray);
+    //cv::imshow("CV", cvMat);
     mutex.unlock();
 }
 

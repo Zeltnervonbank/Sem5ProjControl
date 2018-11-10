@@ -28,4 +28,15 @@ struct LidarRay
     float angle;
 };
 
+struct RobotPosition
+{
+    double posX;
+    double posY;
+
+    double rotW;
+    double rotX;
+    double rotY;
+    double rotZ;
+};
+
 #endif // DATATYPES_H

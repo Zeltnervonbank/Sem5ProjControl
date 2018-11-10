@@ -13,12 +13,17 @@
 #include "marbel_controller.h"
 #include "datatypes.h"
 #include "lidar.h"
+#include "mapping.h"
 
 bool lidar::marblesPresent = false;
 std::vector<LidarMarble> lidar::detectedMarbles;
 LidarMarble lidar::nearestMarble;
 std::vector<LidarRay> lidar::lidarRays;
 LidarRay lidar::nearestPoint;
+
+int mapping::map[400][400] = {};
+cv::Mat mapping::img = cv::Mat(400, 400, CV_8U);
+
 
 static boost::mutex mutex;
     int cent;
@@ -33,21 +38,35 @@ void statCallback(ConstWorldStatisticsPtr &_msg) {
 
 void poseCallback(ConstPosesStampedPtr &_msg) {
   // Dump the message contents to stdout.
-  //  std::cout << _msg->DebugString();
+    //std::cout << std::flush;
 
-  for (int i = 0; i < _msg->pose_size(); i++) {
-    if (_msg->pose(i).name() == "pioneer2dx") {
 
-      //std::cout << std::setprecision(2) << std::fixed << std::setw(6)
-               //<< _msg->pose(i).position().x() << std::setw(6)
-               //<< _msg->pose(i).position().y() << std::setw(6)
-               //<< _msg->pose(i).position().z() << std::endl;
-               // << _msg->pose(i).orientation().w() << std::setw(6)
-               // << _msg->pose(i).orientation().x() << std::setw(6)
-               // << _msg->pose(i).orientation().y() << std::setw(6)
-               // << _msg->pose(i).orientation().z() << std::endl;
+    for (int i = 0; i < _msg->pose_size(); i++)
+    {
+        if (_msg->pose(i).name() == "pioneer2dx")
+        {
+            RobotPosition pos = {
+                _msg->pose(i).position().x(),
+                _msg->pose(i).position().y(),
+                _msg->pose(i).orientation().w(),
+                _msg->pose(i).orientation().x(),
+                _msg->pose(i).orientation().y(),
+                _msg->pose(i).orientation().z()
+            };
+
+            mapping::UpdateMap(pos);
+
+
+      /*std::cout << std::setprecision(2) << std::fixed << std::setw(6)
+               << _msg->pose(i).position().x() << std::setw(6)
+               << _msg->pose(i).position().y() << std::setw(6)
+               << _msg->pose(i).position().z() << std::endl
+                << _msg->pose(i).orientation().w() << std::setw(6)
+                << _msg->pose(i).orientation().x() << std::setw(6)
+                << _msg->pose(i).orientation().y() << std::setw(6)
+                << _msg->pose(i).orientation().z() << std::endl;*/
+        }
     }
-  }
 }
 
 void cameraCallback(ConstImageStampedPtr &msg) {
@@ -111,18 +130,18 @@ int main(int _argc, char **_argv) {
 
   float speed = 0.0;
 
-
+    mapping::img.setTo(0);
     // Loop
   while (true) {
     //std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
 
     // Display lidar info
-    std::cout << "Marbles have been detected: " << lidar::marblesPresent << std::endl;
+    /*std::cout << "Marbles have been detected: " << lidar::marblesPresent << std::endl;
     std::cout << "Range to nearest detected point: " << lidar::nearestPoint.range << std::endl;
     std::cout << "Total number of detected marbles: " << lidar::detectedMarbles.size() << std::endl;
-    std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;
-
+    std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;*/
+    //std::cout << mapping::map[1][1] << std::endl;
 
     mutex.lock();
     int key = cv::waitKey(1);

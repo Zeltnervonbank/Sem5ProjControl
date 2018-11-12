@@ -19,7 +19,6 @@ public:
     virtual void buildController();
     virtual ControlOutput getControlOutput(float cent, float dist);
 protected:
-    //LaserScanner*        m_pcLaserScanner;
 
     fl::Engine*          m_pcFLEngine;
     fl::InputVariable*   m_pflObstacleDirection;

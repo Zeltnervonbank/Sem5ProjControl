@@ -13,6 +13,7 @@
 #include "marbel_controller.h"
 #include "datatypes.h"
 #include "lidar.h"
+#include "wall_controller.h"
 
 bool lidar::marblesPresent = false;
 std::vector<LidarMarble> lidar::detectedMarbles;
@@ -113,6 +114,8 @@ int main(int _argc, char **_argv) {
   const int key_c = 99;
   marbel_Controller fuzzy;
   fuzzy.buildController();
+  wall_Controller fuzz;
+  fuzz.buildController();
 
   float speed;
   float dir;
@@ -125,8 +128,8 @@ int main(int _argc, char **_argv) {
 
     // Display lidar info
     std::cout << "Marbles have been detected: " << lidar::marblesPresent << std::endl;
-    std::cout << "angle to nearest detected point: " << lidar::nearestMarble.angle << std::endl;
-    std::cout << "distance to nearest detected point: " << lidar::nearestMarble.distance << std::endl;
+    std::cout << "angle to nearest detected point: " << lidar::nearestPoint.angle << std::endl;
+    std::cout << "distance to nearest detected point: " << lidar::nearestPoint.range << std::endl;
     //std::cout << "Total number of detected marbles: " << lidar::detectedMarbles.size() << std::endl;
     //std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;
 
@@ -138,16 +141,21 @@ int main(int _argc, char **_argv) {
     if (key == key_esc)
       break;
 
-    if(lidar::nearestMarble.angle>-4.00){
-    if(lidar::marblesPresent==1 && lidar::nearestMarble.distance<100){
-    dir= fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).direction;
-    speed = fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).speed;
+    //if(lidar::nearestMarble.angle>-4.00){
+    //if(lidar::marblesPresent==1 && lidar::nearestMarble.distance<100){
+    //dir= fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).direction;
+    //speed = fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).speed;
+    //}
+  //}
+    if(lidar::nearestPoint.range<3){
+        dir=fuzz.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).direction;
+        speed=fuzz.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).speed;
+
     }
-  }
-    else{
-        dir= 0;
-        speed = 0.0;
-    }
+    //else{
+        //dir= 0;
+        //speed = 0.0;
+    //}
 
     //if(radius>36){
     //    dir=0;

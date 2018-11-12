@@ -21,8 +21,8 @@ LidarMarble lidar::nearestMarble;
 std::vector<LidarRay> lidar::lidarRays;
 LidarRay lidar::nearestPoint;
 
-int mapping::map[400][400] = {};
-cv::Mat mapping::img = cv::Mat(400, 400, CV_8U);
+int mapping::map[800][800] = {};
+cv::Mat mapping::img = cv::Mat(800, 800, CV_8U);
 
 
 static boost::mutex mutex;
@@ -51,7 +51,7 @@ void poseCallback(ConstPosesStampedPtr &_msg) {
                 _msg->pose(i).orientation().w(),
                 _msg->pose(i).orientation().x(),
                 _msg->pose(i).orientation().y(),
-                _msg->pose(i).orientation().z()
+                _msg->pose(i).orientation().z()                
             };
 
             mapping::UpdateMap(pos);

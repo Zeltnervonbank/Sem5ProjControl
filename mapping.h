@@ -19,7 +19,7 @@ class mapping
 public:
     mapping();
 
-    static int map[400][400];
+    static int map[800][800];
 
     static cv::Mat img;
 

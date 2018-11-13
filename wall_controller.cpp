@@ -20,11 +20,11 @@ void wall_Controller::buildController()
     inputVariable1->setName("WallDirection");
     inputVariable1->setRange(-2.600, 2.600);
     inputVariable1->setLockValueInRange(false);
-    inputVariable1->addTerm(new fl::Ramp("farrigth", -0.1500, -2.570));
+    inputVariable1->addTerm(new fl::Ramp("farrigth", -0.1500, -1.570));
     //inputVariable1->addTerm(new fl::Triangle("rigth", -0.500, -0.750, -1.000));
     inputVariable1->addTerm(new fl::Triangle("center", 0.1500, 0.000, -0.150));
     //inputVariable1->addTerm(new fl::Triangle("left", 1.000, 0.750, 0.500));
-    inputVariable1->addTerm(new fl::Ramp("farleft", 0.1500, 2.570));
+    inputVariable1->addTerm(new fl::Ramp("farleft", 0.1500, 1.570));
     //inputVariable1->addTerm(new fl::Ramp("error", -1.600, -5.000));
     wall_Engine->addInputVariable(inputVariable1);
 
@@ -49,11 +49,11 @@ void wall_Controller::buildController()
     outputVariable1->setAggregation(new fl::Maximum);
     outputVariable1->setDefaultValue(0);
     //outputVariable1->addTerm(new fl::Triangle("serror", -0.100, 0.000, 0.100));
-    outputVariable1->addTerm(new fl::Ramp("ssharprigth", 0.400, 1.570));
+    outputVariable1->addTerm(new fl::Ramp("ssharprigth", 1.000, 0.400));
     //outputVariable1->addTerm(new fl::Triangle("srigth",1.000, 0.600, 0.200 ));
     outputVariable1->addTerm(new fl::Triangle("sstraight", 0.100, -0.000, -0.100));
     //outputVariable1->addTerm(new fl::Triangle("sleft", -0.200, -0.600, -1.000));
-    outputVariable1->addTerm(new fl::Ramp("ssharpleft", -0.400, -1.570));
+    outputVariable1->addTerm(new fl::Ramp("ssharpleft", -1.000, -0.400));
     wall_Engine->addOutputVariable(outputVariable1);
 
     //Membership functions of outputspeed
@@ -65,7 +65,7 @@ void wall_Controller::buildController()
     outputVariable2->setAggregation(new fl::Maximum);
     outputVariable2->setDefaultValue(fl::nan);
     outputVariable2->setDefuzzifier(new fl::Centroid(100));
-    outputVariable2->addTerm(new fl::Ramp("forward", 0.050, 1.000));
+    outputVariable2->addTerm(new fl::Ramp("forward", 0.050, 3.000));
     outputVariable2->addTerm(new fl::Ramp("stop", 0.020, -0.020));
     wall_Engine->addOutputVariable(outputVariable2);
 
@@ -111,10 +111,11 @@ WallControlOutput wall_Controller::getControlOutput(float cent, float dist)
 
     WallControlOutput out;
 
-    out.direction = ((int)(wall_Direction->getValue() * 100 + .5) / 100.0);
+    out.direction = wall_Direction->getValue(); //((int)(wall_Direction->getValue() * 100 + .5) / 100.0);
     out.speed     = speed->getValue();
 
-    std::cout << "output:" << out.direction << std::endl;
+    std::cout << "dirr:" << out.direction << std::endl;
+    std::cout << "speed:" << out.speed << std::endl;
 
 
     return out;

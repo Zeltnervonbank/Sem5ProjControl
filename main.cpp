@@ -141,21 +141,20 @@ int main(int _argc, char **_argv) {
     if (key == key_esc)
       break;
 
-    //if(lidar::nearestMarble.angle>-4.00){
-    //if(lidar::marblesPresent==1 && lidar::nearestMarble.distance<100){
-    //dir= fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).direction;
-    //speed = fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).speed;
-    //}
-  //}
-    if(lidar::nearestPoint.range<3){
-        dir=fuzz.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).direction;
-        speed=fuzz.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).speed;
-
+    if(lidar::nearestMarble.angle>-4.00){
+    if(lidar::marblesPresent==1 && lidar::nearestMarble.distance<100){
+    dir= fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).direction;
+    speed = fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).speed;
     }
-    //else{
-        //dir= 0;
-        //speed = 0.0;
-    //}
+  }
+    else if(lidar::nearestPoint.range<1 && lidar::nearestPoint.angle<=1.4 &&lidar::nearestPoint.angle>=-1.4 ){
+        dir=fuzz.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).direction;
+        //speed=fuzz.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).speed;
+    }
+    else{
+        dir= 0;
+        speed = 0.7;
+    }
 
     //if(radius>36){
     //    dir=0;

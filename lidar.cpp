@@ -187,7 +187,7 @@ std::vector<LidarMarble> lidar::ConvertCirclesToLidarMarbles(std::vector<cv::Vec
     detectedMarbles.clear();
 
     // Sets nearestMarble to high value
-    nearestMarble.distance = 100.0f;
+    nearestMarble.distance = 1000.0f;
 
     // Loop through detected circles
     for(size_t i = 0; i < circles.size(); i++)

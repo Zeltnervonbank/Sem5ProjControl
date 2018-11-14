@@ -61,7 +61,7 @@ void marbel_Controller::buildController()
     outputVariable2->setRange(-1, 1);
     outputVariable2->setLockValueInRange(false);
     outputVariable2->setAggregation(new fl::Maximum);
-    outputVariable2->setDefaultValue(fl::nan);
+    outputVariable2->setDefaultValue(0);
     outputVariable2->setDefuzzifier(new fl::Centroid(100));
     outputVariable2->addTerm(new fl::Ramp("forward", 0.050, 1.000));
     m_pcFLEngine->addOutputVariable(outputVariable2);

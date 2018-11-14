@@ -142,13 +142,13 @@ int main(int _argc, char **_argv) {
       break;
 
 
-    if(lidar::marblesPresent==1 && lidar::nearestMarble.distance<100){
+    if(lidar::marblesPresent==1 && lidar::nearestMarble.distance<1000){
     dir= fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).direction;
     speed = fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).speed;
   }
     else if(lidar::nearestPoint.range<1 && lidar::nearestPoint.angle<=1.56 && lidar::nearestPoint.angle>=-1.56 ){
         dir=fuzz.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).direction;
-        //speed=fuzz.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).speed;
+        speed=fuzz.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).speed;
     }
     else{
         dir= 0.0;

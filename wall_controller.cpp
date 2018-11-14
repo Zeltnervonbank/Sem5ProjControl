@@ -34,8 +34,8 @@ void wall_Controller::buildController()
     inputVariable2->setName("WallDistance");
     inputVariable2->setRange(-1.600, 1.600);
     inputVariable2->setLockValueInRange(false);
-    inputVariable2->addTerm(new fl::Ramp("close", 0.000, 0.500));
-    inputVariable2->addTerm(new fl::Ramp("far", 4.000, 100.000));
+    inputVariable2->addTerm(new fl::Ramp("close", 0.000, 0.300));
+    inputVariable2->addTerm(new fl::Ramp("far", 4.000, 1000.000));
     wall_Engine->addInputVariable(inputVariable2);
 
 
@@ -63,7 +63,7 @@ void wall_Controller::buildController()
     outputVariable2->setRange(-1, 1);
     outputVariable2->setLockValueInRange(false);
     outputVariable2->setAggregation(new fl::Maximum);
-    outputVariable2->setDefaultValue(fl::nan);
+    outputVariable2->setDefaultValue(0.2);
     outputVariable2->setDefuzzifier(new fl::Centroid(100));
     outputVariable2->addTerm(new fl::Ramp("forward", 0.050, 3.000));
     outputVariable2->addTerm(new fl::Ramp("stop", 0.020, -0.000));
@@ -84,7 +84,7 @@ void wall_Controller::buildController()
     //mamdani->addRule(fl::Rule::parse("if WallDirection is rigth then direction is srigth",wall_Engine));
     //mamdani->addRule(fl::Rule::parse("if WallDirection is error then direction is serror", wall_Engine));
     mamdani->addRule(fl::Rule::parse("if WallDistance is far then speed is forward", wall_Engine));
-    mamdani->addRule(fl::Rule::parse("if WallDistance is close then speed is stop", wall_Engine));
+    //mamdani->addRule(fl::Rule::parse("if WallDistance is close then speed is stop", wall_Engine));
     wall_Engine->addRuleBlock(mamdani);
 
     std::string status;
@@ -106,7 +106,7 @@ WallControlOutput wall_Controller::getControlOutput(float cent, float dist)
     wall_Direction->setValue(cent);
     wall_Distance->setValue(dist);
 
-    std::cout << "hej:" << cent << std::endl;
+    std::cout << "hej:" << dist << std::endl;
 
     wall_Engine->process();
 

@@ -108,6 +108,8 @@ ControlOutput marbel_Controller::getControlOutput(float cent, float dist)
 
     ControlOutput out;
 
+
+
     out.direction = ((int)(m_pflSteerDirection->getValue() * 100 + .5) / 100.0);
     out.speed     = m_pflSpeed->getValue();
 

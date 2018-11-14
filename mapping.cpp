@@ -1,4 +1,5 @@
 #include "mapping.h"
+#define PI 3.14159
 
 mapping::mapping()
 {
@@ -14,26 +15,10 @@ void mapping::UpdateMap(RobotPosition position)
         return;
     }
 
-    double x = (position.posX + 50.0) * 8.0;
-    double y = (position.posY + 50.0) * 8.0;
+    double x = (position.posX + 50.0) * MAP_SIDE_LENGTH / 100;
+    double y = (position.posY + 50.0) * MAP_SIDE_LENGTH / 100;
 
-    double rW = position.rotW;
-    double rX = position.rotX;
-    double rY = position.rotY;
-    double rZ = position.rotZ;
-
-    double roll = atan2(2.0 * rY * rW - 2.0 * rX * rZ, 2.0 * rY * rY - 2.0 * rZ * rZ);
-    double pitch = atan2(2.0 * rX * rW - 2.0 * rY * rZ, 2.0 * rX * rX - 2.0 * rZ * rZ);
-    double yaw = asin(2.0 * rX * rY + 2.0 * rZ * rW);
-
-    std::cout
-            //<< "X: " << x
-            //<< " Y: " << y
-            << " Roll: " << roll
-            << " Pitch: " << pitch
-            << " Yaw: " << yaw
-            << std::endl;
-
+    double yaw = fmod(2.0 * atan2(position.rotW, position.rotZ) + 3.0 * M_PI, 2.0 * M_PI);
 
     for(size_t i = 0; i < rays.size(); i++)
     {
@@ -42,11 +27,39 @@ void mapping::UpdateMap(RobotPosition position)
             continue;
         }
 
-        int xPos = x + rays[i].range * cos(rays[i].angle) * 8.0;
-        int yPos = y + rays[i].range * sin(rays[i].angle) * 8.0;
+        int xPos = x + rays[i].range * cos(rays[i].angle - yaw) * MAP_SIDE_LENGTH / 100;
+        int yPos = y + rays[i].range * sin(rays[i].angle - yaw) * MAP_SIDE_LENGTH / 100;
 
-        img.at<uchar>(800 - yPos, xPos, 0) = 255;
+
+        map[xPos][yPos] = 1;
+        img.at<uchar>(MAP_SIDE_LENGTH - yPos, xPos, 0) = 255;
     }
 
     cv::imshow("Map", img);
+}
+
+void mapping::SaveMapToDisk()
+{
+    const char *path="/home/andreas/Desktop/map.txt";
+    std::cout << "Attempting to save map" << std::endl;
+    std::ofstream mapStream(path);
+    if(mapStream.is_open())
+    {
+        for(int x = 0; x < MAP_SIDE_LENGTH; x++)
+        {
+            for(int y = 0; y < MAP_SIDE_LENGTH; y++)
+            {
+                mapStream << map[y][x];
+            }
+
+            mapStream << "\n";
+        }
+
+        mapStream.close();
+    }
+    else
+    {
+        std::cout << "Could not open stream" << std::endl;
+    }
+    std::cout << "Finished saving attempt" << std::endl;
 }

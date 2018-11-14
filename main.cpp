@@ -21,8 +21,8 @@ LidarMarble lidar::nearestMarble;
 std::vector<LidarRay> lidar::lidarRays;
 LidarRay lidar::nearestPoint;
 
-int mapping::map[800][800] = {};
-cv::Mat mapping::img = cv::Mat(800, 800, CV_8U);
+int mapping::map[MAP_SIDE_LENGTH][MAP_SIDE_LENGTH] = {};
+cv::Mat mapping::img = cv::Mat(MAP_SIDE_LENGTH, MAP_SIDE_LENGTH, CV_8U);
 
 
 static boost::mutex mutex;
@@ -164,6 +164,10 @@ int main(int _argc, char **_argv) {
 //    else if (cent < 150 && cent > 0)
 //        dir =-0.15;
 
+    if(key != 255)
+    {
+        std::cout << key << std::endl;
+    }
 
     if ((key == key_up) && (speed <= 1.2f))
       speed += 0.05;
@@ -173,6 +177,10 @@ int main(int _argc, char **_argv) {
       dir += 0.05;
     else if ((key == key_left) && (dir >= -0.4f))
       dir -= 0.05;
+    else if(key == 115)
+    {
+        mapping::SaveMapToDisk();
+    }
     else
     {
         speed *= 0.99f;

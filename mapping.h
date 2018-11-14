@@ -4,6 +4,7 @@
 #include "lidar.h"
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <math.h>
 
 #include <stdio.h>
@@ -14,16 +15,19 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#define MAP_SIDE_LENGTH 800
+
 class mapping
 {
 public:
     mapping();
 
-    static int map[800][800];
+    static int map[MAP_SIDE_LENGTH][MAP_SIDE_LENGTH];
 
     static cv::Mat img;
 
     static void UpdateMap(RobotPosition position);
+    static void SaveMapToDisk();
 };
 
 #endif // MAPPING_H

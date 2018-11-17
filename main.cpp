@@ -91,7 +91,7 @@ int main(int _argc, char **_argv) {
       node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidar::lidarCallback);
 
   gazebo::transport::SubscriberPtr cameraSubscriber =
-  node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
+      node->Subscribe("~/pioneer2dx/camera/link/camera/image", Camera::cameraCallback);
 
 
   // Publish to the robot vel_cmd topic

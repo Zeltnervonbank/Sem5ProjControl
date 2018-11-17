@@ -1,8 +1,21 @@
 #include "camera.h"
 
+static boost::mutex mutex;
+
 Camera::Camera()
 {
 
+}
+
+void Camera::cameraCallback(ConstImageStampedPtr &msg){
+    std::size_t width = msg->image().width();
+    std::size_t height = msg->image().height();
+    const char *data = msg->image().data().c_str();
+    cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
+
+    mutex.lock();
+    cv::imshow("camera", im);
+    mutex.unlock();
 }
 
 MarbleLocation Camera::getMarbelCenter(cv::Mat im)

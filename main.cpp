@@ -75,9 +75,9 @@ void cameraCallback(ConstImageStampedPtr &msg) {
     const char *data = msg->image().data().c_str();
     cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
     Camera cam;
-    MarbleLocation mLoc = cam.getMarbelCenter(im);
+    //MarbleLocation mLoc = cam.getMarbelCenter(im);
 
-    marbel_Controller fuzzy;
+    //marbel_Controller fuzzy;
     //dir=fuzzy.buildController(mLoc.center);
 
 
@@ -126,6 +126,8 @@ int main(int _argc, char **_argv) {
   const int key_down = 84;
   const int key_right = 83;
   const int key_esc = 27;
+  const int key_s = 115;
+  const int key_l = 108;
   marbel_Controller fuzzy;
 
   float speed = 0.0;
@@ -163,7 +165,7 @@ int main(int _argc, char **_argv) {
 //        dir =0.15;
 //    else if (cent < 150 && cent > 0)
 //        dir =-0.15;
-
+    // Print key pressed
     if(key != 255)
     {
         std::cout << key << std::endl;
@@ -177,9 +179,13 @@ int main(int _argc, char **_argv) {
       dir += 0.05;
     else if ((key == key_left) && (dir >= -0.4f))
       dir -= 0.05;
-    else if(key == 115)
+    else if(key == key_s)
     {
         mapping::SaveMapToDisk();
+    }
+    else if(key == key_l)
+    {
+        mapping::LoadMapFromDisk();
     }
     else
     {

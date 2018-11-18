@@ -82,3 +82,28 @@ void mapping::SaveMapToDisk()
     }
     std::cout << "Finished saving attempt" << std::endl;
 }
+
+void mapping::LoadMapFromDisk()
+{
+    std::ifstream stream ("/home/andreas/Desktop/map.txt");
+
+    if(stream.is_open())
+    {
+        for(int y = 0; y < MAP_SIDE_LENGTH; y++)
+        {
+            int x = 0;
+            int val = 0;
+            while(val != -38)
+            {
+                val = stream.get() - '0';
+                if(val != -38)
+                {
+                    std::cout << val;
+                }
+                x++;
+            }
+        }
+
+        stream.close();
+    }
+}

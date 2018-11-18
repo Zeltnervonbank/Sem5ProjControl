@@ -51,13 +51,13 @@ void poseCallback(ConstPosesStampedPtr &_msg) {
   }
 }
 
-void cameraCallback(ConstImageStampedPtr &msg) {
+// Now that Camera Class works, this section can be removed.
+/*void cameraCallback(ConstImageStampedPtr &msg) {
     std::size_t width = msg->image().width();
     std::size_t height = msg->image().height();
     const char *data = msg->image().data().c_str();
-    cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
-    Camera cam;
-    MarbleLocation mLoc = cam.getMarbelCenter(im);
+    cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));    
+    MarbleLocation mLoc = Camera::getMarbelCenter(im);
     radius=mLoc.radius;
     cent=mLoc.center;
 
@@ -69,7 +69,7 @@ void cameraCallback(ConstImageStampedPtr &msg) {
     mutex.lock();
     cv::imshow("camera", im);
     mutex.unlock();
-}
+}*/
 
 int main(int _argc, char **_argv) {
   //lidar::doSomething();

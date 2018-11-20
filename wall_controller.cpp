@@ -66,7 +66,7 @@ void wall_Controller::buildController()
     outputVariable2->setDefaultValue(0.2);
     outputVariable2->setDefuzzifier(new fl::Centroid(100));
     outputVariable2->addTerm(new fl::Ramp("forward", 0.050, 3.000));
-    outputVariable2->addTerm(new fl::Ramp("stop", 0.020, -0.000));
+    outputVariable2->addTerm(new fl::Ramp("stop", 0.020, -0.020));
     wall_Engine->addOutputVariable(outputVariable2);
 
     //Rules
@@ -84,7 +84,7 @@ void wall_Controller::buildController()
     //mamdani->addRule(fl::Rule::parse("if WallDirection is rigth then direction is srigth",wall_Engine));
     //mamdani->addRule(fl::Rule::parse("if WallDirection is error then direction is serror", wall_Engine));
     mamdani->addRule(fl::Rule::parse("if WallDistance is far then speed is forward", wall_Engine));
-    //mamdani->addRule(fl::Rule::parse("if WallDistance is close then speed is stop", wall_Engine));
+    mamdani->addRule(fl::Rule::parse("if WallDistance is close then speed is stop", wall_Engine));
     wall_Engine->addRuleBlock(mamdani);
 
     std::string status;

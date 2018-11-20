@@ -8,10 +8,38 @@ Camera::Camera()
 }
 
 void Camera::cameraCallback(ConstImageStampedPtr &msg){
+
+    cv::Mat kombi;
+    cv::Mat mask;
+    int marblePixels;
+
     std::size_t width = msg->image().width();
     std::size_t height = msg->image().height();
     const char *data = msg->image().data().c_str();
     cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
+
+    kombi = im.clone();
+    cv::cvtColor(im,im,CV_BGR2RGB);
+
+
+    cv::cvtColor(kombi, kombi, CV_BGR2HSV);
+    cv::inRange(kombi,cv::Scalar(0,0,50),cv::Scalar(80,220,200),mask);
+
+    kombi.setTo(cv::Scalar(255), mask); // Set area of mask to value 255
+
+    for(int i=0; i<kombi.rows;i++){
+         for(int j=0; j<kombi.cols;j++){
+             if(kombi.at<cv::Vec3b>(i,j)[0]==0){
+                 kombi.at<cv::Vec3b>(i,j)[0]=255;
+                 kombi.at<cv::Vec3b>(i,j)[1]=0;
+                 kombi.at<cv::Vec3b>(i,j)[2]=255;
+                 marblePixels++;
+             }
+         }
+     }
+    Camera::marbelClose = marblePixels>=49920;
+
+    cv::cvtColor(kombi, kombi, CV_HSV2RGB);
 
     mutex.lock();
     cv::imshow("camera", im);

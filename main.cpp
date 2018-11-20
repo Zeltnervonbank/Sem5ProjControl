@@ -16,6 +16,7 @@
 #include "wall_controller.h"
 
 bool lidar::marblesPresent = false;
+bool Camera::marbelClose = false;
 std::vector<LidarMarble> lidar::detectedMarbles;
 LidarMarble lidar::nearestMarble;
 std::vector<LidarRay> lidar::lidarRays;
@@ -141,8 +142,13 @@ int main(int _argc, char **_argv) {
     if (key == key_esc)
       break;
 
+    std::cout << "close?" << Camera::marbelClose << std::endl;
 
-    if(lidar::marblesPresent==1 && lidar::nearestMarble.distance<1000){
+    if(Camera::marbelClose){
+        dir= 0.0;
+        speed = 1.0;
+    }
+    else if(lidar::marblesPresent==1 && lidar::nearestMarble.distance<1000){
     dir= fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).direction;
     speed = fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).speed;
   }

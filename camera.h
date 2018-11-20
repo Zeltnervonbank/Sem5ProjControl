@@ -22,6 +22,7 @@ class Camera
 {
 public:
     Camera();
+    static bool marbelClose;
     static MarbleLocation getMarbelCenter(cv::Mat im);
     static void cameraCallback(ConstImageStampedPtr &msg);
 };

@@ -23,9 +23,20 @@ struct LidarRay
 {
     cv::Point2f startPoint;
     cv::Point2f endPoint;
-    float range;
+    double range;
     bool isMaxRange;
-    float angle;
+    double angle;
+};
+
+struct RobotPosition
+{
+    double posX;
+    double posY;
+
+    double rotW;
+    double rotX;
+    double rotY;
+    double rotZ;
 };
 
 #endif // DATATYPES_H

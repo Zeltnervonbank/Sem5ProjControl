@@ -13,12 +13,17 @@
 #include "marbel_controller.h"
 #include "datatypes.h"
 #include "lidar.h"
+#include "mapping.h"
 
 bool lidar::marblesPresent = false;
 std::vector<LidarMarble> lidar::detectedMarbles;
 LidarMarble lidar::nearestMarble;
 std::vector<LidarRay> lidar::lidarRays;
 LidarRay lidar::nearestPoint;
+
+int mapping::map[MAP_SIDE_LENGTH][MAP_SIDE_LENGTH] = {};
+cv::Mat mapping::img = cv::Mat(MAP_SIDE_LENGTH, MAP_SIDE_LENGTH, CV_8U);
+
 
 static boost::mutex mutex;
     int cent;
@@ -33,21 +38,35 @@ void statCallback(ConstWorldStatisticsPtr &_msg) {
 
 void poseCallback(ConstPosesStampedPtr &_msg) {
   // Dump the message contents to stdout.
-  //  std::cout << _msg->DebugString();
+    //std::cout << std::flush;
 
-  for (int i = 0; i < _msg->pose_size(); i++) {
-    if (_msg->pose(i).name() == "pioneer2dx") {
 
-      //std::cout << std::setprecision(2) << std::fixed << std::setw(6)
-               //<< _msg->pose(i).position().x() << std::setw(6)
-               //<< _msg->pose(i).position().y() << std::setw(6)
-               //<< _msg->pose(i).position().z() << std::endl;
-               // << _msg->pose(i).orientation().w() << std::setw(6)
-               // << _msg->pose(i).orientation().x() << std::setw(6)
-               // << _msg->pose(i).orientation().y() << std::setw(6)
-               // << _msg->pose(i).orientation().z() << std::endl;
+    for (int i = 0; i < _msg->pose_size(); i++)
+    {
+        if (_msg->pose(i).name() == "pioneer2dx")
+        {
+            RobotPosition pos = {
+                _msg->pose(i).position().x(),
+                _msg->pose(i).position().y(),
+                _msg->pose(i).orientation().w(),
+                _msg->pose(i).orientation().x(),
+                _msg->pose(i).orientation().y(),
+                _msg->pose(i).orientation().z()                
+            };
+
+            mapping::UpdateMap(pos);
+
+
+      /*std::cout << std::setprecision(2) << std::fixed << std::setw(6)
+               << _msg->pose(i).position().x() << std::setw(6)
+               << _msg->pose(i).position().y() << std::setw(6)
+               << _msg->pose(i).position().z() << std::endl
+                << _msg->pose(i).orientation().w() << std::setw(6)
+                << _msg->pose(i).orientation().x() << std::setw(6)
+                << _msg->pose(i).orientation().y() << std::setw(6)
+                << _msg->pose(i).orientation().z() << std::endl;*/
+        }
     }
-  }
 }
 
 void cameraCallback(ConstImageStampedPtr &msg) {
@@ -56,9 +75,9 @@ void cameraCallback(ConstImageStampedPtr &msg) {
     const char *data = msg->image().data().c_str();
     cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
     Camera cam;
-    MarbleLocation mLoc = cam.getMarbelCenter(im);
+    //MarbleLocation mLoc = cam.getMarbelCenter(im);
 
-    marbel_Controller fuzzy;
+    //marbel_Controller fuzzy;
     //dir=fuzzy.buildController(mLoc.center);
 
 
@@ -107,22 +126,24 @@ int main(int _argc, char **_argv) {
   const int key_down = 84;
   const int key_right = 83;
   const int key_esc = 27;
+  const int key_s = 115;
+  const int key_l = 108;
   marbel_Controller fuzzy;
 
   float speed = 0.0;
 
-
+    mapping::img.setTo(0);
     // Loop
   while (true) {
     //std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
 
     // Display lidar info
-    std::cout << "Marbles have been detected: " << lidar::marblesPresent << std::endl;
+    /*std::cout << "Marbles have been detected: " << lidar::marblesPresent << std::endl;
     std::cout << "Range to nearest detected point: " << lidar::nearestPoint.range << std::endl;
     std::cout << "Total number of detected marbles: " << lidar::detectedMarbles.size() << std::endl;
-    std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;
-
+    std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;*/
+    //std::cout << mapping::map[1][1] << std::endl;
 
     mutex.lock();
     int key = cv::waitKey(1);
@@ -144,7 +165,11 @@ int main(int _argc, char **_argv) {
 //        dir =0.15;
 //    else if (cent < 150 && cent > 0)
 //        dir =-0.15;
-
+    // Print key pressed
+    if(key != 255)
+    {
+        std::cout << key << std::endl;
+    }
 
     if ((key == key_up) && (speed <= 1.2f))
       speed += 0.05;
@@ -154,6 +179,14 @@ int main(int _argc, char **_argv) {
       dir += 0.05;
     else if ((key == key_left) && (dir >= -0.4f))
       dir -= 0.05;
+    else if(key == key_s)
+    {
+        mapping::SaveMapToDisk();
+    }
+    else if(key == key_l)
+    {
+        mapping::LoadMapFromDisk();
+    }
     else
     {
         speed *= 0.99f;

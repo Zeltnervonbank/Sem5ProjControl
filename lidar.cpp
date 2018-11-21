@@ -59,8 +59,8 @@ void lidar::lidarCallback(ConstLaserScanStampedPtr &msg)
     // Display images
     mutex.lock();
     cv::imshow("Lidar", im);
-    cv::imshow("Gray", im_gray);
-    cv::imshow("CV", cvMat);
+    //cv::imshow("Gray", im_gray);
+    //cv::imshow("CV", cvMat);
     mutex.unlock();
 }
 
@@ -85,7 +85,7 @@ std::vector<LidarRay> lidar::GetLidarPoints(ConstLaserScanStampedPtr &msg)
     lidarRays.clear();
 
     // Loop through each scan ray
-    for (size_t i = 0; i < msg->scan().ranges_size(); i++)
+    for (int i = 0; i < msg->scan().ranges_size(); i++)
     {
         // Get angle and distance of the ray
         float angle = angleMin + i * angleIncrement;

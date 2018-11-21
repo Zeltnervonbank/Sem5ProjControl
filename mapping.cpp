@@ -54,6 +54,11 @@ void mapping::UpdateMap(RobotPosition position)
 // Saves created map to disk
 void mapping::SaveMapToDisk()
 {
+    if(!mappingEnabled)
+    {
+        return;
+    }
+
     // Set output path TODO: Use path that won't just work for me
     const char *path="/home/andreas/Desktop/map.txt";
     std::cout << "Attempting to save map" << std::endl;

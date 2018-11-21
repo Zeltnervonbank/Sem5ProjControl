@@ -9,6 +9,10 @@ mapping::mapping()
 // Updates map based on a given position
 void mapping::UpdateMap(RobotPosition position)
 {
+    if(!mappingEnabled)
+    {
+        return;
+    }
     // Make copy static rays vector TODO: Add lock
     std::vector<LidarRay> rays = lidar::lidarRays;
 

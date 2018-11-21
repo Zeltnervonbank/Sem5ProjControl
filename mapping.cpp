@@ -94,6 +94,11 @@ void mapping::SaveMapToDisk()
 
 void mapping::LoadMapFromDisk()
 {
+    if(!mappingEnabled)
+    {
+        return;
+    }
+
     std::ifstream stream ("/home/andreas/Desktop/map.txt");
 
     if(stream.is_open())

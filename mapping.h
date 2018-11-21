@@ -28,6 +28,7 @@ public:
 
     static void UpdateMap(RobotPosition position);
     static void SaveMapToDisk();
+    static void LoadMapFromDisk();
 };
 
 #endif // MAPPING_H

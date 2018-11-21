@@ -14,6 +14,7 @@
 #include "datatypes.h"
 #include "lidar.h"
 #include "mapping.h"
+#include "waypointnavigation.h"
 
 bool lidar::marblesPresent = false;
 std::vector<LidarMarble> lidar::detectedMarbles;
@@ -153,18 +154,6 @@ int main(int _argc, char **_argv) {
     if (key == key_esc)
       break;
 
-    //dir=fuzzy.buildController(cent);
-
-    /*if (cent==0){
-        speed=0.5;
-  }
-    else if(cent>=150 && cent<=170 && cent != 0){
-        speed= 0.5;
-  }*/
-//    else if (cent > 170)
-//        dir =0.15;
-//    else if (cent < 150 && cent > 0)
-//        dir =-0.15;
     // Print key pressed
     if(key != 255)
     {
@@ -192,11 +181,6 @@ int main(int _argc, char **_argv) {
         speed *= 0.99f;
         dir *= 0.99f;
     }
-//    else {
-      // slow down
-      //      speed *= 0.1;
-      //      dir *= 0.1;
-    //}
 
     // Generate a pose
     ignition::math::Pose3d pose(double(speed), 0, 0, 0, 0, double(dir));

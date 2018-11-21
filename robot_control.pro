@@ -7,7 +7,8 @@ SOURCES += main.cpp \
     marbel_controller.cpp \
     camera.cpp \
     lidar.cpp \
-    mapping.cpp
+    mapping.cpp \
+    waypointnavigation.cpp
 
 CONFIG += link_pkgconfig
 PKGCONFIG += gazebo
@@ -26,7 +27,8 @@ HEADERS += \
     camera.h \
     datatypes.h \
     lidar.h \
-    mapping.h
+    mapping.h \
+    waypointnavigation.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../fuzzylite-6.0-linux64/fuzzylite-6.0/fuzzylite/release/bin/release/ -lfuzzylite
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../fuzzylite-6.0-linux64/fuzzylite-6.0/fuzzylite/release/bin/debug/ -lfuzzylite

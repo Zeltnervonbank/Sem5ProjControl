@@ -9,9 +9,20 @@
 
 #include <iostream>
 #include <stdio.h>
+#include "camera.h"
+#include "marbel_controller.h"
+#include "datatypes.h"
+#include "lidar.h"
+
+bool lidar::marblesPresent = false;
+std::vector<LidarMarble> lidar::detectedMarbles;
+LidarMarble lidar::nearestMarble;
+std::vector<LidarRay> lidar::lidarRays;
+LidarRay lidar::nearestPoint;
 
 static boost::mutex mutex;
-int cent;
+    int cent;
+    float dir =0.0;
 
 void statCallback(ConstWorldStatisticsPtr &_msg) {
   (void)_msg;
@@ -40,116 +51,24 @@ void poseCallback(ConstPosesStampedPtr &_msg) {
 }
 
 void cameraCallback(ConstImageStampedPtr &msg) {
+    std::size_t width = msg->image().width();
+    std::size_t height = msg->image().height();
+    const char *data = msg->image().data().c_str();
+    cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
+    Camera cam;
+    MarbleLocation mLoc = cam.getMarbelCenter(im);
 
-  std::size_t width = msg->image().width();
-  std::size_t height = msg->image().height();
-  const char *data = msg->image().data().c_str();
-  cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
-
-  cv::Mat kombi;
-  cv::Mat mask;
-  cv::Mat cirkler;
-  cv::Mat cirkler_gray;
-
-
-  kombi = im.clone();
-  cv::cvtColor(im,im,CV_BGR2RGB);
+    marbel_Controller fuzzy;
+    //dir=fuzzy.buildController(mLoc.center);
 
 
-  cv::cvtColor(kombi, kombi, CV_BGR2HSV);
-  cv::inRange(kombi,cv::Scalar(0,0,50),cv::Scalar(80,220,200),mask);
-
-  kombi.setTo(cv::Scalar(255), mask); // Set area of mask to value 255
-
-  for(int i=0; i<kombi.rows;i++){
-       for(int j=0; j<kombi.cols;j++){
-           if(kombi.at<cv::Vec3b>(i,j)[0]==0){
-               kombi.at<cv::Vec3b>(i,j)[0]=255;
-               kombi.at<cv::Vec3b>(i,j)[1]=0;
-               kombi.at<cv::Vec3b>(i,j)[2]=255;
-           }
-       }
-   }
-
-  cv::cvtColor(kombi, kombi, CV_HSV2RGB);
-  cirkler = kombi.clone();
-  std::vector<cv::Vec3f> circles;
-  cv::cvtColor(cirkler, cirkler_gray, CV_RGB2GRAY);
-
-  cv::HoughCircles(cirkler_gray,circles,CV_HOUGH_GRADIENT,1,cirkler_gray.rows/8,110,17,0,0);
-  int radius =0;
-  for( size_t i = 0; i < circles.size(); i++ )
-  {
-      cv::Vec3i c = circles[i];
-      if(c[2]>=radius){
-      cent =c[0];
-      cv::Point center = cv::Point(c[0], c[1]);
-      // circle center
-      cv::circle( cirkler, center, 1, cv::Scalar(0,100,100), 3, cv::LINE_AA);
-      // circle outline
-
-      radius = c[2];
-      cv::circle( cirkler, center, radius, cv::Scalar(255,0,255), 3, cv::LINE_AA);
-  }
-  }
-
-  mutex.lock();
-  std::cout << radius << std::endl;
-  cv::imshow("camera", im);
-  cv::imshow("komb", kombi);
-  cv::imshow( "Hough Circle Transform Demo", cirkler );
-  mutex.unlock();
-
-}
-
-void lidarCallback(ConstLaserScanStampedPtr &msg) {
-
-  //  std::cout << ">> " << msg->DebugString() << std::endl;
-  float angle_min = float(msg->scan().angle_min());
-  //  double angle_max = msg->scan().angle_max();
-  float angle_increment = float(msg->scan().angle_step());
-
-  float range_min = float(msg->scan().range_min());
-  float range_max = float(msg->scan().range_max());
-
-  int sec = msg->time().sec();
-  int nsec = msg->time().nsec();
-
-  int nranges = msg->scan().ranges_size();
-  int nintensities = msg->scan().intensities_size();
-
-  assert(nranges == nintensities);
-
-  int width = 400;
-  int height = 400;
-  float px_per_m = 200 / range_max;
-
-  cv::Mat im(height, width, CV_8UC3);
-  im.setTo(0);
-  for (int i = 0; i < nranges; i++) {
-    float angle = angle_min + i * angle_increment;
-    float range = std::min(float(msg->scan().ranges(i)), range_max);
-    //    double intensity = msg->scan().intensities(i);
-    cv::Point2f startpt(200.5f + range_min * px_per_m * std::cos(angle),
-                        200.5f - range_min * px_per_m * std::sin(angle));
-    cv::Point2f endpt(200.5f + range * px_per_m * std::cos(angle),
-                      200.5f - range * px_per_m * std::sin(angle));
-    cv::line(im, startpt * 16, endpt * 16, cv::Scalar(255, 255, 255, 255), 1,
-             cv::LINE_AA, 4);
-
-    //    std::cout << angle << " " << range << " " << intensity << std::endl;
-  }
-  cv::circle(im, cv::Point(200, 200), 2, cv::Scalar(0, 0, 255));
-  cv::putText(im, std::to_string(sec) + ":" + std::to_string(nsec),
-              cv::Point(10, 20), cv::FONT_HERSHEY_PLAIN, 1.0,
-              cv::Scalar(255, 0, 0));
-
-  mutex.lock();
-  cv::imshow("lidar", im);
-  mutex.unlock();
+    mutex.lock();
+    cv::imshow("camera", im);
+    mutex.unlock();
 }
 
 int main(int _argc, char **_argv) {
+  //lidar::doSomething();
   // Load gazebo
   gazebo::client::setup(_argc, _argv);
 
@@ -162,13 +81,13 @@ int main(int _argc, char **_argv) {
       node->Subscribe("~/world_stats", statCallback);
 
   gazebo::transport::SubscriberPtr poseSubscriber =
-      node->Subscribe("~/pose/info", poseCallback);
-
-  gazebo::transport::SubscriberPtr cameraSubscriber =
-      node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
+      node->Subscribe("~/pose/info", poseCallback); 
 
   gazebo::transport::SubscriberPtr lidarSubscriber =
-      node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidarCallback);
+      node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidar::lidarCallback);
+
+  gazebo::transport::SubscriberPtr cameraSubscriber =
+  node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
 
 
   // Publish to the robot vel_cmd topic
@@ -188,41 +107,46 @@ int main(int _argc, char **_argv) {
   const int key_down = 84;
   const int key_right = 83;
   const int key_esc = 27;
-  const int key_shift = 17;
+  marbel_Controller fuzzy;
 
   float speed = 0.0;
-  float dir = 0.0;
 
-  // Loop
+
+    // Loop
   while (true) {
     //std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
+
+    // Display lidar info
+    std::cout << "Marbles have been detected: " << lidar::marblesPresent << std::endl;
+    std::cout << "Range to nearest detected point: " << lidar::nearestPoint.range << std::endl;
+    std::cout << "Total number of detected marbles: " << lidar::detectedMarbles.size() << std::endl;
+    std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;
+
 
     mutex.lock();
     int key = cv::waitKey(1);
     mutex.unlock();
 
+
     if (key == key_esc)
       break;
 
-    if (cent==0){
-        speed-=0.1;
-        dir=0.5;
+    //dir=fuzzy.buildController(cent);
+
+    /*if (cent==0){
+        speed=0.5;
   }
     else if(cent>=150 && cent<=170 && cent != 0){
-        speed= 1;
-        dir=0;
-  }
-    else if (cent > 170)
-        dir =0.15;
-    else if (cent < 150 && cent > 0)
-        dir =-0.15;
+        speed= 0.5;
+  }*/
+//    else if (cent > 170)
+//        dir =0.15;
+//    else if (cent < 150 && cent > 0)
+//        dir =-0.15;
 
-    if(key==key_shift){
-        speed = 0;
-        dir = 0;
-    }
-    else if ((key == key_up) && (speed <= 1.2f))
+
+    if ((key == key_up) && (speed <= 1.2f))
       speed += 0.05;
     else if ((key == key_down) && (speed >= -1.2f))
      speed -= 0.05;
@@ -230,6 +154,11 @@ int main(int _argc, char **_argv) {
       dir += 0.05;
     else if ((key == key_left) && (dir >= -0.4f))
       dir -= 0.05;
+    else
+    {
+        speed *= 0.99f;
+        dir *= 0.99f;
+    }
 //    else {
       // slow down
       //      speed *= 0.1;

@@ -14,6 +14,9 @@
 #include "datatypes.h"
 #include "lidar.h"
 #include "mapping.h"
+#include "gazeboglobals.h"
+
+gazebo::transport::NodePtr GazeboGlobals::node;
 
 bool lidar::marblesPresent = false;
 std::vector<LidarMarble> lidar::detectedMarbles;
@@ -92,30 +95,30 @@ int main(int _argc, char **_argv) {
   gazebo::client::setup(_argc, _argv);
 
   // Create our node for communication
-  gazebo::transport::NodePtr node(new gazebo::transport::Node());
-  node->Init();
+  //GazeboGlobals::node = new gazebo::transport::Node();
+  GazeboGlobals::node->Init();
 
   // Listen to Gazebo topics
   gazebo::transport::SubscriberPtr statSubscriber =
-      node->Subscribe("~/world_stats", statCallback);
+      GazeboGlobals::node->Subscribe("~/world_stats", statCallback);
 
   gazebo::transport::SubscriberPtr poseSubscriber =
-      node->Subscribe("~/pose/info", poseCallback); 
+      GazeboGlobals::node->Subscribe("~/pose/info", poseCallback);
 
   gazebo::transport::SubscriberPtr lidarSubscriber =
-      node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidar::lidarCallback);
+      GazeboGlobals::node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidar::lidarCallback);
 
   gazebo::transport::SubscriberPtr cameraSubscriber =
-  node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
+  GazeboGlobals::node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
 
 
   // Publish to the robot vel_cmd topic
   gazebo::transport::PublisherPtr movementPublisher =
-      node->Advertise<gazebo::msgs::Pose>("~/pioneer2dx/vel_cmd");
+      GazeboGlobals::node->Advertise<gazebo::msgs::Pose>("~/pioneer2dx/vel_cmd");
 
   // Publish a reset of the world
   gazebo::transport::PublisherPtr worldPublisher =
-      node->Advertise<gazebo::msgs::WorldControl>("~/world_control");
+      GazeboGlobals::node->Advertise<gazebo::msgs::WorldControl>("~/world_control");
   gazebo::msgs::WorldControl controlMessage;
   controlMessage.mutable_reset()->set_all(true);
   worldPublisher->WaitForConnection();

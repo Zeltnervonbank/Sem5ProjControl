@@ -23,11 +23,11 @@ LidarRay lidar::nearestPoint;
 
 int mapping::map[MAP_SIDE_LENGTH][MAP_SIDE_LENGTH] = {};
 cv::Mat mapping::img = cv::Mat(MAP_SIDE_LENGTH, MAP_SIDE_LENGTH, CV_8U);
-
+bool mapping::mappingEnabled = false;
 
 static boost::mutex mutex;
     int cent;
-    float dir =0.0;
+    float dir = 0.0;
 
 void statCallback(ConstWorldStatisticsPtr &_msg) {
   (void)_msg;

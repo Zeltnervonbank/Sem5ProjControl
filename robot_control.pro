@@ -8,6 +8,7 @@ SOURCES += main.cpp \
     camera.cpp \
     lidar.cpp \
     mapping.cpp \
+    movement.cpp
     waypointnavigation.cpp
 
 CONFIG += link_pkgconfig
@@ -28,6 +29,8 @@ HEADERS += \
     datatypes.h \
     lidar.h \
     mapping.h \
+    movement.h \
+    globals.h
     waypointnavigation.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../fuzzylite-6.0-linux64/fuzzylite-6.0/fuzzylite/release/bin/release/ -lfuzzylite

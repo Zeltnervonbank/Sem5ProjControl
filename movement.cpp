@@ -23,6 +23,12 @@ void Movement::PublishPose(ignition::math::Pose3d pose)
     Globals::movementPublisher->Publish(msg);
 }
 
+void Movement::Move(double speed, double rotation)
+{
+    ignition::math::Pose3d pose(speed, 0, 0, 0, 0, rotation);
+    PublishPose(pose);
+}
+
 // Vars for keyboard input
 double dir = 0.0;
 double speed = 0.0;

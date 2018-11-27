@@ -14,6 +14,7 @@
 #include "datatypes.h"
 #include "lidar.h"
 #include "wall_controller.h"
+#include "qlearning.h"
 
 bool lidar::marblesPresent = false;
 bool Camera::marbelClose = false;
@@ -113,12 +114,22 @@ int main(int _argc, char **_argv) {
   const int key_right = 83;
   const int key_esc = 27;
   const int key_c = 99;
-  marbel_Controller fuzzy;
+  const int key_v = 118;
+  /*marbel_Controller fuzzy;
   fuzzy.buildController();
   wall_Controller fuzz;
-  fuzz.buildController();
+  fuzz.buildController();*/
 
-  float speed;
+  int reward=0;
+  int iterations=0;
+  int visited=0;
+  int runs=0;
+  Qlearning qlear;
+  //qlear.initialize();
+  qlear.chooseAction(0,0,1);
+  //std::cout << "her2" << std::endl;
+
+  float speed=0;
   float dir;
 
 
@@ -127,12 +138,12 @@ int main(int _argc, char **_argv) {
     //std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
 
-    // Display lidar info
+    /* Display lidar info
     std::cout << "Marbles have been detected: " << lidar::marblesPresent << std::endl;
     std::cout << "angle to nearest detected point: " << lidar::nearestPoint.angle << std::endl;
     std::cout << "distance to nearest detected point: " << lidar::nearestPoint.range << std::endl;
-    //std::cout << "Total number of detected marbles: " << lidar::detectedMarbles.size() << std::endl;
-    //std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;
+    std::cout << "Total number of detected marbles: " << lidar::detectedMarbles.size() << std::endl;
+    std::cout << "Total number of rays: " << lidar::lidarRays.size() << std::endl;*/
 
     mutex.lock();
     int key = cv::waitKey(1);
@@ -141,7 +152,7 @@ int main(int _argc, char **_argv) {
 
     if (key == key_esc)
       break;
-
+/*
     std::cout << "close?" << Camera::marbelClose << std::endl;
 
     if(Camera::marbelClose){
@@ -168,6 +179,7 @@ int main(int _argc, char **_argv) {
 
      //   }
   //}
+  */
     //std::cout << "key" << key << std::endl;
 
     //dir=0.5; Højre er positiv retning
@@ -191,8 +203,21 @@ int main(int _argc, char **_argv) {
     else if ((key == key_left) && (dir >= -0.4f))
       dir -= 0.05;
     else if (key == key_c){
-        dir = 0.00;
-        speed = 0.00;
+        if(visited>=3){
+            qlear.run();
+            runs++;
+            visited=0;
+            std::cout << "runs: " << runs << std::endl;
+        }
+        reward= (rand()%100)+1;
+        std::cout << "reward rand" << reward << std::endl;
+        qlear.chooseAction(qlear.currentState,reward,iterations);
+        iterations=0;
+        visited++;
+        qlear.printR();
+    }
+    else if (key == key_v){
+        qlear.printroute();
     }
 //    else {
       // slow down
@@ -207,6 +232,7 @@ int main(int _argc, char **_argv) {
     gazebo::msgs::Pose msg;
     gazebo::msgs::Set(&msg, pose);
     movementPublisher->Publish(msg);
+    iterations++;
   }
 
   // Make sure to shut everything down.

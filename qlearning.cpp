@@ -48,16 +48,16 @@ int Qlearning::getRandomAction(){
 }
 
 
-void Qlearning::chooseAction(int initialState, int marbles, int itterations){
-    int possibleAction;
+void Qlearning::chooseAction(int initialState, int marbles, double time){
+
     currentState=initialState;
 
     possibleAction = getRandomAction();
 
 
     if(R[currentState][possibleAction] >= 0){
-        std::cout << reward(possibleAction,marbles,itterations) << std::endl;
-        R[currentState][possibleAction] = reward(possibleAction,marbles,itterations); //Update reward of choosen action.
+        //std::cout << reward(possibleAction,marbles,itterations) << std::endl;
+        R[currentState][possibleAction] = reward(possibleAction,marbles,time); //Update reward of choosen action.
         //std::cout << reward(possibleAction) << std::endl;
         currentState = possibleAction;
     }
@@ -118,10 +118,12 @@ else{
     }
 }
 
-int Qlearning::reward(int action, int marbles, int itterations){
+int Qlearning::reward(int action, int marbles, double time){
     //Get reward
-    std::cout << "her1" << std::endl;
-    return static_cast<int>((((marbles)) + (gamma * maximum(action, false, false)))/2);
+    //std::cout << "her1" << std::endl;
+    //std::cout << gamma * R[currentState][possibleAction] << std::endl;
+    int rewardV=marbles/time;
+    return static_cast<int>((rewardV + (gamma * R[currentState][possibleAction]))/2);
 }
 
 void Qlearning::printR(){

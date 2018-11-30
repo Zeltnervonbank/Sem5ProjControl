@@ -15,6 +15,7 @@
 #include "lidar.h"
 #include "wall_controller.h"
 #include "qlearning.h"
+#include <chrono>
 
 bool lidar::marblesPresent = false;
 bool Camera::marbelClose = false;
@@ -22,6 +23,7 @@ std::vector<LidarMarble> lidar::detectedMarbles;
 LidarMarble lidar::nearestMarble;
 std::vector<LidarRay> lidar::lidarRays;
 LidarRay lidar::nearestPoint;
+int removedMarbels=0;
 
 static boost::mutex mutex;
     int cent;
@@ -32,6 +34,14 @@ void statCallback(ConstWorldStatisticsPtr &_msg) {
   // Dump the message contents to stdout.
   //  std::cout << _msg->DebugString();
   //  std::cout << std::flush;
+}
+
+void contactCallback(ConstContactSensorPtr &_msg)
+{
+    if(_msg->ByteSize()>300){
+        removedMarbels+=100;
+        std::cout << "Marble point:                          " << removedMarbels << std::endl;
+        }
 }
 
 void poseCallback(ConstPosesStampedPtr &_msg) {
@@ -53,25 +63,6 @@ void poseCallback(ConstPosesStampedPtr &_msg) {
   }
 }
 
-// Now that Camera Class works, this section can be removed.
-/*void cameraCallback(ConstImageStampedPtr &msg) {
-    std::size_t width = msg->image().width();
-    std::size_t height = msg->image().height();
-    const char *data = msg->image().data().c_str();
-    cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));    
-    MarbleLocation mLoc = Camera::getMarbelCenter(im);
-    radius=mLoc.radius;
-    cent=mLoc.center;
-
-    //std::cout << "rad:" << radius << std::endl;
-    //std::cout << "cent:" << mLoc.center << std::endl;
-    marbel_Controller fuzzy;
-    //dir=fuzzy.buildController(mLoc.center);
-
-    mutex.lock();
-    cv::imshow("camera", im);
-    mutex.unlock();
-}*/
 
 int main(int _argc, char **_argv) {
   //lidar::doSomething();
@@ -108,6 +99,30 @@ int main(int _argc, char **_argv) {
   worldPublisher->WaitForConnection();
   worldPublisher->Publish(controlMessage);
 
+
+  gazebo::transport::SubscriberPtr marble_clone_0 = node->Subscribe("~/marble_clone_0/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_1 = node->Subscribe("~/marble_clone_1/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_10 = node->Subscribe("~/marble_clone_10/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_11 = node->Subscribe("~/marble_clone_11/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_12 = node->Subscribe("~/marble_clone_12/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_13 = node->Subscribe("~/marble_clone_13/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_14 = node->Subscribe("~/marble_clone_14/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_15 = node->Subscribe("~/marble_clone_15/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_16 = node->Subscribe("~/marble_clone_16/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_17 = node->Subscribe("~/marble_clone_17/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_18 = node->Subscribe("~/marble_clone_18/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_19 = node->Subscribe("~/marble_clone_19/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_2 = node->Subscribe("~/marble_clone_2/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_3 = node->Subscribe("~/marble_clone_3/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_4 = node->Subscribe("~/marble_clone_4/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_5 = node->Subscribe("~/marble_clone_5/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_6 = node->Subscribe("~/marble_clone_6/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_7 = node->Subscribe("~/marble_clone_7/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_8 = node->Subscribe("~/marble_clone_8/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_9 = node->Subscribe("~/marble_clone_9/marble/link/marble_contact/contacts", contactCallback);
+
+
+
   const int key_left = 81;
   const int key_up = 82;
   const int key_down = 84;
@@ -115,22 +130,24 @@ int main(int _argc, char **_argv) {
   const int key_esc = 27;
   const int key_c = 99;
   const int key_v = 118;
-  /*marbel_Controller fuzzy;
+  marbel_Controller fuzzy;
   fuzzy.buildController();
   wall_Controller fuzz;
-  fuzz.buildController();*/
+  fuzz.buildController();
 
   int reward=0;
-  int iterations=0;
   int visited=0;
   int runs=0;
   Qlearning qlear;
   //qlear.initialize();
   qlear.chooseAction(0,0,1);
   //std::cout << "her2" << std::endl;
+  auto start=std::chrono::steady_clock::now();
+
 
   float speed=0;
-  float dir;
+  float dir=0;
+
 
 
     // Loop
@@ -149,11 +166,12 @@ int main(int _argc, char **_argv) {
     int key = cv::waitKey(1);
     mutex.unlock();
 
+    //std::cout << gazebo::common::Time::GetWallTime()-startTime << std::endl;
 
     if (key == key_esc)
       break;
-/*
-    std::cout << "close?" << Camera::marbelClose << std::endl;
+
+    //std::cout << "close?" << Camera::marbelClose << std::endl;
 
     if(Camera::marbelClose){
         dir= 0.0;
@@ -179,7 +197,7 @@ int main(int _argc, char **_argv) {
 
      //   }
   //}
-  */
+
     //std::cout << "key" << key << std::endl;
 
     //dir=0.5; Højre er positiv retning
@@ -210,11 +228,15 @@ int main(int _argc, char **_argv) {
             std::cout << "runs: " << runs << std::endl;
         }
         reward= (rand()%100)+1;
-        std::cout << "reward rand" << reward << std::endl;
-        qlear.chooseAction(qlear.currentState,reward,iterations);
-        iterations=0;
+        //std::cout << "reward rand" << reward << std::endl;
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> diff = end-start;
+        std::cout << diff.count() << std::endl;
+        qlear.chooseAction(qlear.currentState,removedMarbels,diff.count());
+        removedMarbels=0;
         visited++;
         qlear.printR();
+
     }
     else if (key == key_v){
         qlear.printroute();
@@ -232,7 +254,6 @@ int main(int _argc, char **_argv) {
     gazebo::msgs::Pose msg;
     gazebo::msgs::Set(&msg, pose);
     movementPublisher->Publish(msg);
-    iterations++;
   }
 
   // Make sure to shut everything down.

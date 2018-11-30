@@ -102,7 +102,7 @@ ControlOutput marbel_Controller::getControlOutput(float cent, float dist)
     m_pflObstacleDirection->setValue(cent);
     m_pflObstacleDistance->setValue(dist);
 
-    std::cout << "hej:" << cent << std::endl;
+    //std::cout << "hej:" << cent << std::endl;
 
     m_pcFLEngine->process();
 
@@ -113,7 +113,7 @@ ControlOutput marbel_Controller::getControlOutput(float cent, float dist)
     out.direction = ((int)(m_pflSteerDirection->getValue() * 100 + .5) / 100.0);
     out.speed     = m_pflSpeed->getValue();
 
-    std::cout << "output:" << out.direction << std::endl;
+    //std::cout << "output:" << out.direction << std::endl;
 
 
     return out;

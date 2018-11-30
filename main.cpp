@@ -16,6 +16,7 @@
 #include "mapping.h"
 #include "globals.h"
 #include "movement.h"
+#include "pathFinding.h"
 
 
 // Initialise Gazebo node and publishers

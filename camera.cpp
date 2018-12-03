@@ -37,44 +37,23 @@ void Camera::cameraCallback(ConstImageStampedPtr &msg){
              }
          }
      }
-    Camera::marbelClose = marblePixels>=30000;
+    Camera::marbelClose = marblePixels>=25000;
 
     cv::cvtColor(kombi, kombi, CV_HSV2RGB);
 
     mutex.lock();
     cv::imshow("camera", im);
     mutex.unlock();
+
+    Camera::getMarbelCenter(kombi);
 }
 
 MarbleLocation Camera::getMarbelCenter(cv::Mat im)
 {
-    cv::Mat kombi;
-    cv::Mat mask;
     cv::Mat cirkler;
     cv::Mat cirkler_gray;
 
-
-    kombi = im.clone();
-    cv::cvtColor(im,im,CV_BGR2RGB);
-
-
-    cv::cvtColor(kombi, kombi, CV_BGR2HSV);
-    cv::inRange(kombi,cv::Scalar(0,0,50),cv::Scalar(80,220,200),mask);
-
-    kombi.setTo(cv::Scalar(255), mask); // Set area of mask to value 255
-
-    for(int i=0; i<kombi.rows;i++){
-         for(int j=0; j<kombi.cols;j++){
-             if(kombi.at<cv::Vec3b>(i,j)[0]==0){
-                 kombi.at<cv::Vec3b>(i,j)[0]=255;
-                 kombi.at<cv::Vec3b>(i,j)[1]=0;
-                 kombi.at<cv::Vec3b>(i,j)[2]=255;
-             }
-         }
-     }
-
-    cv::cvtColor(kombi, kombi, CV_HSV2RGB);
-    cirkler = kombi.clone();
+    cirkler = im.clone();
     std::vector<cv::Vec3f> circles;
     cv::cvtColor(cirkler, cirkler_gray, CV_RGB2GRAY);
 
@@ -102,8 +81,8 @@ MarbleLocation Camera::getMarbelCenter(cv::Mat im)
 
 
     //std::cout << mLoc.radius << std::endl;
-    //cv::imshow("komb", kombi);
-    //cv::imshow( "Hough Circle Transform Demo", cirkler );
+    cv::imshow("komb", im);
+    cv::imshow( "Hough Circle Transform Demo", cirkler );
 
     return mLoc;
 }

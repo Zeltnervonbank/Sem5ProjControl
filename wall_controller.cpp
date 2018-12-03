@@ -20,11 +20,11 @@ void wall_Controller::buildController()
     inputVariable1->setName("WallDirection");
     inputVariable1->setRange(-2.600, 2.600);
     inputVariable1->setLockValueInRange(false);
-    inputVariable1->addTerm(new fl::Ramp("farrigth", -0.1500, -1.570));
-    //inputVariable1->addTerm(new fl::Triangle("rigth", -0.500, -0.750, -1.000));
+    inputVariable1->addTerm(new fl::Ramp("farrigth", -0.750, -1.400));
+    inputVariable1->addTerm(new fl::Triangle("rigth", -0.000, -0.750, -1.000));
     inputVariable1->addTerm(new fl::Triangle("center", 0.1500, 0.000, -0.150));
-    //inputVariable1->addTerm(new fl::Triangle("left", 1.000, 0.750, 0.500));
-    inputVariable1->addTerm(new fl::Ramp("farleft", 0.1500, 1.570));
+    inputVariable1->addTerm(new fl::Triangle("left", 1.000, 0.750, 0.000));
+    inputVariable1->addTerm(new fl::Ramp("farleft", 0.750, 1.400));
     //inputVariable1->addTerm(new fl::Ramp("error", -1.600, -5.000));
     wall_Engine->addInputVariable(inputVariable1);
 
@@ -49,11 +49,11 @@ void wall_Controller::buildController()
     outputVariable1->setAggregation(new fl::Maximum);
     outputVariable1->setDefaultValue(0);
     //outputVariable1->addTerm(new fl::Triangle("serror", -0.100, 0.000, 0.100));
-    outputVariable1->addTerm(new fl::Ramp("ssharprigth", 1.000, 0.400));
-    //outputVariable1->addTerm(new fl::Triangle("srigth",1.000, 0.600, 0.200 ));
+    outputVariable1->addTerm(new fl::Ramp("ssharprigth", 1.000, 0.300));
+    outputVariable1->addTerm(new fl::Triangle("srigth",0.600, 0.300, 0.000 ));
     outputVariable1->addTerm(new fl::Triangle("sstraight", 0.100, -0.000, -0.100));
-    //outputVariable1->addTerm(new fl::Triangle("sleft", -0.200, -0.600, -1.000));
-    outputVariable1->addTerm(new fl::Ramp("ssharpleft", -1.000, -0.400));
+    outputVariable1->addTerm(new fl::Triangle("sleft", -0.000, -0.300, -0.600));
+    outputVariable1->addTerm(new fl::Ramp("ssharpleft", -1.000, -0.300));
     wall_Engine->addOutputVariable(outputVariable1);
 
     //Membership functions of outputspeed
@@ -77,14 +77,15 @@ void wall_Controller::buildController()
     mamdani->setDisjunction(new fl::Maximum);
     mamdani->setImplication(new fl::Minimum);
     mamdani->setActivation(new fl::General);
-    mamdani->addRule(fl::Rule::parse("if WallDirection is center then speed is stop", wall_Engine));
-    mamdani->addRule(fl::Rule::parse("if WallDirection is farleft then direction is ssharprigth", wall_Engine));
-    //mamdani->addRule(fl::Rule::parse("if WallDirection is rigth then direction is sleft", wall_Engine));
-    mamdani->addRule(fl::Rule::parse("if WallDirection is farrigth then direction is ssharpleft", wall_Engine));
-    //mamdani->addRule(fl::Rule::parse("if WallDirection is rigth then direction is srigth",wall_Engine));
+    //mamdani->addRule(fl::Rule::parse("if WallDirection is center then speed is stop", wall_Engine));
+    mamdani->addRule(fl::Rule::parse("if WallDirection is farleft then direction is srigth", wall_Engine));
+    mamdani->addRule(fl::Rule::parse("if WallDirection is rigth then direction is ssharpleft", wall_Engine));
+    mamdani->addRule(fl::Rule::parse("if WallDirection is farrigth then direction is sleft", wall_Engine));
+    mamdani->addRule(fl::Rule::parse("if WallDirection is rigth then direction is ssharprigth",wall_Engine));
     //mamdani->addRule(fl::Rule::parse("if WallDirection is error then direction is serror", wall_Engine));
     mamdani->addRule(fl::Rule::parse("if WallDistance is far then speed is forward", wall_Engine));
     mamdani->addRule(fl::Rule::parse("if WallDistance is close then speed is stop", wall_Engine));
+    mamdani->addRule(fl::Rule::parse("if WallDistance is close and WallDirection is center then direction is ssharpleft", wall_Engine));
     wall_Engine->addRuleBlock(mamdani);
 
     std::string status;
@@ -106,7 +107,7 @@ WallControlOutput wall_Controller::getControlOutput(float cent, float dist)
     wall_Direction->setValue(cent);
     wall_Distance->setValue(dist);
 
-    //std::cout << "hej:" << dist << std::endl;
+    std::cout << "hej:" << dist << std::endl;
 
     wall_Engine->process();
 
@@ -115,8 +116,8 @@ WallControlOutput wall_Controller::getControlOutput(float cent, float dist)
     out.direction = wall_Direction->getValue(); //((int)(wall_Direction->getValue() * 100 + .5) / 100.0);
     out.speed     = speed->getValue();
 
-    //std::cout << "dirr:" << out.direction << std::endl;
-    //std::cout << "speed:" << out.speed << std::endl;
+    std::cout << "dirr:" << out.direction << std::endl;
+    std::cout << "speed:" << out.speed << std::endl;
 
 
     return out;

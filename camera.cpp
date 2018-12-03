@@ -45,7 +45,7 @@ void Camera::cameraCallback(ConstImageStampedPtr &msg){
     cv::imshow("camera", im);
     mutex.unlock();
 
-    Camera::getMarbelCenter(kombi);
+    //Camera::getMarbelCenter(kombi);
 }
 
 MarbleLocation Camera::getMarbelCenter(cv::Mat im)

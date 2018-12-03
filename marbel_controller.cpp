@@ -19,11 +19,11 @@ void marbel_Controller::buildController()
     inputVariable1->setName("BallDirection");
     inputVariable1->setRange(-1.600, 1.600);
     inputVariable1->setLockValueInRange(false);
-    inputVariable1->addTerm(new fl::Ramp("farrigth", -0.1500, -1.570));
-    //inputVariable1->addTerm(new fl::Triangle("rigth", -0.500, -0.750, -1.000));
-    inputVariable1->addTerm(new fl::Triangle("center", 0.1500, 0.000, -0.150));
-    //inputVariable1->addTerm(new fl::Triangle("left", 1.000, 0.750, 0.500));
-    inputVariable1->addTerm(new fl::Ramp("farleft", 0.1500, 1.570));
+    inputVariable1->addTerm(new fl::Ramp("farrigth", -0.300, -1.570));
+    inputVariable1->addTerm(new fl::Triangle("rigth", -0.000, -0.300, -0.600));
+    inputVariable1->addTerm(new fl::Triangle("center", 0.0500, 0.000, -0.050));
+    inputVariable1->addTerm(new fl::Triangle("left", 0.600, 0.300, 0.000));
+    inputVariable1->addTerm(new fl::Ramp("farleft", 0.300, 1.570));
     //inputVariable1->addTerm(new fl::Ramp("error", -1.600, -5.000));
     m_pcFLEngine->addInputVariable(inputVariable1);
 
@@ -47,11 +47,11 @@ void marbel_Controller::buildController()
     outputVariable1->setAggregation(new fl::Maximum);
     outputVariable1->setDefaultValue(0);
     //outputVariable1->addTerm(new fl::Triangle("serror", -0.100, 0.000, 0.100));
-    outputVariable1->addTerm(new fl::Ramp("ssharprigth", 0.400, 1.570));
-    //outputVariable1->addTerm(new fl::Triangle("srigth",1.000, 0.600, 0.200 ));
-    outputVariable1->addTerm(new fl::Triangle("sstraight", 0.100, -0.000, -0.100));
-    //outputVariable1->addTerm(new fl::Triangle("sleft", -0.200, -0.600, -1.000));
-    outputVariable1->addTerm(new fl::Ramp("ssharpleft", -0.400, -1.570));
+    outputVariable1->addTerm(new fl::Ramp("ssharprigth", 0.700, 1.570));
+    outputVariable1->addTerm(new fl::Triangle("srigth",1.200, 0.700, 0.000 ));
+    outputVariable1->addTerm(new fl::Triangle("sstraight", 0.100, 0.000, -0.100));
+    outputVariable1->addTerm(new fl::Triangle("sleft", 0.000, -0.700, -1.200));
+    outputVariable1->addTerm(new fl::Ramp("ssharpleft", -0.700, -1.570));
     m_pcFLEngine->addOutputVariable(outputVariable1);
 
     //Membership functions of outputspeed
@@ -76,9 +76,9 @@ void marbel_Controller::buildController()
     mamdani->setActivation(new fl::General);
     mamdani->addRule(fl::Rule::parse("if BallDirection is center then direction is sstraight", m_pcFLEngine));
     mamdani->addRule(fl::Rule::parse("if BallDirection is farrigth then direction is ssharprigth", m_pcFLEngine));
-    //mamdani->addRule(fl::Rule::parse("if BallDirection is left then direction is sleft", m_pcFLEngine));
+    mamdani->addRule(fl::Rule::parse("if BallDirection is left then direction is srigth", m_pcFLEngine));
     mamdani->addRule(fl::Rule::parse("if BallDirection is farleft then direction is ssharpleft", m_pcFLEngine));
-    //mamdani->addRule(fl::Rule::parse("if BallDirection is rigth then direction is srigth",m_pcFLEngine));
+    mamdani->addRule(fl::Rule::parse("if BallDirection is rigth then direction is sleft",m_pcFLEngine));
     //mamdani->addRule(fl::Rule::parse("if BallDirection is error then direction is serror", m_pcFLEngine));
     mamdani->addRule(fl::Rule::parse("if BallDistance is close then speed is forward", m_pcFLEngine));
     m_pcFLEngine->addRuleBlock(mamdani);

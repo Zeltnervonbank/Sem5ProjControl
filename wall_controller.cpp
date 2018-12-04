@@ -107,7 +107,7 @@ WallControlOutput wall_Controller::getControlOutput(float cent, float dist)
     wall_Direction->setValue(cent);
     wall_Distance->setValue(dist);
 
-    std::cout << "hej:" << dist << std::endl;
+    //std::cout << "hej:" << dist << std::endl;
 
     wall_Engine->process();
 
@@ -116,8 +116,8 @@ WallControlOutput wall_Controller::getControlOutput(float cent, float dist)
     out.direction = wall_Direction->getValue(); //((int)(wall_Direction->getValue() * 100 + .5) / 100.0);
     out.speed     = speed->getValue();
 
-    std::cout << "dirr:" << out.direction << std::endl;
-    std::cout << "speed:" << out.speed << std::endl;
+    //std::cout << "dirr:" << out.direction << std::endl;
+    //std::cout << "speed:" << out.speed << std::endl;
 
 
     return out;

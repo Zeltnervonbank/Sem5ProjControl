@@ -23,7 +23,10 @@ std::vector<LidarMarble> lidar::detectedMarbles;
 LidarMarble lidar::nearestMarble;
 std::vector<LidarRay> lidar::lidarRays;
 LidarRay lidar::nearestPoint;
-int removedMarbels=0;
+int marblePoint=0;
+int marblesCollected=0;
+auto start=std::chrono::steady_clock::now();
+auto tempC=start;
 
 static boost::mutex mutex;
     int cent;
@@ -38,10 +41,18 @@ void statCallback(ConstWorldStatisticsPtr &_msg) {
 
 void contactCallback(ConstContactSensorPtr &_msg)
 {
+    auto startC=std::chrono::steady_clock::now();
     if(_msg->ByteSize()>300){
-        removedMarbels+=100;
-        std::cout << "Marble point:                          " << removedMarbels << std::endl;
+        std::chrono::duration<double> diffC = startC-tempC;
+        std::cout << diffC.count() << std::endl;
+        if(diffC.count()>=0.20){
+            marblePoint+=100;
+            marblesCollected++;
+            std::cout << "Marble point:                          " << marblePoint << std::endl;
+            std::cout << "Marbles collected:                          " << marblesCollected << std::endl;
         }
+        tempC=startC;
+     }
 }
 
 void poseCallback(ConstPosesStampedPtr &_msg) {
@@ -142,7 +153,7 @@ int main(int _argc, char **_argv) {
   //qlear.initialize();
   qlear.chooseAction(0,0,1);
   //std::cout << "her2" << std::endl;
-  auto start=std::chrono::steady_clock::now();
+
 
 
   float speed=0;
@@ -152,6 +163,9 @@ int main(int _argc, char **_argv) {
 
     // Loop
   while (true) {
+      if(marblesCollected=20){
+          std::cout << "ya done son" << std::endl;
+      }
     //std::cout << cent << std::endl;
     gazebo::common::Time::MSleep(10);
 
@@ -232,8 +246,8 @@ int main(int _argc, char **_argv) {
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> diff = end-start;
         std::cout << diff.count() << std::endl;
-        qlear.chooseAction(qlear.currentState,removedMarbels,diff.count());
-        removedMarbels=0;
+        qlear.chooseAction(qlear.currentState,marblePoint,diff.count());
+        marblePoint=0;
         visited++;
         qlear.printR();
 

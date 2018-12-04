@@ -20,11 +20,11 @@ public:
     virtual ControlOutput getControlOutput(float cent, float dist);
 protected:
 
-    fl::Engine*          m_pcFLEngine;
-    fl::InputVariable*   m_pflObstacleDirection;
-    fl::InputVariable*   m_pflObstacleDistance;
-    fl::OutputVariable*  m_pflSteerDirection;
-    fl::OutputVariable*  m_pflSpeed;
+    fl::Engine*          marbleEngine;
+    fl::InputVariable*   marbleDirection;
+    fl::InputVariable*   marbleDistance;
+    fl::OutputVariable*  SteerDirection;
+    fl::OutputVariable*  Speed;
     float center;
 };
 

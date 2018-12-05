@@ -1,6 +1,7 @@
 #ifndef PATH_FINDING_H
 #define PATH_FINDING_H
-
+#define ROW 80
+#define COL 120
 #endif // PATH_FINDING_H
 
 #include <opencv2/core/core.hpp>
@@ -13,30 +14,21 @@
 using namespace std;
 using namespace cv;
 
-
-// A C++ Program to implement A* Search Algorithm
-
 using namespace std;
 
-#define ROW 80
-#define COL 120
-
-// Creating a shortcut for int, int pair type
+// Creating a pair of ints
 typedef pair<int, int> Pair;
-vector<int> vec1;
-vector<int> vec2;
-
 
 // Creating a shortcut for pair<int, pair<int, int>> type
 typedef pair<double, pair<int, int>> pPair;
 
-// A structure to hold the neccesary parameters
+// A struct to hold the parameters for coordinates
 struct cell
 {
     // Row and Column index of its parent
     // Note that 0 <= i <= ROW-1 & 0 <= j <= COL-1
     int parent_i, parent_j;
-    // f = g + h
+    //Creating cost parameters
     double f, g, h;
 };
 
@@ -44,14 +36,16 @@ struct cell
 class pathing
 {
 public:
+pathing();
 bool isValid(int, int);
-bool isUnBlocked(int, int, int);
+bool isUnBlocked(int, int);
 bool isDestination(int, int, Pair);
 double calculateHValue(int, int, Pair);
 void tracePath(cell, Pair);
-void aStarSearch(int, Pair, Pair);
-void aStarmulti(int, vector<int>, vector<vector<int>>);
-}
+void aStarSearch(Pair, Pair);
+void aStarmulti(vector<int>, vector<vector<int>>);
+~pathing();
+};
 
 
 

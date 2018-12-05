@@ -44,7 +44,7 @@ void contactCallback(ConstContactSensorPtr &_msg)
     auto startC=std::chrono::steady_clock::now();
     if(_msg->ByteSize()>300){
         std::chrono::duration<double> diffC = startC-tempC;
-        std::cout << diffC.count() << std::endl;
+        //std::cout << diffC.count() << std::endl;
         if(diffC.count()>=0.20){
             marblePoint+=100;
             marblesCollected++;
@@ -141,29 +141,28 @@ int main(int _argc, char **_argv) {
   const int key_esc = 27;
   const int key_c = 99;
   const int key_v = 118;
-  marbel_Controller fuzzy;
-  fuzzy.buildController();
-  wall_Controller fuzz;
-  fuzz.buildController();
+  marbel_Controller marble;
+  marble.buildController();
+  wall_Controller wall;
+  wall.buildController();
 
-  int reward=0;
   int visited=0;
   int runs=0;
   Qlearning qlear;
-  //qlear.initialize();
+  qlear.initialize();
   qlear.chooseAction(0,0,1);
   //std::cout << "her2" << std::endl;
 
-
+srand(time(NULL));
 
   float speed=0;
   float dir=0;
 
 
-
     // Loop
   while (true) {
-      if(marblesCollected=20){
+
+      if(marblesCollected==20){
           std::cout << "ya done son" << std::endl;
       }
     //std::cout << cent << std::endl;
@@ -192,12 +191,12 @@ int main(int _argc, char **_argv) {
         speed = 1.0;
     }
     else if(lidar::marblesPresent==1 && lidar::nearestMarble.distance<1000){
-    dir= fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).direction;
-    speed = fuzzy.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).speed;
+    dir= marble.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).direction;
+    speed = marble.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).speed;
   }
     else if(lidar::nearestPoint.range<1 && lidar::nearestPoint.angle<=1.56 && lidar::nearestPoint.angle>=-1.56 ){
-        dir=fuzz.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).direction;
-        speed=fuzz.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).speed;
+        dir=wall.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).direction;
+        speed=wall.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).speed;
     }
     else{
         dir= 0.0;
@@ -241,11 +240,11 @@ int main(int _argc, char **_argv) {
             visited=0;
             std::cout << "runs: " << runs << std::endl;
         }
-        reward= (rand()%100)+1;
+        //reward= (rand()%100)+1;
         //std::cout << "reward rand" << reward << std::endl;
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> diff = end-start;
-        std::cout << diff.count() << std::endl;
+        //std::cout << diff.count() << std::endl;
         qlear.chooseAction(qlear.currentState,marblePoint,diff.count());
         marblePoint=0;
         visited++;

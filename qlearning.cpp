@@ -9,12 +9,20 @@ void Qlearning::initialize(){
 
     srand((unsigned)time(NULL));
 
-    //Get matrix from file from former experiments - Reset state for now.
+    Qlearning::readFromFile();//read R from external file
+    Qlearning::printR();
+    for(int i = 0; i <= (rSize - 1); i++){
+        for(int j = 0; j <= (rSize - 1); j++){
+            RTemp[i][j] = R[i][j];
+        }
+    }
+
+    /*//Get matrix from file from former experiments - Reset state for now.
     for(int i = 0; i <= (rSize - 1); i++){
         for(int j = 0; j <= (rSize - 1); j++){
             //Q[i][j] = 0;
         }
-    }
+    }*/
 }
 
 void Qlearning::run(){
@@ -54,14 +62,14 @@ void Qlearning::chooseAction(int initialState, int marbles, double time){
 
     possibleAction = getRandomAction();
 
-
     if(R[currentState][possibleAction] >= 0){
         //std::cout << reward(possibleAction,marbles,itterations) << std::endl;
         R[currentState][possibleAction] = reward(possibleAction,marbles,time); //Update reward of choosen action.
+        Qlearning::writeToFile(); //update external file with rewards
         //std::cout << reward(possibleAction) << std::endl;
         currentState = possibleAction;
+        std::cout << "currentState:" << currentState << std::endl;
     }
-
 }
 
 int Qlearning::maximum(int state, bool returnIndexOnly, bool temp){
@@ -123,6 +131,7 @@ int Qlearning::reward(int action, int marbles, double time){
     //std::cout << "her1" << std::endl;
     //std::cout << gamma * R[currentState][possibleAction] << std::endl;
     int rewardV=marbles/time;
+    std::cout << "reward" << rewardV << std::endl;
     return static_cast<int>((rewardV + (gamma * R[currentState][possibleAction]))/2);
 }
 
@@ -158,10 +167,29 @@ void Qlearning::printroute(){ //Print the most optimal route, based on past expe
 
 }
 
+void Qlearning::writeToFile(){
+
+    std::ofstream f("matrix.txt");
+    for (int i = 0; i < 6; i++)
+      {
+      for (int j = 0; j < 6; j++)
+        {
+        f << R[i][j] << " ";
+        }
+      }
+    f.close();
+}
 
 
+void Qlearning::readFromFile(){
+    std::ifstream f("matrix.txt");
 
-
+    for (int i = 0; i < 6; i++){
+    for (int j = 0; j < 6; j++){
+      f >> R[i][j];
+    }
+    }
+}
 
 
 

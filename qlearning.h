@@ -6,6 +6,7 @@
 #include <ctime>
 #include <stdio.h>
 #include <string.h>
+#include <fstream>
 
 
 class Qlearning
@@ -21,21 +22,18 @@ public:
     void getReward(int action);
     void printR();
     void printroute();
+    void writeToFile();
+    void readFromFile();
+
     int currentState;
-    int R[6][6] =  {{-1, 0, 0, 0, 0, 0},
-                    {-1, -1, 0, 0, 0, 0},
-                    {-1, 0, -1, 0, 0, 0},
-                    {-1, 0, 0, -1, 0, 0},
-                    {-1, 0, 0, 0, -1, 0},
-                    {-1, 0, 0, 0, 0, -1}};
 
 private:
-    int initialStates[6] = {1, 3, 5, 2, 4, 0};
-    //int Q[6][6];
+    int R[6][6];
+    int initialStates[6] = {0,1,2,3,4,5};
     int possibleAction;
 
     const double gamma = 0.8;
-    int newState;
+    int newState=0;
     int rSize=6;
     int RTemp[6][6];
 };

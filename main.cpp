@@ -122,6 +122,7 @@ int main(int _argc, char **_argv)
     // Set static variables in classes
     mapping::img.setTo(0);
 
+    /*
     WaypointNavigation::Waypoint p1 = {.x = -16.0, .y = 0.0};
     WaypointNavigation::Waypoint p2 = {.x = -16.0, .y = -10.0};
     WaypointNavigation::Waypoint p3 = {.x = -16.0, .y = 2.0};
@@ -131,7 +132,7 @@ int main(int _argc, char **_argv)
     WaypointNavigation::waypoints.push(p1);
     WaypointNavigation::waypoints.push(p2);
     WaypointNavigation::waypoints.push(p3);
-    WaypointNavigation::waypoints.push(p4);
+    WaypointNavigation::waypoints.push(p4);*/
 
     // Source is the middle point
     std::vector<int> src = {39,59};

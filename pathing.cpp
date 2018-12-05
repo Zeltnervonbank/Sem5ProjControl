@@ -161,7 +161,15 @@ void pathing::tracePath(cell cellDetails[][COL], Pair dest)
     {
         std::pair<int,int> p = Path.top();
         Path.pop();
-        std::printf("-> (%d,%d) ", p.first, p.second);
+        std::cout << "-> (" << p.first - (ROW / 2.0) * (2.0 / 3.0) << ", " << p.second - (COL / 2.0) * (2.0 / 3.0) << ") ";
+        //std::printf("-> (%d,%d) ", p.first - (ROW / 2.0), p.second - (COL / 2.0));
+        WaypointNavigation::Waypoint wp =
+        {
+            .x = p.first - (ROW / 2.0) * (2.0 / 3.0),
+            .y = p.second - (COL / 2.0) * (2.0 / 3.0)
+        };
+        WaypointNavigation::waypoints.push(wp);
+
         vec1.push_back(p.first);
         vec2.push_back(p.second);
 
@@ -173,6 +181,7 @@ void pathing::tracePath(cell cellDetails[][COL], Pair dest)
 
     }
 
+    std::cout << std::endl;
     cv::namedWindow("scaled", CV_WINDOW_AUTOSIZE);
     cv::imshow("scaled", image);
 }
@@ -712,10 +721,10 @@ void pathing::aStarSearch(Pair src, Pair dest)
     // list is empty, then we conclude that we failed to
     // reach the destiantion cell. This may happen when the
     // there is no way to destination cell (due to blockages)
-    if (foundDest == false)
+    if (!foundDest)
+    {
         printf("Failed to find the Destination Cell\n");
-
-    return;
+    }
 }
 void pathing::aStarmulti(std::vector<int> src, std::vector<std::vector<int>> dest)
 {

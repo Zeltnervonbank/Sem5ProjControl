@@ -12,6 +12,7 @@
 #include <iostream>
 #include <set>
 #include <stack>
+#include "waypointnavigation.h"
 
 // Creating a pair of ints
 typedef std::pair<int, int> Pair;

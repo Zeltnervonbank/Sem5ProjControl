@@ -18,6 +18,7 @@ class Movement
 public:
     Movement();
     static void PublishPose(ignition::math::Pose3d pose);
+    static void Move(double speed, double rotation);
     static int HandleKeyboardInput(bool printKey = false);
 };
 

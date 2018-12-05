@@ -9,6 +9,7 @@ SOURCES += main.cpp \
     lidar.cpp \
     mapping.cpp \
     movement.cpp \
+    waypointnavigation.cpp
     pathing.cpp
 
 CONFIG += link_pkgconfig
@@ -30,6 +31,7 @@ HEADERS += \
     lidar.h \
     mapping.h \
     movement.h \
+    waypointnavigation.h
     globals.h \
     pathing.h
 

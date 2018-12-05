@@ -1,7 +1,7 @@
-#include "pathFinding.h"
+#include "pathing.h"
 
-vector<int> vec1;
-vector<int> vec2;
+std::vector<int> vec1;
+std::vector<int> vec2;
 
 int grid[ROW][COL] =
 {
@@ -89,17 +89,15 @@ int grid[ROW][COL] =
 
 };
 
-// A Function to check if a cell is valid or not
-pathing::pathing()
-{
 
-}
+pathing::pathing()
+{}
 
 pathing::~pathing()
-{
+{}
 
-}
-bool isValid(int row, int col)
+// A Function to check if a cell is valid or not
+bool pathing::isValid(int row, int col)
 {
     // Returns true if row number and column number is inside the grid
 
@@ -112,7 +110,7 @@ bool isValid(int row, int col)
 }
 
 // A Function to check if a cell is blocked or not
-bool isUnBlocked(int row, int col)
+bool pathing::isUnBlocked(int row, int col)
 {
     // Returns true if the cell is not blocked else false
     if (grid[row][col] == 1)
@@ -122,7 +120,7 @@ bool isUnBlocked(int row, int col)
 }
 
 // A function to check if the current posistion is the destination
-bool isDestination(int row, int col, Pair dest)
+bool pathing::isDestination(int row, int col, Pair dest)
 {
     if (row == dest.first && col == dest.second)
         return true;
@@ -131,7 +129,7 @@ bool isDestination(int row, int col, Pair dest)
 }
 
 // A Function to calculate the heuristic.
-double calculateHValue(int row, int col, Pair dest)
+double pathing::calculateHValue(int row, int col, Pair dest)
 {
     // Return the estimated distance from row and col to dest
     return ((double)sqrt ((row-dest.first)*(row-dest.first)
@@ -139,53 +137,51 @@ double calculateHValue(int row, int col, Pair dest)
 }
 
 // A function to track the path from the source to destination
-void tracePath(cell cellDetails[][COL], Pair dest)
+void pathing::tracePath(cell cellDetails[][COL], Pair dest)
 {
-    Mat image = imread("/home/mini/Desktop/5 sem projekt/Sem5Project/models/bigworld/meshes/floor_plan.png", CV_LOAD_IMAGE_COLOR); //bærbar location
+    cv::Mat image = cv::imread("/home/mini/Desktop/5 sem projekt/Sem5Project/models/bigworld/meshes/floor_plan.png", CV_LOAD_IMAGE_COLOR); //bærbar location
     printf ("\nThe Path is ");
     int row = dest.first;
     int col = dest.second;
 
-    stack<Pair> Path;
+    std::stack<Pair> Path;
 
     while (!(cellDetails[row][col].parent_i == row
             && cellDetails[row][col].parent_j == col ))
     {
-        Path.push (make_pair (row, col));
+        Path.push (std::make_pair (row, col));
         int temp_row = cellDetails[row][col].parent_i;
         int temp_col = cellDetails[row][col].parent_j;
         row = temp_row;
         col = temp_col;
     }
 
-    Path.push (make_pair (row, col));
+    Path.push (std::make_pair (row, col));
     while (!Path.empty())
     {
-        pair<int,int> p = Path.top();
+        std::pair<int,int> p = Path.top();
         Path.pop();
-        printf("-> (%d,%d) ", p.first, p.second);
+        std::printf("-> (%d,%d) ", p.first, p.second);
         vec1.push_back(p.first);
         vec2.push_back(p.second);
 
         for (size_t i = 0; i < vec1.size(); i++)
         {
-            image.at<Vec3b>(vec1[i],vec2[i]) = 255, 255, 0;
+            image.at<cv::Vec3b>(vec1[i],vec2[i]) = 255;
         }
 
 
     }
 
-    namedWindow("scaled", CV_WINDOW_AUTOSIZE);
-    imshow("scaled", image);
-    return;
-
+    cv::namedWindow("scaled", CV_WINDOW_AUTOSIZE);
+    cv::imshow("scaled", image);
 }
 
 
 
 // A Function to find the shortest path between a given source cell to a destination cell
 // A* Search Algorithm
-void aStarSearch(Pair src, Pair dest)
+void pathing::aStarSearch(Pair src, Pair dest)
 {
     // If the source is out of range
     if (isValid (src.first, src.second) == false)
@@ -255,11 +251,11 @@ void aStarSearch(Pair src, Pair dest)
     and i, j are the row and column index of that cell
     Note that 0 <= i <= ROW-1 & 0 <= j <= COL-1
     This open list is implenented as a set of pair of pair.*/
-    set<pPair> openList;
+    std::set<pPair> openList;
 
     // Put the starting cell on the open list and set its
     // 'f' as 0
-    openList.insert(make_pair (0.0, make_pair (i, j)));
+    openList.insert(std::make_pair (0.0, std::make_pair (i, j)));
 
     // We set this boolean value as false as initially
     // the destination is not reached.
@@ -339,8 +335,8 @@ void aStarSearch(Pair src, Pair dest)
                 if (cellDetails[i-1][j].f == FLT_MAX ||
                         cellDetails[i-1][j].f > fNew)
                 {
-                    openList.insert( make_pair(fNew,
-                                            make_pair(i-1, j)));
+                    openList.insert( std::make_pair(fNew,
+                                            std::make_pair(i-1, j)));
 
                     // Update the details of this cell
                     cellDetails[i-1][j].f = fNew;
@@ -390,7 +386,7 @@ void aStarSearch(Pair src, Pair dest)
                 if (cellDetails[i+1][j].f == FLT_MAX ||
                         cellDetails[i+1][j].f > fNew)
                 {
-                    openList.insert( make_pair (fNew, make_pair (i+1, j)));
+                    openList.insert( std::make_pair (fNew, std::make_pair (i+1, j)));
                     // Update the details of this cell
                     cellDetails[i+1][j].f = fNew;
                     cellDetails[i+1][j].g = gNew;
@@ -440,8 +436,8 @@ void aStarSearch(Pair src, Pair dest)
                 if (cellDetails[i][j+1].f == FLT_MAX ||
                         cellDetails[i][j+1].f > fNew)
                 {
-                    openList.insert( make_pair(fNew,
-                                        make_pair (i, j+1)));
+                    openList.insert( std::make_pair(fNew,
+                                        std::make_pair (i, j+1)));
 
                     // Update the details of this cell
                     cellDetails[i][j+1].f = fNew;
@@ -492,8 +488,8 @@ void aStarSearch(Pair src, Pair dest)
                 if (cellDetails[i][j-1].f == FLT_MAX ||
                         cellDetails[i][j-1].f > fNew)
                 {
-                    openList.insert( make_pair (fNew,
-                                        make_pair (i, j-1)));
+                    openList.insert( std::make_pair (fNew,
+                                        std::make_pair (i, j-1)));
 
                     // Update the details of this cell
                     cellDetails[i][j-1].f = fNew;
@@ -544,8 +540,8 @@ void aStarSearch(Pair src, Pair dest)
                 if (cellDetails[i-1][j+1].f == FLT_MAX ||
                         cellDetails[i-1][j+1].f > fNew)
                 {
-                    openList.insert( make_pair (fNew,
-                                    make_pair(i-1, j+1)));
+                    openList.insert( std::make_pair (fNew,
+                                    std::make_pair(i-1, j+1)));
 
                     // Update the details of this cell
                     cellDetails[i-1][j+1].f = fNew;
@@ -596,7 +592,7 @@ void aStarSearch(Pair src, Pair dest)
                 if (cellDetails[i-1][j-1].f == FLT_MAX ||
                         cellDetails[i-1][j-1].f > fNew)
                 {
-                    openList.insert( make_pair (fNew, make_pair (i-1, j-1)));
+                    openList.insert( std::make_pair (fNew, std::make_pair (i-1, j-1)));
                     // Update the details of this cell
                     cellDetails[i-1][j-1].f = fNew;
                     cellDetails[i-1][j-1].g = gNew;
@@ -646,8 +642,8 @@ void aStarSearch(Pair src, Pair dest)
                 if (cellDetails[i+1][j+1].f == FLT_MAX ||
                         cellDetails[i+1][j+1].f > fNew)
                 {
-                    openList.insert(make_pair(fNew,
-                                        make_pair (i+1, j+1)));
+                    openList.insert(std::make_pair(fNew,
+                                        std::make_pair (i+1, j+1)));
 
                     // Update the details of this cell
                     cellDetails[i+1][j+1].f = fNew;
@@ -698,8 +694,8 @@ void aStarSearch(Pair src, Pair dest)
                 if (cellDetails[i+1][j-1].f == FLT_MAX ||
                         cellDetails[i+1][j-1].f > fNew)
                 {
-                    openList.insert(make_pair(fNew,
-                                        make_pair(i+1, j-1)));
+                    openList.insert(std::make_pair(fNew,
+                                        std::make_pair(i+1, j-1)));
 
                     // Update the details of this cell
                     cellDetails[i+1][j-1].f = fNew;
@@ -721,10 +717,10 @@ void aStarSearch(Pair src, Pair dest)
 
     return;
 }
-void aStarmulti(vector<int> src, vector<vector<int>> dest)
+void pathing::aStarmulti(std::vector<int> src, std::vector<std::vector<int>> dest)
 {
-    Pair start = make_pair(src[0],src[1]);
-    Pair goal = make_pair(dest[0][0],dest[0][1]);
+    Pair start = std::make_pair(src[0],src[1]);
+    Pair goal = std::make_pair(dest[0][0],dest[0][1]);
 
     for(unsigned int i=0; i < dest.size(); i++)
     {
@@ -732,11 +728,10 @@ void aStarmulti(vector<int> src, vector<vector<int>> dest)
             aStarSearch(start,goal);
         else
         {
-            start = make_pair(dest[i-1][0],dest[i-1][1]);
-            goal = make_pair(dest[i][0],dest[i][1]);
+            start = std::make_pair(dest[i-1][0],dest[i-1][1]);
+            goal = std::make_pair(dest[i][0],dest[i][1]);
             aStarSearch(start,goal);
         }
     }
 
 }
-

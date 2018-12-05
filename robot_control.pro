@@ -9,7 +9,7 @@ SOURCES += main.cpp \
     lidar.cpp \
     mapping.cpp \
     movement.cpp \
-    pathFinding.cpp
+    pathing.cpp
 
 CONFIG += link_pkgconfig
 PKGCONFIG += gazebo
@@ -31,7 +31,7 @@ HEADERS += \
     mapping.h \
     movement.h \
     globals.h \
-    pathFinding.h
+    pathing.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../fuzzylite-6.0-linux64/fuzzylite-6.0/fuzzylite/release/bin/release/ -lfuzzylite
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../fuzzylite-6.0-linux64/fuzzylite-6.0/fuzzylite/release/bin/debug/ -lfuzzylite

@@ -122,6 +122,9 @@ int main(int _argc, char **_argv)
         {
             break;
         }
+
+        // Apparently this has to be here, or opencv windows break ¯\_(ツ)_/¯
+        cv::waitKey(1);
     }
 
     // Make sure to shut everything down.

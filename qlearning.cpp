@@ -5,6 +5,11 @@ Qlearning::Qlearning()
 
 }
 
+Qlearning::~Qlearning()
+{
+
+}
+
 void Qlearning::initialize(){
 
     srand((unsigned)time(NULL));
@@ -55,7 +60,6 @@ int Qlearning::getRandomAction(){
     return action;
 }
 
-
 void Qlearning::chooseAction(int initialState, int marbles, double time){
 
     currentState=initialState;
@@ -97,14 +101,14 @@ if(!temp){
             done = true;
         }
 
-    } while(done = false);
+    } while(done == false);
 }
 else{
     do {
         foundNewWinner = false;
         for(int i = 0; i <= (rSize - 1); i++){
             if((i < winner) || (i > winner)){     //Avoid self-comparison.
-                if(RTemp[state][i] > RTemp[state][winner]){
+                if(Ropt[state][i] > Ropt[state][winner]){
                     winner = i;
                     foundNewWinner = true;
                 }
@@ -147,10 +151,15 @@ void Qlearning::printR(){
         std::cout << "\n";
     } // i
     std::cout << "\n";
-} // j
+}
 
 void Qlearning::printroute(){ //Print the most optimal route, based on past experience.
-    run();
+    for(int i = 0; i <= (rSize - 1); i++){
+        for(int j = 0; j <= (rSize - 1); j++){
+            Ropt[i][j] = R[i][j];
+        }
+    }
+
     currentState=initialStates[0];
     std::cout << "Optimal path:  " << std::endl;
     for(int i=0; i<rSize;i++){
@@ -158,7 +167,7 @@ void Qlearning::printroute(){ //Print the most optimal route, based on past expe
         //std::cout << "hej" << std::endl;
         newState = maximum(currentState, true,true);
         for(int i = 0; i <= (rSize - 1); i++){
-                RTemp[i][newState] = -1;
+                Ropt[i][newState] = -1;
             }
         currentState = newState;
         std::cout << currentState << ", ";
@@ -179,7 +188,6 @@ void Qlearning::writeToFile(){
       }
     f.close();
 }
-
 
 void Qlearning::readFromFile(){
     std::ifstream f("matrix.txt");

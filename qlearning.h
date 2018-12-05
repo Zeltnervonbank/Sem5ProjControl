@@ -13,6 +13,7 @@ class Qlearning
 {
 public:
     Qlearning();
+    ~Qlearning();
     void run();
     void chooseAction(int initialState, int marbles, double time);
     int getRandomAction();
@@ -36,6 +37,7 @@ private:
     int newState=0;
     int rSize=6;
     int RTemp[6][6];
+    int Ropt[6][6];
 };
 
 #endif // QLEARNING_H

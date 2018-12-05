@@ -138,18 +138,17 @@ int main(int _argc, char **_argv)
         gazebo::common::Time::MSleep(10);
 
         // Handle keyboard input and quit if esc key is pressed
-        /*if(Movement::HandleKeyboardInput() == -1)
+        if(Movement::HandleKeyboardInput() == -1)
         {
             break;
         }
 
-        // Apparently this has to be here, or opencv windows break ¯\_(ツ)_/¯
-        cv::waitKey(1);
-        }*/
-
-        //WaypointNavigation::NavigateToNextWaypoint();
+        WaypointNavigation::NavigateToNextWaypoint();
 
         //std::cout << WaypointNavigation::GetDistanceToWaypoint() << std::endl;
+
+        // Apparently this has to be here, or opencv windows break ¯\_(ツ)_/¯
+        //cv::waitKey(1);
     }
 
     // Make sure to shut everything down.

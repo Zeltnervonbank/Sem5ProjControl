@@ -122,7 +122,7 @@ int main(int _argc, char **_argv)
 
     WaypointNavigation::Waypoint p1 = {.x = -16.0, .y = 0.0};
     WaypointNavigation::Waypoint p2 = {.x = -16.0, .y = -10.0};
-    WaypointNavigation::Waypoint p3 = {.x = 10.0, .y = -2.0};
+    WaypointNavigation::Waypoint p3 = {.x = -16.0, .y = 2.0};
     WaypointNavigation::Waypoint p4 = {.x = 0.0, .y = 0.0};
 
 
@@ -143,7 +143,7 @@ int main(int _argc, char **_argv)
             break;
         }*/
 
-        WaypointNavigation::NavigateToNextWaypoint();
+        //WaypointNavigation::NavigateToNextWaypoint();
 
         //std::cout << WaypointNavigation::GetDistanceToWaypoint() << std::endl;
     }

@@ -133,8 +133,15 @@ int main(int _argc, char **_argv)
     WaypointNavigation::waypoints.push(p3);
     WaypointNavigation::waypoints.push(p4);
 
+    // Source is the middle point
+    std::vector<int> src = {39,59};
+
+    std::vector<std::vector<int>> dest = { {7,9}, {9,24}, {9,41}, {9,68}, {11,93}, {11,111}, {24,9}, {24,24}, {24,41}, {26,68}, {39,8}, {39,34}, {39,93}, {39,111}, {57,52}, {57,111}, {62,8}, {62,34}, {75,52}, {75,79}, {69,79}, {69,111} };
+
+    pathing::aStarmulti(src, dest);
+
     // Loop
-  /*  while (true)
+    while (true)
     {
         // Insert slight delay between frames
         gazebo::common::Time::MSleep(10);
@@ -152,20 +159,17 @@ int main(int _argc, char **_argv)
         // Apparently this has to be here, or opencv windows break ¯\_(ツ)_/¯
         //cv::waitKey(1);
     }
-*/
+
     /* Description of the Grid-
     1--> The cell is not blocked
     0--> The cell is blocked */
 
-    // Source is the middle point
-    std::vector<int> src = {39,59};
 
    // Pair src1 = {39,59};
    // vector<Pair> dest1 = { {7,9}, {9,24}, {9,41}, {9,68}, {11,93}, {11,111}, {24,9}, {24,24}, {24,41}, {26,68}, {39,8}, {39,34}, {39,93}, {39,111}, {57,52}, {57,111}, {62,8}, {62,34}, {75,52}, {75,79}, {69,79}, {69,111} };
 
     // Destination is the left-most top-most corner
     // vector<vector<int>> dest = { {5,5} };
-    std::vector<std::vector<int>> dest = { {7,9}, {9,24}, {9,41}, {9,68}, {11,93}, {11,111}, {24,9}, {24,24}, {24,41}, {26,68}, {39,8}, {39,34}, {39,93}, {39,111}, {57,52}, {57,111}, {62,8}, {62,34}, {75,52}, {75,79}, {69,79}, {69,111} };
    // vector<vector<int>> dest = { {50,70},{60,80},{75,110},{45,75} };
    // Pair dest1 = std::make_pair(60,70);
     //vector<int> dest1 = {39,59};
@@ -175,11 +179,10 @@ int main(int _argc, char **_argv)
   //cout << endl;
    // path.aStarSearch(grid,src,dest1);
 
-   pathing::aStarmulti(src,dest);
    /*cv::namedWindow("scaled", CV_WINDOW_AUTOSIZE);
 
    cv::imshow("scaled", *mypoint);*/
-   cv::waitKey(0);
+   //cv::waitKey(0);
 
 
     // Make sure to shut everything down.

@@ -139,7 +139,7 @@ double pathing::calculateHValue(int row, int col, Pair dest)
 // A function to track the path from the source to destination
 void pathing::tracePath(cell cellDetails[][COL], Pair dest)
 {
-    cv::Mat image = cv::imread("/home/mini/Desktop/5 sem projekt/Sem5Project/models/bigworld/meshes/floor_plan.png", CV_LOAD_IMAGE_COLOR); //bærbar location
+    cv::Mat image = cv::imread("/home/mini/Desktop/5 sem projekt/Sem5Project/models/bigworld/meshes/floor_plan.png", CV_LOAD_IMAGE_COLOR); //laptop location
     printf ("\nThe Path is ");
     int row = dest.first;
     int col = dest.second;

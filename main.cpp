@@ -113,7 +113,7 @@ int main(int _argc, char **_argv)
     mapping::img.setTo(0);
 
     // Loop
-    while (true)
+  /*  while (true)
     {
         // Insert slight delay between frames
         gazebo::common::Time::MSleep(10);
@@ -124,7 +124,7 @@ int main(int _argc, char **_argv)
             break;
         }
     }
-
+*/
     /* Description of the Grid-
     1--> The cell is not blocked
     0--> The cell is blocked */
@@ -151,7 +151,7 @@ int main(int _argc, char **_argv)
    /*cv::namedWindow("scaled", CV_WINDOW_AUTOSIZE);
 
    cv::imshow("scaled", *mypoint);*/
-   // waitKey(0);
+   cv::waitKey(0);
 
 
     // Make sure to shut everything down.

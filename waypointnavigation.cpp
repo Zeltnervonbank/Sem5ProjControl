@@ -17,7 +17,7 @@ void WaypointNavigation::NavigateToNextWaypoint()
     }
 
     // Stop the robot if close to waypoint, and there are no more waypoints in queue
-    else if (GetDistanceToWaypoint() < 0.1 && waypoints.size() == 0)
+    else if (GetDistanceToWaypoint() < 0.05 && waypoints.size() == 0)
     {
         Movement::Move(0.0, 0.0);
     }
@@ -58,7 +58,11 @@ void WaypointNavigation::MoveTowardWaypoint()
     // Calculate angle between vectors
     double difference = cross < 0 ? -acos(dot / distance) : acos(dot / distance);
 
+
+    std::cout << "\033[1;1H";
     // Print some data
+    std::cout << "Current waypoint: " << CurrentWaypoint.x << ", " << CurrentWaypoint.y << std::endl;
+    std::cout << "Current position: " << position.posX << ", " << position.posY << std::endl;
     std::cout << "Rotation offset: " << difference << " Distance: " << GetDistanceToWaypoint() << " Cross: " << cross << std::endl;
 
     /// Output movement
@@ -69,7 +73,7 @@ void WaypointNavigation::MoveTowardWaypoint()
     rotation = abs(difference) < 0.3 ? rotation * 0.3 : rotation;
 
     // Set speed if not very close to waypoint and pointing in correct direction, else stop
-    double speed = GetDistanceToWaypoint() > 0.1 && abs(difference) < 0.1 ? 1.2 : 0;
+    double speed = GetDistanceToWaypoint() > 0.05 && abs(difference) < 0.01 ? 1.2 : 0;
 
     // Send movement
     Movement::Move(speed, rotation);

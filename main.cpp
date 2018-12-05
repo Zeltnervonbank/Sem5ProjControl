@@ -9,23 +9,27 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <queue>
+
 #include "camera.h"
 #include "marbel_controller.h"
 #include "datatypes.h"
 #include "lidar.h"
 #include "mapping.h"
-#include "globals.h"
+#include "waypointnavigation.h"
 #include "movement.h"
+#include "globals.h"
 
 
 // Initialise Gazebo node and publishers
 gazebo::transport::NodePtr Globals::node(new gazebo::transport::Node());
 gazebo::transport::PublisherPtr Globals::movementPublisher;
 
-// Declare mutex
-boost::mutex Globals::mutex;
-
 // Initialise static variables in classes:
+// Globals
+boost::mutex Globals::mutex;
+RobotPosition Globals::LastPosition;
+
 // Lidar
 bool lidar::marblesPresent = false;
 std::vector<LidarMarble> lidar::detectedMarbles;
@@ -37,6 +41,10 @@ LidarRay lidar::nearestPoint;
 int mapping::map[MAP_SIDE_LENGTH][MAP_SIDE_LENGTH] = {};
 cv::Mat mapping::img = cv::Mat(MAP_SIDE_LENGTH, MAP_SIDE_LENGTH, CV_8U);
 bool mapping::mappingEnabled = false;
+
+// Waypoint navigation
+std::queue<WaypointNavigation::Waypoint> WaypointNavigation::waypoints;
+WaypointNavigation::Waypoint WaypointNavigation::CurrentWaypoint = {.x = 0.0, .y = 0.0};
 
 void statCallback(ConstWorldStatisticsPtr &_msg)
 {
@@ -62,6 +70,7 @@ void poseCallback(ConstPosesStampedPtr &_msg)
                 _msg->pose(i).orientation().z()                
             };
 
+            Globals::LastPosition = pos;
             mapping::UpdateMap(pos);
         }
     }
@@ -111,6 +120,17 @@ int main(int _argc, char **_argv)
     // Set static variables in classes
     mapping::img.setTo(0);
 
+    WaypointNavigation::Waypoint p1 = {.x = -16.0, .y = 0.0};
+    WaypointNavigation::Waypoint p2 = {.x = -16.0, .y = -10.0};
+    WaypointNavigation::Waypoint p3 = {.x = -16.0, .y = 2.0};
+    WaypointNavigation::Waypoint p4 = {.x = 0.0, .y = 0.0};
+
+
+    WaypointNavigation::waypoints.push(p1);
+    WaypointNavigation::waypoints.push(p2);
+    WaypointNavigation::waypoints.push(p3);
+    WaypointNavigation::waypoints.push(p4);
+
     // Loop
     while (true)
     {
@@ -118,13 +138,18 @@ int main(int _argc, char **_argv)
         gazebo::common::Time::MSleep(10);
 
         // Handle keyboard input and quit if esc key is pressed
-        if(Movement::HandleKeyboardInput() == -1)
+        /*if(Movement::HandleKeyboardInput() == -1)
         {
             break;
         }
 
         // Apparently this has to be here, or opencv windows break ¯\_(ツ)_/¯
         cv::waitKey(1);
+        }*/
+
+        //WaypointNavigation::NavigateToNextWaypoint();
+
+        //std::cout << WaypointNavigation::GetDistanceToWaypoint() << std::endl;
     }
 
     // Make sure to shut everything down.

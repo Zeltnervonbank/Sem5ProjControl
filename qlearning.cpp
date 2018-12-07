@@ -179,9 +179,9 @@ void Qlearning::printroute(){ //Print the most optimal route, based on past expe
 void Qlearning::writeToFile(){
 
     std::ofstream f("matrix.txt");
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < rSize; i++)
       {
-      for (int j = 0; j < 6; j++)
+      for (int j = 0; j < rSize; j++)
         {
         f << R[i][j] << " ";
         }
@@ -192,8 +192,8 @@ void Qlearning::writeToFile(){
 void Qlearning::readFromFile(){
     std::ifstream f("matrix.txt");
 
-    for (int i = 0; i < 6; i++){
-    for (int j = 0; j < 6; j++){
+    for (int i = 0; i < rSize; i++){
+    for (int j = 0; j < rSize; j++){
       f >> R[i][j];
     }
     }

@@ -29,15 +29,15 @@ public:
     int currentState;
 
 private:
-    int R[6][6];
-    int initialStates[6] = {0,1,2,3,4,5};
+    int R[23][23];
+    int initialStates[23] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,10,20,21,22};
     int possibleAction;
+    int rSize=23;
 
     const double gamma = 0.8;
     int newState=0;
-    int rSize=6;
-    int RTemp[6][6];
-    int Ropt[6][6];
+    int RTemp[23][23];
+    int Ropt[23][23];
 };
 
 #endif // QLEARNING_H

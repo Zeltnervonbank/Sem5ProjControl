@@ -50,6 +50,7 @@ WaypointNavigation::Waypoint WaypointNavigation::CurrentWaypoint = {.x = 0.0, .y
 
 // Pathfinding
 int pathing::grid[ROW][COL] = {};
+cv::Mat pathing::image = cv::imread("/home/andreas/Desktop/floor_plan.png", CV_LOAD_IMAGE_COLOR);
 
 void statCallback(ConstWorldStatisticsPtr &_msg)
 {
@@ -94,6 +95,16 @@ void cameraCallback(ConstImageStampedPtr &msg)
     Globals::mutex.unlock();
 }
 
+std::vector<int> convertToPixelCoords(std::vector<int> pair)
+{
+    std::vector<int> retPair;
+
+    retPair.push_back(pair[0] * 4 + 200);
+    retPair.push_back(200 - pair[1] * 4);
+
+    return retPair;
+}
+
 int main(int _argc, char **_argv)
 {
     // Load gazebo
@@ -131,23 +142,23 @@ int main(int _argc, char **_argv)
     cv::Mat testimg = cv::Mat(COL, ROW, CV_8U);
     testimg.setTo(0);
 
-    for(int x = 0; x < 400; x++)
+    for(int y = 0; y < 400; y++)
     {
-        for(int y = 0; y < 400; y++)
+        for(int x = 0; x < 400; x++)
         {
             auto i = image.at<uchar>(x, y);
             if(i == 255)
             {
                 std::cout << "1";
-                pathing::grid[x][y] = 1;
+                pathing::grid[y][x] = 1;
 
             }
             else
             {
                 std::cout << "0";
-                pathing::grid[x][y] = 0;
+                pathing::grid[y][x] = 0;
             }
-            testimg.at<char>(y, x) = i;
+            testimg.at<char>(x, y) = i;
 
         }
         std::cout << std::endl;
@@ -170,17 +181,24 @@ int main(int _argc, char **_argv)
     WaypointNavigation::waypoints.push(p4);*/
 
     // Source is the middle point
-    std::vector<int> src = {39,59};
+    std::vector<int> src = convertToPixelCoords({0, 0});
 
-    std::vector<std::vector<int>> dest = { {7,9}, {9,24}, {9,41}, {9,68}, {11,93}, {11,111}, {24,9}, {24,24}, {24,41}, {26,68}, {39,8}, {39,34}, {39,93}, {39,111}, {57,52}, {57,111}, {62,8}, {62,34}, {75,52}, {75,79}, {69,79}, {69,111} };
+    std::vector<std::vector<int>> dest = {{-36, 22}, {-25, 22}, {-26, 11}, {-36, 10}, {-13, 11}, {-13, 22}, {7, 21}, {7, 10}, {-36, -1}, {-36, -23}, {-20, -22}};
+    std::vector<std::vector<int>> pixelDest;
 
-    pathing::aStarSearch(std::make_pair(200, 200), std::make_pair(76, 256));
+    for(size_t i = 0 ; i < dest.size(); i++)
+    {
+        pixelDest.push_back(convertToPixelCoords(dest[i]));
+    }
+    //pathing::aStarSearch(std::make_pair(200, 200), std::make_pair(76, 256));
 
-    //pathing::aStarmulti(src, dest);
+    pathing::aStarmulti(src, pixelDest);
 
     // Loop
     while (true)
     {
+        try
+        {
         // Insert slight delay between frames
         gazebo::common::Time::MSleep(10);
 
@@ -196,6 +214,12 @@ int main(int _argc, char **_argv)
 
         // Apparently this has to be here, or opencv windows break ¯\_(ツ)_/¯
         //cv::waitKey(1);
+        }
+        catch(std::exception e)
+        {
+            std::cout << e.what() << std::endl;
+        }
+
     }
 
     /* Description of the Grid-

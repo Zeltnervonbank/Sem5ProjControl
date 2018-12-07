@@ -59,24 +59,30 @@ void WaypointNavigation::MoveTowardWaypoint()
     double difference = cross < 0 ? -acos(dot / distance) : acos(dot / distance);
 
 
-    std::cout << "\033[1;1H";
+    std::cout << "\033[2J\033[1;1H";
     // Print some data
     std::cout << "Current waypoint: " << CurrentWaypoint.x << ", " << CurrentWaypoint.y << std::endl;
     std::cout << "Current position: " << position.posX << ", " << position.posY << std::endl;
     std::cout << "Rotation offset: " << difference << " Distance: " << GetDistanceToWaypoint() << " Cross: " << cross << std::endl;
+    std::cout << "Remaining waypoints: " << waypoints.size() << std::endl;
 
+    try
+    {
     /// Output movement
     // Set rotation depending on sign of angle to waypoint
-    double rotation = difference > 0 ? 1.0 : -1.0;
-
-    // If almost pointing at waypoint, reduce speed to limit overshoot
-    rotation = abs(difference) < 0.3 ? rotation * 0.3 : rotation;
+    double rotation = (double) difference;
 
     // Set speed if not very close to waypoint and pointing in correct direction, else stop
-    double speed = GetDistanceToWaypoint() > 0.05 && abs(difference) < 0.01 ? 1.2 : 0;
+    double speed = GetDistanceToWaypoint() > 0.05 && abs(difference) < 0.1 ? 1.2 : 0;
 
     // Send movement
     Movement::Move(speed, rotation);
+    }
+    catch(std::exception e)
+    {
+        std::cout << e.what() << std::endl;
+        Movement::Move(0.0, 0.0);
+    }
 }
 
 double WaypointNavigation::GetDistanceToWaypoint()

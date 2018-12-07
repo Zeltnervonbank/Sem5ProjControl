@@ -38,6 +38,7 @@ public:
     ~pathing();
 
     static int grid[ROW][COL];
+    static cv::Mat image;
 
     static bool isValid(int row, int col);
     static bool isUnBlocked(int row, int col);

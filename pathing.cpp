@@ -11,7 +11,7 @@ bool pathing::isValid(int row, int col)
 {
     // Returns true if row number and column number is inside the grid
 
-    if(row <= ROW && col <= COL)
+    if(row < ROW && col < COL)
     {
         if(row >= 0 && col >= 0)
         return true;
@@ -49,7 +49,7 @@ double pathing::calculateHValue(int row, int col, Pair dest)
 // A function to track the path from the source to destination
 void pathing::tracePath(cell cellDetails[][COL], Pair dest)
 {
-    cv::Mat image = cv::imread("/home/andreas/Desktop/floor_plan.png", CV_LOAD_IMAGE_COLOR); //laptop location
+    //cv::Mat image = cv::imread("/home/andreas/Desktop/floor_plan.png", CV_LOAD_IMAGE_COLOR); //laptop location
     printf ("\nThe Path is ");
     int row = dest.first;
     int col = dest.second;
@@ -79,11 +79,11 @@ void pathing::tracePath(cell cellDetails[][COL], Pair dest)
         WaypointNavigation::Waypoint wp =
         {
             .x = (p.first - (ROW / 2.0)) * 0.25,
-            .y = (p.second - (COL / 2.0)) * 0.25
+            .y = -(p.second - (COL / 2.0)) * 0.25
         };
         waypoints.push_back(wp);
 
-        image.at<cv::Vec3b>(COL - p.second, p.first) = 255;
+        image.at<cv::Vec3b>(p.second, p.first) = 255;
     }
 
     for(size_t i = 0; i < waypoints.size(); i++)

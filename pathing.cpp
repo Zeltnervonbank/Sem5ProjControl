@@ -80,30 +80,52 @@ void pathing::tracePath(cell cellDetails[][COL], Pair dest)
         image.at<cv::Vec3b>(p.second, p.first) = 255;
     }
 
+    // Try to limit the amount of waypoints by eliminating those that are in a straight line
     for(size_t i = 0; i < waypoints.size(); i++)
     {
-        //WaypointNavigation::waypoints.push(waypoints[i]);
-        //std::cout << "-> (" << waypoints[i].x << ", " << waypoints[i].y << ") ";
         // Always include first and last points
         if(i == 0 || i == waypoints.size() - 1)
         {
             WaypointNavigation::waypoints.push(waypoints[i]);
-            std::cout << "-> (" << waypoints[i].x << ", " << waypoints[i].y << ") ";
             continue;
         }
 
+        // Get the values of each vector
+        double vec1X = waypoints[i].x - waypoints[i - 1].x;
+        double vec1Y = waypoints[i - 1].y - waypoints[i].y;
+
+        double vec2X = waypoints[i + 1].x - waypoints[i].x;
+        double vec2Y = waypoints[i].y - waypoints[i + 1].y;
+
+        // Get dot product of vectors
+        double dot = vec1X * vec2X + vec1Y * vec2Y;
+
+        // Get cross product of vectors
+        double cross = vec1X * vec2X - vec1Y * vec2Y;
+
+        // Get the magnitude of each vector
+        double v1Dist = sqrt(pow(vec1X, 2) + pow(vec1Y, 2));
+        double v2Dist = sqrt(pow(vec2X, 2) + pow(vec2Y, 2));
+
+        // Calculate angle between vectors
+        double difference = cross < 0 ? -acos(dot / (v1Dist * v2Dist)) : acos(dot / (v1Dist * v2Dist));
+
+        if(abs(difference) > 0)
+        {
+            WaypointNavigation::waypoints.push(waypoints[i]);
+        }
+
         // Add point if the next point is not collinear with this and the last point
-        if(!GetCollinearity(waypoints[i - 1], waypoints[i], waypoints[i + 1]))
+        /*if(!GetCollinearity(waypoints[i - 1], waypoints[i], waypoints[i + 1]))
         {
             WaypointNavigation::waypoints.push(waypoints[i]);
             std::cout << "-> (" << waypoints[i].x << ", " << waypoints[i].y << ") ";
-        }
+        }*/
     }
 
     std::cout << std::endl;
     cv::namedWindow("scaled", CV_WINDOW_AUTOSIZE);
     cv::imshow("scaled", image);
-    //cv::waitKey(0);
 }
 
 bool pathing::GetCollinearity(WaypointNavigation::Waypoint a, WaypointNavigation::Waypoint b, WaypointNavigation::Waypoint c)
@@ -426,7 +448,7 @@ void pathing::aStarSearch(Pair src, Pair dest)
                 if (cellDetails[i - 1][j - 1].f == FLT_MAX || cellDetails[i - 1][j - 1].f > fNew)
                 {
                     openList.insert( std::make_pair (fNew, std::make_pair (i - 1, j - 1)));
-                    // Update the details of this cell
+
                     cellDetails[i - 1][j - 1].f = fNew;
                     cellDetails[i - 1][j - 1].g = gNew;
                     cellDetails[i - 1][j - 1].h = hNew;
@@ -456,6 +478,7 @@ void pathing::aStarSearch(Pair src, Pair dest)
                 if (cellDetails[i + 1][j - 1].f == FLT_MAX || cellDetails[i + 1][j - 1].f > fNew)
                 {
                     openList.insert(std::make_pair(fNew, std::make_pair(i + 1, j - 1)));
+
                     cellDetails[i + 1][j - 1].f = fNew;
                     cellDetails[i + 1][j - 1].g = gNew;
                     cellDetails[i + 1][j - 1].h = hNew;
@@ -519,6 +542,7 @@ void pathing::aStarSearch(Pair src, Pair dest)
                 if (cellDetails[i + 1][j - 1].f == FLT_MAX || cellDetails[i + 1][j - 1].f > fNew)
                 {
                     openList.insert(std::make_pair(fNew, std::make_pair(i + 1, j - 1)));
+
                     cellDetails[i + 1][j - 1].f = fNew;
                     cellDetails[i + 1][j - 1].g = gNew;
                     cellDetails[i + 1][j - 1].h = hNew;
@@ -539,6 +563,7 @@ void pathing::aStarSearch(Pair src, Pair dest)
     }
 }
 
+// Does the same as aStarSearch, but is less verbose
 void pathing::newAStarSearch(Pair src, Pair dest)
 {
 
@@ -662,11 +687,15 @@ void pathing::newAStarSearch(Pair src, Pair dest)
 
         for(int x = 0; x < 8; x++)
         {
+            // Get values of i and j for this iteration
             int nI = neighbours[x].first;
             int nJ = neighbours[x].second;
+
+            // 1 for cardinals, sqrt(2) for diagonals
             double addValue = x < 4 ? 1.0 : 1.414;
 
             double gNew, hNew, fNew;
+
             if (isValid (nI, nJ))
             {
                 if (isDestination(nI, nJ, dest))

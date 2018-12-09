@@ -37,7 +37,7 @@ void Camera::cameraCallback(ConstImageStampedPtr &msg){
              }
          }
      }
-    Camera::marbelClose = marblePixels>=25000;
+    Camera::marbleClose = marblePixels>=25000;
 
     cv::cvtColor(kombi, kombi, CV_HSV2RGB);
 

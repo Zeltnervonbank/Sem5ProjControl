@@ -12,6 +12,7 @@
 
 #include "globals.h"
 #include "mapping.h"
+#include "qlearning.h"
 
 class Movement
 {

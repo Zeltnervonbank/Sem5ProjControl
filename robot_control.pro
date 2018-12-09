@@ -10,7 +10,7 @@ SOURCES += main.cpp \
     mapping.cpp \
     movement.cpp \
     waypointnavigation.cpp \
-    pathing.cpp
+    pathing.cpp \
     wall_controller.cpp \
     qlearning.cpp
 
@@ -35,7 +35,7 @@ HEADERS += \
     movement.h \
     waypointnavigation.h \
     globals.h \
-    pathing.h
+    pathing.h \
     wall_controller.h \
     qlearning.h
 

@@ -47,6 +47,7 @@ public:
     static void tracePath(cell cellDetails[][COL], Pair dest);
     static bool GetCollinearity(WaypointNavigation::Waypoint a, WaypointNavigation::Waypoint b, WaypointNavigation::Waypoint c);
     static void aStarSearch(Pair src, Pair dest);
+    static void newAStarSearch(Pair src, Pair dest);
     static void aStarmulti(std::vector<int> src, std::vector<std::vector<int>> dest);
 };
 

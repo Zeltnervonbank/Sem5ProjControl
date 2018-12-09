@@ -15,6 +15,9 @@
 #include "marbel_controller.h"
 #include "datatypes.h"
 #include "lidar.h"
+#include "wall_controller.h"
+#include "qlearning.h"
+#include <chrono>
 #include "mapping.h"
 #include "waypointnavigation.h"
 #include "movement.h"
@@ -34,15 +37,23 @@ RobotPosition Globals::LastPosition;
 
 // Lidar
 bool lidar::marblesPresent = false;
+bool Camera::marbelClose = false;
 std::vector<LidarMarble> lidar::detectedMarbles;
 LidarMarble lidar::nearestMarble;
 std::vector<LidarRay> lidar::lidarRays;
 LidarRay lidar::nearestPoint;
+int marblePoint=0;
+int marblesCollected=0;
+auto start=std::chrono::steady_clock::now();
+auto tempC=start;
 
 // Mapping
 int mapping::map[MAP_SIDE_LENGTH][MAP_SIDE_LENGTH] = {};
 cv::Mat mapping::img = cv::Mat(MAP_SIDE_LENGTH, MAP_SIDE_LENGTH, CV_8U);
 bool mapping::mappingEnabled = false;
+static boost::mutex mutex;
+    int cent;
+    int radius;
 
 // Waypoint navigation
 std::queue<WaypointNavigation::Waypoint> WaypointNavigation::waypoints;
@@ -60,6 +71,25 @@ void statCallback(ConstWorldStatisticsPtr &_msg)
       //std::cout << std::flush;
 }
 
+void contactCallback(ConstContactSensorPtr &_msg)
+{
+    auto startC=std::chrono::steady_clock::now();
+    if(_msg->ByteSize()>300){
+        std::chrono::duration<double> diffC = startC-tempC;
+        //std::cout << diffC.count() << std::endl;
+        if(diffC.count()>=0.20){
+            marblePoint+=100;
+            marblesCollected++;
+            std::cout << "Marble point:                          " << marblePoint << std::endl;
+            std::cout << "Marbles collected:                          " << marblesCollected << std::endl;
+        }
+        tempC=startC;
+     }
+}
+
+void poseCallback(ConstPosesStampedPtr &_msg) {
+  // Dump the message contents to stdout.
+  //  std::cout << _msg->DebugString();
 void poseCallback(ConstPosesStampedPtr &_msg)
 {
     for (int i = 0; i < _msg->pose_size(); i++)
@@ -120,7 +150,8 @@ int main(int _argc, char **_argv)
 
     gazebo::transport::SubscriberPtr lidarSubscriber = Globals::node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidar::lidarCallback);
 
-    gazebo::transport::SubscriberPtr cameraSubscriber = Globals::node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
+  gazebo::transport::SubscriberPtr cameraSubscriber =
+      node->Subscribe("~/pioneer2dx/camera/link/camera/image", Camera::cameraCallback);
 
     // Publish to the robot vel_cmd topic
     Globals::movementPublisher = Globals::node->Advertise<gazebo::msgs::Pose>("~/pioneer2dx/vel_cmd");
@@ -133,15 +164,70 @@ int main(int _argc, char **_argv)
     worldPublisher->WaitForConnection();
     worldPublisher->Publish(controlMessage);
 
+
+  gazebo::transport::SubscriberPtr marble_clone_0 = node->Subscribe("~/marble_clone_0/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_1 = node->Subscribe("~/marble_clone_1/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_10 = node->Subscribe("~/marble_clone_10/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_11 = node->Subscribe("~/marble_clone_11/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_12 = node->Subscribe("~/marble_clone_12/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_13 = node->Subscribe("~/marble_clone_13/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_14 = node->Subscribe("~/marble_clone_14/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_15 = node->Subscribe("~/marble_clone_15/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_16 = node->Subscribe("~/marble_clone_16/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_17 = node->Subscribe("~/marble_clone_17/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_18 = node->Subscribe("~/marble_clone_18/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_19 = node->Subscribe("~/marble_clone_19/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_2 = node->Subscribe("~/marble_clone_2/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_3 = node->Subscribe("~/marble_clone_3/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_4 = node->Subscribe("~/marble_clone_4/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_5 = node->Subscribe("~/marble_clone_5/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_6 = node->Subscribe("~/marble_clone_6/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_7 = node->Subscribe("~/marble_clone_7/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_8 = node->Subscribe("~/marble_clone_8/marble/link/marble_contact/contacts", contactCallback);
+  gazebo::transport::SubscriberPtr marble_clone_9 = node->Subscribe("~/marble_clone_9/marble/link/marble_contact/contacts", contactCallback);
+
+
+
+  const int key_left = 81;
+  const int key_up = 82;
+  const int key_down = 84;
+  const int key_right = 83;
+  const int key_esc = 27;
+  const int key_c = 99;
+  const int key_v = 118;
     // Set static variables in classes
     mapping::img.setTo(0);
 
+  marbel_Controller marble;
+  marble.buildController();
+  wall_Controller wall;
+  wall.buildController();
     cv::Mat image = cv::imread("/home/andreas/Desktop/floor_plan.png", CV_8U);
     cv::imshow("test", image);
 
+  int visited=0;
+  int runs=0;
+  Qlearning qlear;
+  qlear.initialize();
+  qlear.chooseAction(0,0,1);
+  //std::cout << "her2" << std::endl;
     cv::Mat testimg = cv::Mat(COL, ROW, CV_8U);
     testimg.setTo(0);
 
+srand(time(NULL));
+
+  float speed=0;
+  float dir=0;
+
+
+    // Loop
+  while (true) {
+
+      if(marblesCollected==20){
+          std::cout << "ya done son" << std::endl;
+      }
+    //std::cout << cent << std::endl;
+    gazebo::common::Time::MSleep(10);
     for(int y = 0; y < 400; y++)
     {
         for(int x = 0; x < 400; x++)
@@ -165,8 +251,10 @@ int main(int _argc, char **_argv)
     }
 
     cv::imshow("orientationtest", testimg);
+    mutex.lock();
+    int key = cv::waitKey(1);
+    mutex.unlock();
 
-    //cv::waitKey(0);
 
     /*
     WaypointNavigation::Waypoint p1 = {.x = -16.0, .y = 0.0};
@@ -174,11 +262,45 @@ int main(int _argc, char **_argv)
     WaypointNavigation::Waypoint p3 = {.x = -16.0, .y = 2.0};
     WaypointNavigation::Waypoint p4 = {.x = 0.0, .y = 0.0};
 
+    //dir=fuzzy.buildController(cent);
 
-    WaypointNavigation::waypoints.push(p1);
-    WaypointNavigation::waypoints.push(p2);
-    WaypointNavigation::waypoints.push(p3);
-    WaypointNavigation::waypoints.push(p4);*/
+    if(Camera::marbelClose){
+        dir= 0.0;
+        speed = 1.0;
+    }
+    else if(lidar::marblesPresent==1 && lidar::nearestMarble.distance<1000){
+    dir= marble.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).direction;
+    speed = marble.getControlOutput(lidar::nearestMarble.angle,lidar::nearestMarble.distance).speed;
+  }
+    else if(lidar::nearestPoint.range<1 && lidar::nearestPoint.angle<=1.56 && lidar::nearestPoint.angle>=-1.56 ){
+        dir=wall.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).direction;
+        speed=wall.getControlOutput(lidar::nearestPoint.angle,lidar::nearestPoint.range).speed;
+    }
+    else{
+        dir= 0.0;
+        speed = 0.7;
+    }
+
+    //if(radius>36){
+    //    dir=0;
+    //    speed=0;
+    //    for(int i=0; i<100;i++){
+
+     //   }
+  //}
+
+    //std::cout << "key" << key << std::endl;
+
+    //dir=0.5; Højre er positiv retning
+    //dir=-0.5; Venstre er negativ retning
+
+    //else if(cent>=150 && cent<=170 && cent != 0){
+  //      speed= 0.5;
+ // }
+//    else if (cent > 170)
+//        dir =0.15;
+//    else if (cent < 150 && cent > 0)
+//        dir =-0.15;
 
     // Source is the middle point
     std::vector<int> src = convertToPixelCoords({0, 0});
@@ -189,8 +311,40 @@ int main(int _argc, char **_argv)
     for(size_t i = 0 ; i < dest.size(); i++)
     {
         pixelDest.push_back(convertToPixelCoords(dest[i]));
+    if ((key == key_up) && (speed <= 1.2f))
+      speed += 0.05;
+    else if ((key == key_down) && (speed >= -1.2f))
+     speed -= 0.05;
+    else if ((key == key_right) && (dir <= 0.4f))
+      dir += 0.05;
+    else if ((key == key_left) && (dir >= -0.4f))
+      dir -= 0.05;
+    else if (key == key_c){
+        if(visited>=3){
+            qlear.run();
+            runs++;
+            visited=0;
+            std::cout << "runs: " << runs << std::endl;
+        }
+        //reward= (rand()%100)+1;
+        //std::cout << "reward rand" << reward << std::endl;
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> diff = end-start;
+        //std::cout << diff.count() << std::endl;
+        qlear.chooseAction(qlear.currentState,marblePoint,diff.count());
+        marblePoint=0;
+        visited++;
+        qlear.printR();
+
     }
-    //pathing::aStarSearch(std::make_pair(200, 200), std::make_pair(76, 256));
+    else if (key == key_v){
+        qlear.printroute();
+    }
+//    else {
+      // slow down
+      //      speed *= 0.1;
+      //      dir *= 0.1;
+    //}
 
     pathing::aStarmulti(src, pixelDest);
 

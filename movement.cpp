@@ -7,6 +7,8 @@
 #define KEY_ESC 27
 #define KEY_S 115
 #define KEY_L 108
+#define KEY_C 99
+#define KEY_V 118
 
 Movement::Movement()
 {
@@ -23,40 +25,116 @@ void Movement::PublishPose(ignition::math::Pose3d pose)
     Globals::movementPublisher->Publish(msg);
 }
 
+// Vars for movement
+double dir = 0.0;
+double speed = 0.0;
+
+// Move with internally set values
+void Movement::Move()
+{
+    // Generate a pose
+    ignition::math::Pose3d pose(double(speed), 0, 0, 0, 0, double(dir));
+
+    // Publish that pose
+    PublishPose(pose);
+}
+
+// Move with given values
 void Movement::Move(double speed, double rotation)
 {
     ignition::math::Pose3d pose(speed, 0, 0, 0, 0, rotation);
     PublishPose(pose);
 }
 
-// Vars for keyboard input
-double dir = 0.0;
-double speed = 0.0;
+int Movement::HandleMovement()
+{
+    // Checks keyboard first
+    if(HandleKeyboardInput() == -1)
+    {
+        return -1;
+    }
 
-int Movement::HandleKeyboardInput(bool printKey)
+    // If a marble is close, move toward it
+    if(Camera::marbleClose)
+    {
+        dir = 0.0;
+        speed = 1.0;
+    }
+
+    // If marbles are visible, and within a certain range, move toward it
+    else if(lidar::marblesPresent && lidar::nearestMarble.distance < 1000)
+    {
+        dir = marbleController.getControlOutput(
+                    lidar::nearestMarble.angle,
+                    lidar::nearestMarble.distance
+                    ).direction;
+
+        speed = marbleController.getControlOutput(
+                    lidar::nearestMarble.angle,
+                    lidar::nearestMarble.distance
+                    ).speed;
+    }
+
+    // If we're about to move into an obstacle, don't
+    else if(lidar::nearestPoint.range < 1 && abs(lidar::nearestPoint.angle) <= 1.56)
+    {
+        dir = wallController.getControlOutput(
+                    lidar::nearestPoint.angle,
+                    lidar::nearestPoint.range
+                    ).direction;
+
+        speed = wallController.getControlOutput(
+                    lidar::nearestPoint.angle,
+                    lidar::nearestPoint.range
+                    ).speed;
+    }
+
+    // If no marbles are visible, use A* to move to next waypoint
+    else
+    {
+        // TODO: Implement A* pathfollowing here
+        dir = 0.0;
+        speed = 0.7;
+    }
+
+    Move();
+}
+
+
+int Movement::HandleKeyboardInput()
 {
     Globals::mutex.lock();
     int key = cv::waitKey(1);
     Globals::mutex.unlock();
 
-
+    // Break out if esc pressed
     if (key == KEY_ESC)
+    {
         return -1;
+    }
 
-    // Print key pressed
-    if(key != 255 && printKey)
+    // If enabled, print the pressed key
+    if(key != 255 && printKeyPresses)
     {
         std::cout << key << std::endl;
     }
 
-    if ((key == KEY_UP) && (speed <= 1.2))
+    if ((key == KEY_UP) && (speed <= 1.2))        
+    {
         speed += 0.05;
+    }
     else if ((key == KEY_DOWN) && (speed >= -1.2))
+    {
         speed -= 0.05;
+    }
     else if ((key == KEY_RIGHT) && (dir <= 0.4))
+    {
         dir += 0.05;
+    }
     else if ((key == KEY_LEFT) && (dir >= -0.4))
+    {
         dir -= 0.05;
+    }
     else if(key == KEY_S)
     {
         mapping::SaveMapToDisk();
@@ -65,16 +143,38 @@ int Movement::HandleKeyboardInput(bool printKey)
     {
         mapping::LoadMapFromDisk();
     }
-    else
+
+    // Testing feature
+    else if(key == KEY_C && !testMode)
+    {
+        if(visited >= 3)
+        {
+            qLearn.run();
+            runs++;
+            visited = 0;
+            std::cout << "runs: " << runs << std::endl;
+        }
+
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> diff = end - start;
+
+        qLearn.chooseAction(qLearn.currentState, marblePoint, diff.count());
+        qLearn.printR();
+
+        marblePoint = 0;
+        visited++;
+    }
+    else if(key == KEY_V && !testMode)
+    {
+        qLearn.printroute();
+    }
+
+    // Slow down if set to do so
+    else if(allowPassiveSlowing)
     {
         speed *= 0.99;
         dir *= 0.99;
-    }
-
-    // Generate a pose
-    ignition::math::Pose3d pose(double(speed), 0, 0, 0, 0, double(dir));
-
-    Movement::PublishPose(pose);
+    }    
 
     return 0;
 }

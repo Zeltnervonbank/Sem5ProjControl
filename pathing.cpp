@@ -205,24 +205,24 @@ void pathing::aStarSearch(Pair src, Pair dest)
         j = p.second.second;
         closedList[i][j] = true;
 
-    /*
+        /*
         Generating all the 8 successor of this cell
-            N.W N N.E
-            \ | /
+         N.W  N  N.E
+           \  |  /
             \ | /
         W----Cell----E
             / | \
-            / | \
-            S.W S S.E
-        Cell-->Popped Cell (i, j)
-        N --> North	 (i - 1, j)
-        S --> South	 (i + 1, j)
-        E --> East	 (i, j + 1)
-        W --> West		 (i, j - 1)
-        N.E--> North-East (i - 1, j + 1)
-        N.W--> North-West (i - 1, j - 1)
-        S.E--> South-East (i + 1, j + 1)
-        S.W--> South-West (i + 1, j - 1)*/
+           /  |  \
+         S.W  S  S.E
+        Cell-->Popped Cell  (i, j)
+        N --> North         (i - 1, j)
+        S --> South         (i + 1, j)
+        E --> East          (i, j + 1)
+        W --> West          (i, j - 1)
+        N.E--> North-East   (i - 1, j + 1)
+        N.W--> North-West   (i - 1, j - 1)
+        S.E--> South-East   (i + 1, j + 1)
+        S.W--> South-West   (i + 1, j - 1) */
 
         // To store the 'g', 'h' and 'f' of the 8 successors
         double gNew, hNew, fNew;
@@ -291,6 +291,7 @@ void pathing::aStarSearch(Pair src, Pair dest)
             else if (!closedList[i + 1][j] && isUnBlocked(i + 1, j))
             {
                 gNew = cellDetails[i][j].g + 1.0;
+                cellDetails[i + 1][j].h = hNew;
                 hNew = calculateHValue(i + 1, j, dest);
                 fNew = gNew + hNew;
 
@@ -434,7 +435,35 @@ void pathing::aStarSearch(Pair src, Pair dest)
                 }
             }
         }
+        if (isValid (i + 1, j - 1))
+        {
+            if (isDestination(i + 1, j - 1, dest))
+            {
+                cellDetails[i + 1][j - 1].parent_i = i;
+                cellDetails[i + 1][j - 1].parent_j = j;
+                printf("The destination cell is found\n");
+                tracePath(cellDetails, dest);
+                foundDest = true;
+                return;
+            }
 
+            else if (!closedList[i + 1][j - 1] && isUnBlocked(i + 1, j - 1))
+            {
+                gNew = cellDetails[i][j].g + 1.414;
+                hNew = calculateHValue(i + 1, j - 1, dest);
+                fNew = gNew + hNew;
+
+                if (cellDetails[i + 1][j - 1].f == FLT_MAX || cellDetails[i + 1][j - 1].f > fNew)
+                {
+                    openList.insert(std::make_pair(fNew, std::make_pair(i + 1, j - 1)));
+                    cellDetails[i + 1][j - 1].f = fNew;
+                    cellDetails[i + 1][j - 1].g = gNew;
+                    cellDetails[i + 1][j - 1].h = hNew;
+                    cellDetails[i + 1][j - 1].parent_i = i;
+                    cellDetails[i + 1][j - 1].parent_j = j;
+                }
+            }
+        }
         //----------- 7th Successor (South-East) ------------
         if (isValid(i + 1, j + 1))
         {
@@ -510,6 +539,176 @@ void pathing::aStarSearch(Pair src, Pair dest)
     }
 }
 
+void pathing::newAStarSearch(Pair src, Pair dest)
+{
+
+    // If the source is out of range
+    if (!isValid (src.first, src.second))
+    {
+        printf ("Source is invalid\n");
+        return;
+    }
+
+    // If the destination is out of range
+    if (!isValid (dest.first, dest.second))
+    {
+        printf ("Destination is invalid\n");
+        return;
+    }
+
+    // Either the source or the destination is blocked
+    if (!isUnBlocked(src.first, src.second) || !isUnBlocked(dest.first, dest.second))
+    {
+        printf ("Source or the destination is blocked\n");
+        return;
+    }
+
+    // If the destination cell is the same as source cell
+    if (isDestination(src.first, src.second, dest) == true)
+    {
+        printf ("We are already at the destination\n");
+        return;
+    }
+
+    // Create a closed list and initialise it to false which means
+    // that no cell has been included yet
+    // This closed list is implemented as a boolean 2D array
+    bool closedList[ROW][COL];
+    memset(closedList, false, sizeof (closedList));
+    /*
+    Generating all the 8 successor of this cell
+     N.W  N  N.E
+       \  |  /
+        \ | /
+    W----Cell----E
+        / | \
+       /  |  \
+     S.W  S  S.E
+    Cell-->Popped Cell  (i, j)
+    N --> North         (i - 1, j)
+    S --> South         (i + 1, j)
+    E --> East          (i, j + 1)
+    W --> West          (i, j - 1)
+    N.E--> North-East   (i - 1, j + 1)
+    N.W--> North-West   (i - 1, j - 1)
+    S.E--> South-East   (i + 1, j + 1)
+    S.W--> South-West   (i + 1, j - 1) */
+    // Declare a 2D array of structure to hold the details
+    //of that cell
+    cell cellDetails[ROW][COL];
+
+    int i, j;
+
+    for (i = 0; i < ROW; i++)
+    {
+        for (j = 0; j < COL; j++)
+        {
+            cellDetails[i][j].f = FLT_MAX;
+            cellDetails[i][j].g = FLT_MAX;
+            cellDetails[i][j].h = FLT_MAX;
+            cellDetails[i][j].parent_i = -1;
+            cellDetails[i][j].parent_j = -1;
+        }
+    }
+
+    // Initialising the parameters of the starting node
+    i = src.first, j = src.second;
+    cellDetails[i][j].f = 0.0;
+    cellDetails[i][j].g = 0.0;
+    cellDetails[i][j].h = 0.0;
+    cellDetails[i][j].parent_i = i;
+    cellDetails[i][j].parent_j = j;
+
+    /*
+    Create an open list having information as-
+    <f, <i, j>>
+    where f = g + h,
+    and i, j are the row and column index of that cell
+    Note that 0 <= i <= ROW-1 & 0 <= j <= COL-1
+    This open list is implenented as a set of pair of pair.*/
+    std::set<pPair> openList;
+
+    // Put the starting cell on the open list and set its
+    // 'f' as 0
+    openList.insert(std::make_pair (0.0, std::make_pair (i, j)));
+
+    // We set this boolean value as false as initially
+    // the destination is not reached.
+    bool foundDest = false;
+
+    while (!openList.empty())
+    {
+        pPair p = *openList.begin();
+
+        // Remove this vertex from the open list
+        openList.erase(openList.begin());
+
+        // Add this vertex to the closed list
+        i = p.second.first;
+        j = p.second.second;
+        closedList[i][j] = true;
+
+        std::pair<int, int> neighbours[] =
+        {
+            {i - 1, j},
+            {i + 1, j},
+            {i, j + 1},
+            {i, j - 1},
+            {i - 1, j + 1},
+            {i - 1, j - 1},
+            {i + 1, j + 1},
+            {i + 1, j - 1}
+        };
+
+        for(int x = 0; x < 8; x++)
+        {
+            int nI = neighbours[x].first;
+            int nJ = neighbours[x].second;
+            double addValue = x < 4 ? 1.0 : 1.414;
+
+            double gNew, hNew, fNew;
+            if (isValid (nI, nJ))
+            {
+                if (isDestination(nI, nJ, dest))
+                {
+                    cellDetails[nI][nJ].parent_i = i;
+                    cellDetails[nI][nJ].parent_j = j;
+                    printf("The destination cell is found\n");
+                    tracePath(cellDetails, dest);
+                    foundDest = true;
+                    return;
+                }
+
+                else if (!closedList[nI][nJ] && isUnBlocked(nI, nJ))
+                {
+                    gNew = cellDetails[i][j].g + addValue;
+                    hNew = calculateHValue(nI, nJ, dest);
+                    fNew = gNew + hNew;
+
+                    if (cellDetails[nI][nJ].f == FLT_MAX || cellDetails[nI][nJ].f > fNew)
+                    {
+                        openList.insert(std::make_pair(fNew, std::make_pair(nI, nJ)));
+                        cellDetails[nI][nJ].f = fNew;
+                        cellDetails[nI][nJ].g = gNew;
+                        cellDetails[nI][nJ].h = hNew;
+                        cellDetails[nI][nJ].parent_i = i;
+                        cellDetails[nI][nJ].parent_j = j;
+                    }
+                }
+            }
+        }
+    }
+
+    // When the destination cell is not found and the open
+    // list is empty, then we conclude that we failed to
+    // reach the destiantion cell. This may happen when the
+    // there is no way to destination cell (due to blockages)
+    if (!foundDest)
+    {
+        printf("Failed to find the Destination Cell\n");
+    }
+}
+
 void pathing::aStarmulti(std::vector<int> src, std::vector<std::vector<int>> dest)
 {
     Pair start = std::make_pair(src[0], src[1]);
@@ -517,14 +716,12 @@ void pathing::aStarmulti(std::vector<int> src, std::vector<std::vector<int>> des
 
     for(size_t i = 0; i < dest.size(); i++)
     {
-        if(i == 0)
-            aStarSearch(start, goal);
-        else
+        if(i != 0)
         {
             start = std::make_pair(dest[i - 1][0], dest[i - 1][1]);
             goal = std::make_pair(dest[i][0], dest[i][1]);
-            aStarSearch(start, goal);
         }
-    }
 
+        newAStarSearch(start, goal);
+    }
 }

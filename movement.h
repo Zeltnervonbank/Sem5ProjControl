@@ -17,6 +17,7 @@
 #include "qlearning.h"
 #include "marbel_controller.h"
 #include "wall_controller.h"
+#include "waypointcontroller.h"
 
 class Movement
 {
@@ -27,6 +28,7 @@ public:
     // Make marble controller (Marble collection)- TODO: Rename
     static marbel_Controller marbleController;
     static wall_Controller wallController;
+    static waypointController waycontroller;
 
 
     static int runs;

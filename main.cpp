@@ -24,6 +24,7 @@
 #include "globals.h"
 #include "pathing.h"
 #include "movement.h"
+#include "waypointcontroller.h"
 
 
 // Initialise Gazebo node and publishers
@@ -61,6 +62,7 @@ cv::Mat pathing::image = cv::imread("/home/andreas/Desktop/floor_plan.png", CV_L
 Qlearning Movement::qLearn;
 marbel_Controller Movement::marbleController;
 wall_Controller Movement::wallController;
+waypointController Movement::wayController;
 
 int Movement::visited;
 int Movement::runs;
@@ -257,6 +259,7 @@ int main(int _argc, char **_argv)
     // Build fuzzy controllers
     Movement::marbleController.buildController();
     Movement::wallController.buildController();
+    Movement::wayController.buildController();
 
     // Apply settings for Movement class
     Movement::allowPassiveSlowing = false;

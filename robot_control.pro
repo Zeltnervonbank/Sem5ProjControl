@@ -12,7 +12,8 @@ SOURCES += main.cpp \
     waypointnavigation.cpp \
     pathing.cpp \
     wall_controller.cpp \
-    qlearning.cpp
+    qlearning.cpp \
+    waypointcontroller.cpp
 
 CONFIG += link_pkgconfig
 PKGCONFIG += gazebo
@@ -37,7 +38,8 @@ HEADERS += \
     globals.h \
     pathing.h \
     wall_controller.h \
-    qlearning.h
+    qlearning.h \
+    waypointcontroller.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../fuzzylite-6.0-linux64/fuzzylite-6.0/fuzzylite/release/bin/release/ -lfuzzylite
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../fuzzylite-6.0-linux64/fuzzylite-6.0/fuzzylite/release/bin/debug/ -lfuzzylite

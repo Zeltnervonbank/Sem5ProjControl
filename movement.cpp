@@ -92,9 +92,12 @@ int Movement::HandleMovement()
     // If no marbles are visible, use A* to move to next waypoint
     else
     {
+        dir = wayController.getControlOutput().direction;
+        speed = wayController.getControlOutput().speed;
+
         // TODO: Implement A* pathfollowing here
-        dir = 0.0;
-        speed = 0.7;
+        //dir = 0.0;
+        //speed = 0.7;
     }
 
     Move();

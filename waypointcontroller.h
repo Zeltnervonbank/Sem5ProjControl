@@ -4,13 +4,6 @@
 #include <fl/Headers.h>
 #include "globals.h"
 
-
-struct waypointControlOutput
-{
-    float direction;
-    float speed;
-};
-
 class waypointController
 {
 public:

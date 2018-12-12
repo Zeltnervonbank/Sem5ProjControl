@@ -54,7 +54,7 @@ static boost::mutex mutex;
 
 // Pathfinding
 int pathing::grid[ROW][COL] = {};
-cv::Mat pathing::image = cv::imread("/home/andreas/Desktop/floor_plan.png", CV_LOAD_IMAGE_COLOR);
+cv::Mat pathing::image = cv::imread("/../Sem5ProjControl/floor_plan.png", CV_LOAD_IMAGE_COLOR);
 
 // Movement
 Qlearning Movement::qLearn;
@@ -252,7 +252,7 @@ int main(int _argc, char **_argv)
     Movement::qLearn.chooseAction(0, 0, 1);
 
     // Prepare A* grid
-    LoadImageIntoAStarGrid("/home/andreas/Desktop/floor_plan.png");
+    LoadImageIntoAStarGrid("../Sem5ProjControl/floor_plan.png");
 
     // Build fuzzy controllers
     Movement::marbleController.buildController();

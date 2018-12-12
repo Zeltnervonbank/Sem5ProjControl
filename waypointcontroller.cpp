@@ -34,7 +34,7 @@ void waypointController::buildController()
     inputVariable2->setLockValueInRange(false);
     inputVariable2->addTerm(new fl::Ramp("far", 20.000, 200.000));
     inputVariable2->addTerm(new fl::Triangle("close",0.005,20.000, 40.000));
-    inputVariable2->addTerm(new fl::Ramp("veryClose", 0.000, 0.010));
+    inputVariable2->addTerm(new fl::Ramp("veryclose", 0.000, 0.010));
 
     waypointEngine->addInputVariable(inputVariable2);
 
@@ -132,9 +132,10 @@ ControlOutput waypointController::getControlOutput()
     // Calculate angle between vectors
     double difference = cross < 0 ? -acos(dot / distance) : acos(dot / distance);
 
+    std::cout << difference << " " << distance << std::endl;
 
 
-    waypointDirection->setValue(cross);
+    waypointDirection->setValue(difference);
     waypointDistance->setValue(distance);
 
     //std::cout << "cent:" << cent << std::endl;

@@ -55,7 +55,7 @@ int Movement::HandleMovement()
     }
 
     // If a marble is close, move toward it
-    if(Camera::marbleClose)
+    /*if(Camera::marbleClose)
     {
         dir = 0.0;
         speed = 1.0;
@@ -91,14 +91,14 @@ int Movement::HandleMovement()
 
     // If no marbles are visible, use A* to move to next waypoint
     else
-    {
+    {*/
         dir = wayController.getControlOutput().direction;
         speed = wayController.getControlOutput().speed;
 
         // TODO: Implement A* pathfollowing here
         //dir = 0.0;
         //speed = 0.7;
-    }
+    //}
 
     Move();
 }

@@ -253,9 +253,10 @@ int main(int _argc, char **_argv)
 
     // Prepare A* grid
     LoadImageIntoAStarGrid("../Sem5ProjControl/floor_plan.png");
-    //SeedWaypointsWithAStar();
-    Waypoint p = {.x = -10.0, .y = 0.0};
-    Globals::CurrentWaypoint = p;
+    SeedWaypointsWithAStar();
+    /*Waypoint p = {.x = -10.0, .y = 0.0};
+    Globals::CurrentWaypoint = p;*/
+
 
     // Build fuzzy controllers
     Movement::marbleController.buildController();

@@ -62,7 +62,7 @@ void pathing::tracePath(cell cellDetails[][COL], Pair dest)
 
     Path.push (std::make_pair (row, col));
 
-    std::vector<WaypointNavigation::Waypoint> waypoints;
+    std::vector<Waypoint> waypoints;
 
     while (!Path.empty())
     {
@@ -70,7 +70,7 @@ void pathing::tracePath(cell cellDetails[][COL], Pair dest)
         Path.pop();
 
         //std::printf("-> (%d,%d) ", p.first, p.second);
-        WaypointNavigation::Waypoint wp =
+        Waypoint wp =
         {
             .x = (p.first - (ROW / 2.0)) * 0.25,
             .y = -(p.second - (COL / 2.0)) * 0.25
@@ -86,7 +86,7 @@ void pathing::tracePath(cell cellDetails[][COL], Pair dest)
         // Always include first and last points
         if(i == 0 || i == waypoints.size() - 1)
         {
-            WaypointNavigation::waypoints.push(waypoints[i]);
+            Globals::waypoints.push(waypoints[i]);
             continue;
         }
 
@@ -112,7 +112,7 @@ void pathing::tracePath(cell cellDetails[][COL], Pair dest)
 
         if(abs(difference) > 0)
         {
-            WaypointNavigation::waypoints.push(waypoints[i]);
+            Globals::waypoints.push(waypoints[i]);
         }
 
         // Add point if the next point is not collinear with this and the last point
@@ -128,7 +128,7 @@ void pathing::tracePath(cell cellDetails[][COL], Pair dest)
     cv::imshow("scaled", image);
 }
 
-bool pathing::GetCollinearity(WaypointNavigation::Waypoint a, WaypointNavigation::Waypoint b, WaypointNavigation::Waypoint c)
+bool pathing::GetCollinearity(Waypoint a, Waypoint b, Waypoint c)
 {
     double area = abs((a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) / 2.0);
     return area < 0.01;

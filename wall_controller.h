@@ -4,20 +4,13 @@
 #include <fl/Headers.h>
 #include "camera.h"
 
-struct WallControlOutput
-{
-    float direction;
-    float speed;
-};
-
-
 class wall_Controller
 {
 public:
     wall_Controller();
     virtual ~wall_Controller() = default;
     virtual void buildController();
-    virtual WallControlOutput getControlOutput(float dirr, float dist);
+    virtual ControlOutput getControlOutput(float dirr, float dist);
 protected:
     fl::Engine*          wall_Engine;
     fl::InputVariable*   wall_Direction;

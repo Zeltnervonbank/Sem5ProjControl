@@ -5,15 +5,6 @@ waypointController::waypointController()
 
 }
 
-double waypointController::GetDistanceToWaypoint()
-{
-    double xDisplacement = abs(Globals::LastPosition.posX - CurrentWaypoint.x);
-    double yDisplacement = abs(Globals::LastPosition.posY - CurrentWaypoint.y);
-
-    // Uses pythagorean theorem to determine absolute distance to waypoint
-    return sqrt(pow(xDisplacement, 2) + pow(yDisplacement, 2));
-}
-
 void waypointController::buildController()
 {
 
@@ -126,8 +117,8 @@ ControlOutput waypointController::getControlOutput()
     double yawY = sin(yaw);
 
     // Get displacement of waypoint in comparison to robot position
-    double xDisplacement = WaypointNavigation::CurrentWaypoint.x - position.posX;
-    double yDisplacement = position.posY - WaypointNavigation::CurrentWaypoint.y;
+    double xDisplacement = Globals::CurrentWaypoint.x - position.posX;
+    double yDisplacement = position.posY - Globals::CurrentWaypoint.y;
 
     // Get dot product of vectors
     double dot = yawX * xDisplacement + yawY * yDisplacement;
@@ -136,7 +127,7 @@ ControlOutput waypointController::getControlOutput()
     double cross = yawX * yDisplacement - yawY * xDisplacement;
 
     // Get the distance to the waypoint (magnitude of second vector)
-    double distance = waypointController::GetDistanceToWaypoint();
+    double distance = Globals::GetDistanceToWaypoint();
 
     // Calculate angle between vectors
     double difference = cross < 0 ? -acos(dot / distance) : acos(dot / distance);

@@ -39,4 +39,16 @@ struct RobotPosition
     double rotZ;
 };
 
+struct Waypoint
+{
+    double x;
+    double y;
+};
+
+struct ControlOutput
+{
+    float direction;
+    float speed;
+};
+
 #endif // DATATYPES_H

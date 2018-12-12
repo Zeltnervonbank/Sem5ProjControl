@@ -8,7 +8,6 @@ wall_Controller::wall_Controller()
 
 void wall_Controller::buildController()
 {
-
     //Create fuzzy
     wall_Engine = new fl::Engine;
     wall_Engine->setName("AvoidWall");
@@ -101,7 +100,7 @@ void wall_Controller::buildController()
 }
 
 
-WallControlOutput wall_Controller::getControlOutput(float cent, float dist)
+ControlOutput wall_Controller::getControlOutput(float cent, float dist)
 {
 
     wall_Direction->setValue(cent);
@@ -111,7 +110,7 @@ WallControlOutput wall_Controller::getControlOutput(float cent, float dist)
 
     wall_Engine->process();
 
-    WallControlOutput out;
+    ControlOutput out;
 
     out.direction = wall_Direction->getValue(); //((int)(wall_Direction->getValue() * 100 + .5) / 100.0);
     out.speed     = speed->getValue();

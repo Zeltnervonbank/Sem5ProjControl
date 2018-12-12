@@ -2,7 +2,7 @@
 #define WAYPOINTCONTROLLER_H
 
 #include <fl/Headers.h>
-
+#include "globals.h"
 
 
 struct waypointControlOutput
@@ -14,19 +14,10 @@ struct waypointControlOutput
 class waypointController
 {
 public:
-    struct Waypoint
-    {
-        double x;
-        double y;
-    };
-    static std::queue<Waypoint> waypoints;
-    static Waypoint CurrentWaypoint;
-
     waypointController();
     virtual ~waypointController() = default;
     virtual void buildController();
     virtual ControlOutput getControlOutput();
-    static double GetDistanceToWaypoint();
 
 protected:
 

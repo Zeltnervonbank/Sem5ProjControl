@@ -28,7 +28,7 @@ public:
     // Make marble controller (Marble collection)- TODO: Rename
     static marbel_Controller marbleController;
     static wall_Controller wallController;
-    static waypointController waycontroller;
+    static waypointController wayController;
 
 
     static int runs;

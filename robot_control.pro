@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     pathing.cpp \
     wall_controller.cpp \
     qlearning.cpp \
-    waypointcontroller.cpp
+    waypointcontroller.cpp \
+    globals.cpp
 
 CONFIG += link_pkgconfig
 PKGCONFIG += gazebo

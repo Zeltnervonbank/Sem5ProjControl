@@ -35,6 +35,8 @@ gazebo::transport::PublisherPtr Globals::movementPublisher;
 // Globals
 boost::mutex Globals::mutex;
 RobotPosition Globals::LastPosition;
+std::queue<Waypoint> Globals::waypoints;
+Waypoint Globals::CurrentWaypoint = {.x = 0.0, .y = 0.0};
 
 // Lidar
 bool lidar::marblesPresent = false;
@@ -49,10 +51,6 @@ int mapping::map[MAP_SIDE_LENGTH][MAP_SIDE_LENGTH] = {};
 cv::Mat mapping::img = cv::Mat(MAP_SIDE_LENGTH, MAP_SIDE_LENGTH, CV_8U);
 bool mapping::mappingEnabled = false;
 static boost::mutex mutex;
-
-// Waypoint navigation
-std::queue<WaypointNavigation::Waypoint> WaypointNavigation::waypoints;
-WaypointNavigation::Waypoint WaypointNavigation::CurrentWaypoint = {.x = 0.0, .y = 0.0};
 
 // Pathfinding
 int pathing::grid[ROW][COL] = {};

@@ -5,11 +5,7 @@
 #include "camera.h"
 
 
-struct ControlOutput
-{
-    float direction;
-    float speed;
-};
+
 
 class marbel_Controller
 {

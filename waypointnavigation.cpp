@@ -8,16 +8,16 @@ WaypointNavigation::WaypointNavigation()
 void WaypointNavigation::NavigateToNextWaypoint()
 {
     // If the robot is close to the active waypoint and there are more waypoints in queue
-    if(GetDistanceToWaypoint() < 0.1 && waypoints.size() > 0)
+    if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
     {
         // Get the next waypoint from queue, and stop robot
-        CurrentWaypoint = waypoints.front();
-        waypoints.pop();
+        Globals::CurrentWaypoint = Globals::waypoints.front();
+        Globals::waypoints.pop();
         Movement::Move(0.0, 0.0);
     }
 
     // Stop the robot if close to waypoint, and there are no more waypoints in queue
-    else if (GetDistanceToWaypoint() < 0.05 && waypoints.size() == 0)
+    else if (Globals::GetDistanceToWaypoint() < 0.05 && Globals::waypoints.size() == 0)
     {
         Movement::Move(0.0, 0.0);
     }
@@ -43,8 +43,8 @@ void WaypointNavigation::MoveTowardWaypoint()
     double yawY = sin(yaw);
 
     // Get displacement of waypoint in comparison to robot position
-    double xDisplacement = CurrentWaypoint.x - position.posX;
-    double yDisplacement = position.posY - CurrentWaypoint.y;
+    double xDisplacement = Globals::CurrentWaypoint.x - position.posX;
+    double yDisplacement = position.posY - Globals::CurrentWaypoint.y;
 
     // Get dot product of vectors
     double dot = yawX * xDisplacement + yawY * yDisplacement;
@@ -53,7 +53,7 @@ void WaypointNavigation::MoveTowardWaypoint()
     double cross = yawX * yDisplacement - yawY * xDisplacement;
 
     // Get the distance to the waypoint (magnitude of second vector)
-    double distance = GetDistanceToWaypoint();
+    double distance = Globals::GetDistanceToWaypoint();
 
     // Calculate angle between vectors
     double difference = cross < 0 ? -acos(dot / distance) : acos(dot / distance);
@@ -61,10 +61,10 @@ void WaypointNavigation::MoveTowardWaypoint()
 
     std::cout << "\033[2J\033[1;1H";
     // Print some data
-    std::cout << "Current waypoint: " << CurrentWaypoint.x << ", " << CurrentWaypoint.y << std::endl;
+    std::cout << "Current waypoint: " << Globals::CurrentWaypoint.x << ", " << Globals::CurrentWaypoint.y << std::endl;
     std::cout << "Current position: " << position.posX << ", " << position.posY << std::endl;
-    std::cout << "Rotation offset: " << difference << " Distance: " << GetDistanceToWaypoint() << " Cross: " << cross << std::endl;
-    std::cout << "Remaining waypoints: " << waypoints.size() << std::endl;
+    std::cout << "Rotation offset: " << difference << " Distance: " << Globals::GetDistanceToWaypoint() << " Cross: " << cross << std::endl;
+    std::cout << "Remaining waypoints: " << Globals::waypoints.size() << std::endl;
 
     try
     {
@@ -73,7 +73,7 @@ void WaypointNavigation::MoveTowardWaypoint()
     double rotation = (double) difference;
 
     // Set speed if not very close to waypoint and pointing in correct direction, else stop
-    double speed = GetDistanceToWaypoint() > 0.05 && abs(difference) < 0.1 ? 1.2 : 0;
+    double speed = Globals::GetDistanceToWaypoint() > 0.05 && abs(difference) < 0.1 ? 1.2 : 0;
 
     // Send movement
     Movement::Move(speed, rotation);
@@ -83,13 +83,4 @@ void WaypointNavigation::MoveTowardWaypoint()
         std::cout << e.what() << std::endl;
         Movement::Move(0.0, 0.0);
     }
-}
-
-double WaypointNavigation::GetDistanceToWaypoint()
-{
-    double xDisplacement = abs(Globals::LastPosition.posX - CurrentWaypoint.x);
-    double yDisplacement = abs(Globals::LastPosition.posY - CurrentWaypoint.y);
-
-    // Uses pythagorean theorem to determine absolute distance to waypoint
-    return sqrt(pow(xDisplacement, 2) + pow(yDisplacement, 2));
 }

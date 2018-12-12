@@ -19,11 +19,11 @@ void waypointController::buildController()
     inputVariable1->setName("waypointDirection");
     inputVariable1->setRange(-3.14, 3.14);
     inputVariable1->setLockValueInRange(false);
-    inputVariable1->addTerm(new fl::Ramp("farleft", -0.300, -3.14));
-    inputVariable1->addTerm(new fl::Triangle("left", -0.000, -0.300, -1.000));
+    inputVariable1->addTerm(new fl::Ramp("farleft", -0.300, -6.00));
+    inputVariable1->addTerm(new fl::Triangle("left", -0.000, -0.300, -0.600));
     inputVariable1->addTerm(new fl::Triangle("center", 0.300, 0.000, -0.300));
-    inputVariable1->addTerm(new fl::Triangle("rigth", 1.000, 0.300, 0.000));
-    inputVariable1->addTerm(new fl::Ramp("farrigth", 0.300, 3.14));
+    inputVariable1->addTerm(new fl::Triangle("rigth", 0.600, 0.300, 0.000));
+    inputVariable1->addTerm(new fl::Ramp("farrigth", 0.300, 6.00));
     waypointEngine->addInputVariable(inputVariable1);
 
     //Membership functions of input error
@@ -32,9 +32,9 @@ void waypointController::buildController()
     inputVariable2->setName("waypointDistance");
     inputVariable2->setRange(0, 200);
     inputVariable2->setLockValueInRange(false);
-    inputVariable2->addTerm(new fl::Ramp("far", 20.000, 200.000));
-    inputVariable2->addTerm(new fl::Triangle("close",0.005,20.000, 40.000));
-    inputVariable2->addTerm(new fl::Ramp("veryclose", 0.000, 0.010));
+    inputVariable2->addTerm(new fl::Ramp("far", 10.000, 40.000));
+    inputVariable2->addTerm(new fl::Triangle("close",5.000,10.000, 40.000));
+    inputVariable2->addTerm(new fl::Ramp("veryclose", 0.000, 10.00));
 
     waypointEngine->addInputVariable(inputVariable2);
 
@@ -49,11 +49,11 @@ void waypointController::buildController()
     outputVariable1->setAggregation(new fl::Maximum);
     outputVariable1->setDefaultValue(0);
     //outputVariable1->addTerm(new fl::Triangle("serror", -0.100, 0.000, 0.100));
-    outputVariable1->addTerm(new fl::Ramp("ssharprigth", 1.000, 0.300));
-    outputVariable1->addTerm(new fl::Triangle("srigth",0.600, 0.300, 0.000 ));
+    outputVariable1->addTerm(new fl::Ramp("ssharprigth", 1.000, 0.400));
+    outputVariable1->addTerm(new fl::Triangle("srigth",0.500, 0.300, 0.000 ));
     outputVariable1->addTerm(new fl::Triangle("sstraight", 0.100, -0.000, -0.100));
-    outputVariable1->addTerm(new fl::Triangle("sleft", -0.000, -0.300, -0.600));
-    outputVariable1->addTerm(new fl::Ramp("ssharpleft", -1.000, -0.300));
+    outputVariable1->addTerm(new fl::Triangle("sleft", -0.000, -0.400, -0.500));
+    outputVariable1->addTerm(new fl::Ramp("ssharpleft", -1.000, -0.400));
     waypointEngine->addOutputVariable(outputVariable1);
 
     //Membership functions of outputspeed
@@ -65,9 +65,9 @@ void waypointController::buildController()
     outputVariable2->setAggregation(new fl::Maximum);
     outputVariable2->setDefaultValue(0);
     outputVariable2->setDefuzzifier(new fl::Centroid(100));
-    outputVariable2->addTerm(new fl::Ramp("fast", 0.400, 1.000));
-    outputVariable2->addTerm(new fl::Triangle("slow",0.010, 0.400, 0.500));
-    outputVariable2->addTerm(new fl::Ramp("stop", 0.000, 0.020));
+    outputVariable2->addTerm(new fl::Ramp("fast", 0.300, 0.500));
+    outputVariable2->addTerm(new fl::Triangle("slow",0.200, 0.300, 0.500));
+    outputVariable2->addTerm(new fl::Ramp("stop", 0.200, 0.300));
     waypointEngine->addOutputVariable(outputVariable2);
 
     //Rules
@@ -86,10 +86,10 @@ void waypointController::buildController()
     mamdani->addRule(fl::Rule::parse("if waypointDistance is close then speed is slow", waypointEngine));
     mamdani->addRule(fl::Rule::parse("if waypointDistance is far then speed is fast", waypointEngine));
     mamdani->addRule(fl::Rule::parse("if waypointDistance is veryclose then speed is stop", waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDirection is farleft then direction is ssharprigth", waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDirection is farrigth then direction is ssharpleft",waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDirection is farleft then speed is stop", waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDirection is farrigth then speed is stop",waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is farleft then direction is ssharprigth and speed is stop", waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is farrigth then direction is ssharpleft and speed is stop",waypointEngine));
+    //mamdani->addRule(fl::Rule::parse("if waypointDirection is farleft then speed is stop", waypointEngine));
+    //mamdani->addRule(fl::Rule::parse("if waypointDirection is farrigth then speed is stop",waypointEngine));
     waypointEngine->addRuleBlock(mamdani);
 
     std::string status;
@@ -138,7 +138,7 @@ ControlOutput waypointController::getControlOutput()
 
 
     waypointDirection->setValue(difference);
-    waypointDistance->setValue(distance);
+    waypointDistance->setValue(2);
 
     //std::cout << "cent:" << cent << std::endl;
     //std::cout << "dist:" << dist << std::endl;

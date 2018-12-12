@@ -73,10 +73,10 @@ void WaypointNavigation::MoveTowardWaypoint()
     double rotation = (double) difference;
 
     // Set speed if not very close to waypoint and pointing in correct direction, else stop
-    double speed = Globals::GetDistanceToWaypoint() > 0.05 && abs(difference) < 0.1 ? 1.2 : 0;
+    //double speed = Globals::GetDistanceToWaypoint() > 0.05 && abs(difference) < 0.1 ? 1.2 : 0;
 
     // Send movement
-    Movement::Move(speed, rotation);
+    //Movement::Move(speed, rotation);
     }
     catch(std::exception e)
     {

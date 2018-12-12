@@ -86,8 +86,10 @@ void waypointController::buildController()
     mamdani->addRule(fl::Rule::parse("if waypointDistance is close then speed is slow", waypointEngine));
     mamdani->addRule(fl::Rule::parse("if waypointDistance is far then speed is fast", waypointEngine));
     mamdani->addRule(fl::Rule::parse("if waypointDistance is veryclose then speed is stop", waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDirection is left then direction is srigth", waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDirection is rigth then direction is sleft",waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is farleft then direction is ssharprigth", waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is farrigth then direction is ssharpleft",waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is farleft then speed is stop", waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is farrigth then speed is stop",waypointEngine));
     waypointEngine->addRuleBlock(mamdani);
 
     std::string status;
@@ -150,8 +152,8 @@ ControlOutput waypointController::getControlOutput()
     out.direction = ((int)(SteerDirection->getValue() * 100 + .5) / 100.0);
     out.speed     = Speed->getValue();
 
-    //std::cout << "output:" << out.direction << std::endl;
-    //std::cout << "speed:" << out.speed << std::endl;
+    std::cout << "output:" << out.direction << std::endl;
+    std::cout << "speed:" << out.speed << std::endl;
 
 
     return out;

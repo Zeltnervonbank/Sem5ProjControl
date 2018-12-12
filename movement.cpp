@@ -92,6 +92,13 @@ int Movement::HandleMovement()
     // If no marbles are visible, use A* to move to next waypoint
     else
     {*/
+    /*if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
+    {
+        // Get the next waypoint from queue, and stop robot
+        Globals::CurrentWaypoint = Globals::waypoints.front();
+        Globals::waypoints.pop();
+        //Movement::Move(0.0, 0.0);
+    }*/
         dir = wayController.getControlOutput().direction;
         speed = wayController.getControlOutput().speed;
 

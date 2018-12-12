@@ -154,6 +154,7 @@ ControlOutput waypointController::getControlOutput()
 
     std::cout << "output:" << out.direction << std::endl;
     std::cout << "speed:" << out.speed << std::endl;
+    std::cout << "point: " << Globals::CurrentWaypoint.x << " " << Globals::CurrentWaypoint.y << std::endl;
 
 
     return out;

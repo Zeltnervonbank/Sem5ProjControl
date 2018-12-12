@@ -19,11 +19,11 @@ void waypointController::buildController()
     inputVariable1->setName("waypointDirection");
     inputVariable1->setRange(-3.14, 3.14);
     inputVariable1->setLockValueInRange(false);
-    inputVariable1->addTerm(new fl::Ramp("farleft", -0.750, -3.14));
-    inputVariable1->addTerm(new fl::Triangle("left", -0.000, -0.750, -1.000));
-    inputVariable1->addTerm(new fl::Triangle("center", 0.1500, 0.000, -0.150));
-    inputVariable1->addTerm(new fl::Triangle("rigth", 1.000, 0.750, 0.000));
-    inputVariable1->addTerm(new fl::Ramp("farrigth", 0.750, 3.14));
+    inputVariable1->addTerm(new fl::Ramp("farleft", -0.300, -3.14));
+    inputVariable1->addTerm(new fl::Triangle("left", -0.000, -0.300, -1.000));
+    inputVariable1->addTerm(new fl::Triangle("center", 0.300, 0.000, -0.300));
+    inputVariable1->addTerm(new fl::Triangle("rigth", 1.000, 0.300, 0.000));
+    inputVariable1->addTerm(new fl::Ramp("farrigth", 0.300, 3.14));
     waypointEngine->addInputVariable(inputVariable1);
 
     //Membership functions of input error

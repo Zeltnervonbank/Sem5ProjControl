@@ -21,9 +21,12 @@ public:
     static std::queue<Waypoint> waypoints;
     static Waypoint CurrentWaypoint;
 
-    static double GetDistanceToWaypoint();
     static std::vector<std::vector<int>> destinations;
-    static std::queue<Waypoint> destinationQ;
+    static std::queue<Waypoint> destinationQueue;
+
+    static double GetDistanceToWaypoint();
+    static void ClearWaypointQueue();
+    static void ClearDestinationQueue();
 };
 
 #endif // GAZEBOGLOBALS_H

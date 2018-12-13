@@ -38,7 +38,7 @@ RobotPosition Globals::LastPosition;
 std::queue<Waypoint> Globals::waypoints;
 Waypoint Globals::CurrentWaypoint = {.x = 0.0, .y = 0.0};
 std::vector<std::vector<int>> Globals::destinations;
-std::queue<Waypoint> Globals::destinationQ;
+std::queue<Waypoint> Globals::destinationQueue;
 // Lidar
 bool lidar::marblesPresent = false;
 bool Camera::marbleClose = false;
@@ -178,24 +178,43 @@ void LoadImageIntoAStarGrid(char* path)
     }
 }
 
-void AddDestinations()
+void SetDestinations()
 {
     Globals::destinations = {{-36, 22}, {-25, 22}, {-26, 11}, {-36, 10}, {-13, 11}, {-13, 22}, {7, 21}, {7, 10}, {-36, -1}, {-36, -23}, {-20, -22}};
 
 }
-void AddToDestQueue()
+
+void AddDestinationToQueue(int index)
+{
+    Waypoint w = {.x = Globals::destinations[index][0], .y = Globals::destinations[index][1]};
+    Globals::destinationQueue.push(w);
+}
+
+void AddAllToDestinationQueue()
 {
     for (int i = 0; i < Globals::destinations.size(); i++)
     {
-        Waypoint w = {.x = Globals::destinations[i][0], .y = Globals::destinations[i][1]};
-        Globals::destinationQ.push(w);
+        AddDestinationToQueue(i);
     }
 }
 
-void ShuffleDestinations()
+void RandomOrderAddAllDestinationsToQueue()
 {
-    std::random_shuffle (Globals::destinations.begin(), Globals::destinations.end());
-    AddToDestQueue();
+    // Make new vector for indexes and add each index to it
+    std::vector<int> shuffledIndexes;
+    for(size_t i = 0; i < Globals::destinations.size(); i++)
+    {
+        shuffledIndexes.push_back(i);
+    }
+
+    // Shuffle indexes
+    std::random_shuffle (shuffledIndexes.begin(), shuffledIndexes.end());
+
+    // Add each destination to queue
+    for(size_t i = 0; i < shuffledIndexes.size(); i++)
+    {
+        AddDestinationToQueue(shuffledIndexes[i]);
+    }
 }
 
 void SeedWaypointsWithAStar()
@@ -269,6 +288,10 @@ int main(int _argc, char **_argv)
     worldPublisher->Publish(controlMessage);
 
     /// Main code
+    // Prepare destinations
+    SetDestinations();
+    RandomOrderAddAllDestinationsToQueue();
+
     // Initialise Q learning system
     Movement::qLearn.initialize();
     Movement::qLearn.chooseAction(0, 0, 1);

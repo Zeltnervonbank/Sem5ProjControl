@@ -43,7 +43,7 @@ double pathing::calculateHValue(int row, int col, Pair dest)
 // A function to track the path from the source to destination
 void pathing::tracePath(cell cellDetails[][COL], Pair dest)
 {
-    cv::Mat image = cv::imread("/home/mini/Desktop/Project/rb-rca5/models/bigworld/meshes/floor_plan.png", CV_LOAD_IMAGE_COLOR); //laptop location
+    cv::Mat image = cv::imread("../Sem5ProjControl/floor_plan.png", CV_LOAD_IMAGE_COLOR); //laptop location
     printf ("\nThe Path is ");
     int row = dest.first;
     int col = dest.second;
@@ -643,7 +643,6 @@ void pathing::newAStarSearch(Pair src, Pair dest)
     cellDetails[i][j].h = 0.0;
     cellDetails[i][j].parent_i = i;
     cellDetails[i][j].parent_j = j;
-
     /*
     Create an open list having information as-
     <f, <i, j>>
@@ -753,4 +752,27 @@ void pathing::aStarmulti(std::vector<int> src, std::vector<std::vector<int>> des
 
         newAStarSearch(start, goal);
     }
+}
+
+void pathing::CreatePathToCurrentDestination()
+{
+    // Convert current destination and current position to pair form
+    Pair destination = ConvertCoordsToPathingCoord(0, 0);
+    Pair currentPosition = ConvertCoordsToPathingCoord(Globals::LastPosition.posX, Globals::LastPosition.posY);
+
+    // Clear current waypoints
+    Globals::ClearWaypointQueue();
+
+    // Make a new path
+    newAStarSearch(currentPosition, destination);
+
+    // Set a new next waypoint
+    Globals::CurrentWaypoint = Globals::waypoints.front();
+    Globals::waypoints.pop();
+
+}
+
+Pair pathing::ConvertCoordsToPathingCoord(double x, double y)
+{
+    return std::make_pair(x * 4.0 + 200, 200 - y * 4.0);
 }

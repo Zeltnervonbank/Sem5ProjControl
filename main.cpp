@@ -301,6 +301,7 @@ int main(int _argc, char **_argv)
     Movement::qLearn.Initialize();
     Movement::qLearn.ChooseAction(0, 0, 1);
 
+
     // Prepare A* grid
     LoadImageIntoAStarGrid("../Sem5ProjControl/floor_plan.png");
     Globals::NextDestination();
@@ -319,7 +320,7 @@ int main(int _argc, char **_argv)
     // Apply settings for Movement class
     Movement::allowPassiveSlowing = true;
     Movement::printKeyPresses = false;
-    Movement::testMode = false;
+    Movement::testMode = true;
     Movement::enableAutomaticMovement = false;
 
     // Set random seed - TODO: Refactor

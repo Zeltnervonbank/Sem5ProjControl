@@ -166,7 +166,6 @@ void Qlearning::PrintRoute()
             Ropt[i][j] = R[i][j];
         }
     }
-
     currentState = initialStates[0];
     std::cout << "Optimal path:  " << std::endl;
     for(int i = 0; i < rSize; i++)

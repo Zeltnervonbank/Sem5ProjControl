@@ -107,7 +107,14 @@ int Movement::HandleMovement()
             {
                 if(Globals::currentWaypoint.isDestination)
                 {
-                    // Alex kald ting her
+                    auto end = std::chrono::steady_clock::now();
+                    std::chrono::duration<double> diff = end - start;
+                    qLearn.UpdateReward(
+                                Globals::currentDestination.index,
+                                Globals::previousDestination.index,
+                                marblePoint
+                                ,diff.count());
+                    qLearn.PrintR();
                 }
                 Globals::NextDestination();
                 pathing::CreatePathToCurrentDestination();

@@ -45,13 +45,6 @@ struct Waypoint
     double y;
 };
 
-struct Destinations
-{
-    double x;
-    double y;
-    int id;
-};
-
 struct ControlOutput
 {
     float direction;

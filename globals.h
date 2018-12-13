@@ -24,6 +24,6 @@ public:
     static double GetDistanceToWaypoint();
     static std::vector<std::vector<int>> destinations;
     static std::queue<Waypoint> destinationQ;
-
+};
 
 #endif // GAZEBOGLOBALS_H

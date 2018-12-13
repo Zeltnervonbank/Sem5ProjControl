@@ -37,8 +37,8 @@ boost::mutex Globals::mutex;
 RobotPosition Globals::LastPosition;
 std::queue<Waypoint> Globals::waypoints;
 Waypoint Globals::CurrentWaypoint = {.x = 0.0, .y = 0.0};
-std::vector<vector<int>> Globals::destinations;
-std::queue<Waypoints> Globals::destinationQ;
+std::vector<std::vector<int>> Globals::destinations;
+std::queue<Waypoint> Globals::destinationQ;
 // Lidar
 bool lidar::marblesPresent = false;
 bool Camera::marbleClose = false;
@@ -187,7 +187,8 @@ void AddToDestQueue()
 {
     for (int i = 0; i < Globals::destinations.size(); i++)
     {
-        Globals::destinationQ.push(Globals::destinations[i]);
+        Waypoint w = {.x = Globals::destinations[i][0], .y = Globals::destinations[i][1]};
+        Globals::destinationQ.push(w);
     }
 }
 
@@ -219,7 +220,7 @@ void SeedWaypointsWithAStar()
 
 int main(int _argc, char **_argv)
 {
-    /*
+
     // Load gazebo
     gazebo::client::setup(_argc, _argv);
 

@@ -19,11 +19,11 @@ void waypointController::buildController()
     inputVariable1->setName("waypointDirection");
     inputVariable1->setRange(-3.14, 3.14);
     inputVariable1->setLockValueInRange(false);
-    inputVariable1->addTerm(new fl::Ramp("farleft", -0.300, -0.600));
-    inputVariable1->addTerm(new fl::Triangle("left", -0.600, -0.300, -0.000));
-    inputVariable1->addTerm(new fl::Triangle("center", 0.300, 0.000, -0.300));
-    inputVariable1->addTerm(new fl::Triangle("rigth", 0.000, 0.300, 0.600));
-    inputVariable1->addTerm(new fl::Ramp("farrigth", 0.300, 0.600));
+    inputVariable1->addTerm(new fl::Ramp("farleft", -0.030, -0.150));
+    inputVariable1->addTerm(new fl::Triangle("left", -0.150, -0.03, -0.000));
+    inputVariable1->addTerm(new fl::Triangle("center", 0.03, 0.000, -0.03));
+    inputVariable1->addTerm(new fl::Triangle("rigth", 0.000, 0.03, 0.150));
+    inputVariable1->addTerm(new fl::Ramp("farrigth", 0.03, 0.150));
     waypointEngine->addInputVariable(inputVariable1);
 
     //Membership functions of input error
@@ -33,8 +33,8 @@ void waypointController::buildController()
     inputVariable2->setRange(0, 200);
     inputVariable2->setLockValueInRange(false);
     inputVariable2->addTerm(new fl::Ramp("far", 5.000, 10.000));
-    inputVariable2->addTerm(new fl::Trapezoid("close",0.08, 4.0, 5.0, 10.0));
-    inputVariable2->addTerm(new fl::Ramp("veryclose", 4.000, 0.08));
+    inputVariable2->addTerm(new fl::Trapezoid("close",0.1, 4.0, 6.0, 10.0));
+    inputVariable2->addTerm(new fl::Ramp("veryclose", 4.0, 0.1));
 
     waypointEngine->addInputVariable(inputVariable2);
 
@@ -66,8 +66,8 @@ void waypointController::buildController()
     outputVariable2->setDefaultValue(fl::nan);
     outputVariable2->setDefuzzifier(new fl::Centroid(100));
     outputVariable2->addTerm(new fl::Ramp("fast", 0.300, 0.500));
-    outputVariable2->addTerm(new fl::Trapezoid("slow",0.03, 0.1, 0.3, 0.5));
-    outputVariable2->addTerm(new fl::Ramp("stop", 0.1, 0.03));
+    outputVariable2->addTerm(new fl::Trapezoid("slow",0.01, 0.05, 0.3, 0.5));
+    outputVariable2->addTerm(new fl::Ramp("stop", 0.05, 0.01));
     waypointEngine->addOutputVariable(outputVariable2);
 
     //Rules
@@ -78,17 +78,15 @@ void waypointController::buildController()
     mamdani->setDisjunction(new fl::Maximum);
     mamdani->setImplication(new fl::Minimum);
     mamdani->setActivation(new fl::General);
-    mamdani->addRule(fl::Rule::parse("if waypointDirection is center then direction is sstraight", waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDirection is rigth and waypointDistance is far then direction is srigth and speed is stop", waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDirection is rigth and waypointDistance is close then direction is ssharprigth and speed is stop", waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDirection is left and waypointDistance is far then direction is sleft and speed is stop", waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDirection is left and waypointDistance is close then direction is ssharpleft and speed is stop", waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDistance is close then speed is slow", waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDistance is far then speed is fast", waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDistance is veryclose then speed is stop", waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is center then direction is sstraight and speed is fast", waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is rigth and waypointDistance is far then direction is ssharprigth and speed is fast", waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is rigth and waypointDistance is close then direction is ssharprigth and speed is slow", waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is rigth and waypointDistance is veryclose then direction is ssharprigth and speed is stop", waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is left and waypointDistance is far then direction is ssharpleft and speed is fast", waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is left and waypointDistance is close then direction is ssharpleft and speed is slow", waypointEngine));
+    mamdani->addRule(fl::Rule::parse("if waypointDirection is left and waypointDistance is veryclose then direction is ssharpleft and speed is stop", waypointEngine));
     mamdani->addRule(fl::Rule::parse("if waypointDirection is farleft then direction is ssharprigth and speed is stop", waypointEngine));
     mamdani->addRule(fl::Rule::parse("if waypointDirection is farrigth then direction is ssharpleft and speed is stop",waypointEngine));
-    mamdani->addRule(fl::Rule::parse("if waypointDirection is center then speed is slow", waypointEngine));
     //mamdani->addRule(fl::Rule::parse("if waypointDirection is farleft then speed is stop", waypointEngine));
     //mamdani->addRule(fl::Rule::parse("if waypointDirection is farrigth then speed is stop",waypointEngine));
     waypointEngine->addRuleBlock(mamdani);
@@ -153,10 +151,10 @@ ControlOutput waypointController::getControlOutput()
     out.direction = ((int)(SteerDirection->getValue() * 100 + .5) / 100.0);
     out.speed     = Speed->getValue();
 
-    std::cout << "output:" << out.direction << std::endl;
+/*  std::cout << "output:" << out.direction << std::endl;
     std::cout << "speed:" << out.speed << std::endl;
     std::cout << "point: " << Globals::CurrentWaypoint.x << " " << Globals::CurrentWaypoint.y << std::endl;
-
+*/
 
     return out;
 }

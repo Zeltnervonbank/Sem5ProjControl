@@ -62,9 +62,10 @@ int Movement::HandleMovement()
     }
 
     // If marbles are visible, and within a certain range, move toward it
-    else if(lidar::marblesPresent && lidar::nearestMarble.distance < 1000)
+    else if(lidar::marblesPresent && lidar::nearestMarble.distance < 1000 && lidar::nearestMarble.angle<4)
     {
         std::cout << "                  marble" << std::endl;
+
         dir = marbleController.getControlOutput(
                     lidar::nearestMarble.angle,
                     lidar::nearestMarble.distance
@@ -75,9 +76,8 @@ int Movement::HandleMovement()
                     lidar::nearestMarble.distance
                     ).speed;
     }
-
     // If we're about to move into an obstacle, don't
-    else if(lidar::nearestPoint.range < 0.2 && abs(lidar::nearestPoint.angle) <= 1.56)
+    else if(lidar::nearestPoint.range < 0.5 && abs(lidar::nearestPoint.angle) <= 1.56)
     {
         std::cout << "                  wall" << std::endl;
         dir = wallController.getControlOutput(
@@ -92,24 +92,28 @@ int Movement::HandleMovement()
     }
 
     // If no marbles are visible, use A* to move to next waypoint
-    else{
-    if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
+    else if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
     {
         // Get the next waypoint from queue, and stop robot
         Globals::CurrentWaypoint = Globals::waypoints.front();
         Globals::waypoints.pop();
         //Movement::Move(0.0, 0.0);
     }
+else{
     std::cout << "                  path" << std::endl;
         dir = wayController.getControlOutput().direction;
         speed = wayController.getControlOutput().speed;
     }
 
+/*
+    else{
+        dir = 0.0;
+        speed = 1.2;
+        }
+*/
         // TODO: Implement A* pathfollowing here
-        //dir = 0.0;
-        //speed = 0.7;
 
-
+    std::cout << "dirr" << dir << "speed:" << speed << std::endl;
     Move();
 }
 

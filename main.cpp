@@ -36,10 +36,11 @@ gazebo::transport::PublisherPtr Globals::movementPublisher;
 boost::mutex Globals::mutex;
 RobotPosition Globals::lastPosition;
 std::queue<Waypoint> Globals::waypoints;
-Waypoint Globals::currentWaypoint = {.x = 0.0, .y = 0.0};
-Waypoint Globals::currentDestination;
+Waypoint Globals::currentWaypoint = {.x = 0.0, .y = 0.0, .isDestination = false};
+Destination Globals::currentDestination;
+Destination Globals::previousDestination;
 std::vector<std::vector<int>> Globals::destinations;
-std::queue<Waypoint> Globals::destinationQueue;
+std::queue<Destination> Globals::destinationQueue;
 
 // Lidar
 bool Lidar::marblesPresent = false;
@@ -73,6 +74,7 @@ std::chrono::_V2::steady_clock::time_point Movement::start = std::chrono::steady
 bool Movement::testMode;
 bool Movement::allowPassiveSlowing;
 bool Movement::printKeyPresses;
+bool Movement::enableAutomaticMovement;
 
 // Marble collection
 int marblesCollected = 0;
@@ -160,7 +162,7 @@ void LoadImageIntoAStarGrid(const char* path)
 {
     cv::Mat image = cv::imread(path, CV_8U);
 
-    // Convert image file to A* grid
+    // Convert image filee to A* grid
     for(int y = 0; y < 400; y++)
     {
         for(int x = 0; x < 400; x++)
@@ -189,8 +191,8 @@ void SetDestinations()
 
 void AddDestinationToQueue(int index)
 {
-    Waypoint w = {.x = (double)Globals::destinations[index][0], .y = (double)Globals::destinations[index][1]};
-    Globals::destinationQueue.push(w);
+    Destination d = {.x = (double)Globals::destinations[index][0], .y = (double)Globals::destinations[index][1], .index = index};
+    Globals::destinationQueue.push(d);
 }
 
 void AddAllToDestinationQueue()
@@ -315,9 +317,10 @@ int main(int _argc, char **_argv)
     Movement::wayController.buildController();
 
     // Apply settings for Movement class
-    Movement::allowPassiveSlowing = false;
+    Movement::allowPassiveSlowing = true;
     Movement::printKeyPresses = false;
     Movement::testMode = false;
+    Movement::enableAutomaticMovement = false;
 
     // Set random seed - TODO: Refactor
     srand(time(NULL));
@@ -325,34 +328,27 @@ int main(int _argc, char **_argv)
     // Loop
     while (true)
     {
+        // Insert slight delay between frames
         try
         {
-            // Insert slight delay between frames
-            try
-            {
-                gazebo::common::Time::MSleep(10);
-            }
-            catch(std::exception e)
-            {
-                break;
-            }
-            // If all marbles have been collected
-            if(marblesCollected == 20)
-            {
-                std::cout << "ya done son" << std::endl;
-            }
-
-            // Handle movement and quit if esc key is pressed
-            if(Movement::HandleMovement() == -1)
-            {
-                break;
-            }
+            gazebo::common::Time::MSleep(10);
         }
         catch(std::exception e)
         {
-            std::cout << e.what() << std::endl;
+            std::cout << "An error occurred:\n" << e.what() << std::endl;
         }
 
+        // If all marbles have been collected
+        if(marblesCollected == 20)
+        {
+            std::cout << "ya done son" << std::endl;
+        }
+
+        // Handle movement and quit if esc key is pressed
+        if(Movement::HandleMovement() == -1)
+        {
+            break;
+        }
     }
 
     // Make sure to shut everything down.

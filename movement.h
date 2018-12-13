@@ -40,6 +40,7 @@ public:
     static bool testMode;
     static bool allowPassiveSlowing;
     static bool printKeyPresses;
+    static bool enableAutomaticMovement;
 
     static void PublishPose(ignition::math::Pose3d pose);
     static void Move();

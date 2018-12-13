@@ -42,24 +42,24 @@ void Lidar::LidarCallback(ConstLaserScanStampedPtr &msg)
     cvMat = DisplayLines(cvMat, lines);
 
     // Add a little blur
-    GaussianBlur( im_gray, im_gray, cv::Size(9, 9), 2, 2 );
+    GaussianBlur(im_gray, im_gray, cv::Size(3, 3), 2, 2);
 
     // Use Hough transform to find circles in the image
     std::vector<cv::Vec3f> circles;
-    cv::HoughCircles(im_gray, circles, cv::HOUGH_GRADIENT, 1, im_gray.rows/8, 45, 11, 10.5, 10.6);
+    cv::HoughCircles(im_gray, circles, cv::HOUGH_GRADIENT, 1, im_gray.rows/8, 20, 11, 4, 10);
     //std::cout << "There are: " << circles.size() << " circles." << std::endl;
 
     ConvertCirclesToLidarMarbles(circles);
     cvMat = DisplayCircles(cvMat, circles);
 
     // Add robot location and time overlay
-    cv::circle(im, cv::Point(300, 300), 2, cv::Scalar(0, 0, 255));
-    cv::putText(im, std::to_string(sec) + ":" + std::to_string(nsec), cv::Point(10, 20), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(255, 0, 0));
+    //cv::circle(im, cv::Point(300, 300), 2, cv::Scalar(0, 0, 255));
+    //cv::putText(im, std::to_string(sec) + ":" + std::to_string(nsec), cv::Point(10, 20), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(255, 0, 0));
 
     // Display images
     mutex.lock();
     //cv::imshow("Lidar", im);
-    //cv::imshow("Gray", im_gray);
+    cv::imshow("Gray", im_gray);
     cv::imshow("CV", cvMat);
     mutex.unlock();
 }
@@ -204,7 +204,7 @@ std::vector<LidarMarble> Lidar::ConvertCirclesToLidarMarbles(std::vector<cv::Vec
 
 cv::Mat Lidar::DisplayCircles(cv::Mat im, std::vector<cv::Vec3f> circles)
 {
-    for( size_t i = 0; i < circles.size(); i++ )
+    for(size_t i = 0; i < circles.size(); i++)
     {
        cv::Point2f center(circles[i][0], circles[i][1]);
        float radius = circles[i][2];
@@ -219,7 +219,7 @@ cv::Mat Lidar::DisplayCircles(cv::Mat im, std::vector<cv::Vec3f> circles)
 
 cv::Mat Lidar::DisplayLines(cv::Mat im, std::vector<cv::Vec4i> lines)
 {
-    for( size_t i = 0; i < lines.size(); i++)
+    for(size_t i = 0; i < lines.size(); i++)
     {
         cv::Vec4i l = lines[i];
         cv::line( im, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,255,0), 1, CV_AA);

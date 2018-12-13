@@ -9,6 +9,7 @@
 #define KEY_L 108
 #define KEY_C 99
 #define KEY_V 118
+#define KEY_E 101
 
 Movement::Movement()
 {
@@ -54,61 +55,68 @@ int Movement::HandleMovement()
         return -1;
     }
 
-    // If a marble is close, move toward it
-    if(Camera::marbleClose)
+    if(enableAutomaticMovement)
     {
-        dir = 0.0;
-        speed = 1.0;
-    }
-
-    // If marbles are visible, and within a certain range, move toward it
-    else if(Lidar::marblesPresent && Lidar::nearestMarble.distance < 1000)
-    {
-        std::cout << "                  marble" << std::endl;
-        dir = marbleController.getControlOutput(
-                    Lidar::nearestMarble.angle,
-                    Lidar::nearestMarble.distance
-                    ).direction;
-
-        speed = marbleController.getControlOutput(
-                    Lidar::nearestMarble.angle,
-                    Lidar::nearestMarble.distance
-                    ).speed;
-    }
-
-    // If we're about to move into an obstacle, don't
-    else if(Lidar::nearestPoint.range < 0.2 && abs(Lidar::nearestPoint.angle) <= 1.56)
-    {
-        std::cout << "                  wall" << std::endl;
-        dir = wallController.getControlOutput(
-                    Lidar::nearestPoint.angle,
-                    Lidar::nearestPoint.range
-                    ).direction;
-
-        speed = wallController.getControlOutput(
-                    Lidar::nearestPoint.angle,
-                    Lidar::nearestPoint.range
-                    ).speed;
-    }
-
-    // If no marbles are visible, use A* to move to next waypoint
-    else
-    {
-        if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
+        // If a marble is close, move toward it
+        if(Camera::marbleClose)
         {
-            // Get the next waypoint from queue, and stop robot
-            Globals::NextWaypoint();
-            //Movement::Move(0.0, 0.0);
+            dir = 0.0;
+            speed = 1.0;
         }
-        if(Globals::waypoints.size() == 0)
-        {
-            Globals::NextDestination();
-            pathing::CreatePathToCurrentDestination();
-        }
-        std::cout << "                  path" << std::endl;
 
-        dir = wayController.getControlOutput().direction;
-        speed = wayController.getControlOutput().speed;
+        // If marbles are visible, and within a certain range, move toward it
+        else if(Lidar::marblesPresent && Lidar::nearestMarble.distance < 1000)
+        {
+            std::cout << "                  marble" << std::endl;
+            dir = marbleController.getControlOutput(
+                        Lidar::nearestMarble.angle,
+                        Lidar::nearestMarble.distance
+                        ).direction;
+
+            speed = marbleController.getControlOutput(
+                        Lidar::nearestMarble.angle,
+                        Lidar::nearestMarble.distance
+                        ).speed;
+        }
+
+        // If we're about to move into an obstacle, don't
+        else if(Lidar::nearestPoint.range < 0.2 && abs(Lidar::nearestPoint.angle) <= 1.56)
+        {
+            std::cout << "                  wall" << std::endl;
+            dir = wallController.getControlOutput(
+                        Lidar::nearestPoint.angle,
+                        Lidar::nearestPoint.range
+                        ).direction;
+
+            speed = wallController.getControlOutput(
+                        Lidar::nearestPoint.angle,
+                        Lidar::nearestPoint.range
+                        ).speed;
+        }
+
+        // If no marbles are visible, use A* to move to next waypoint
+        else
+        {
+            if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
+            {
+                // Get the next waypoint from queue, and stop robot
+                Globals::NextWaypoint();
+                //Movement::Move(0.0, 0.0);
+            }
+            if(Globals::waypoints.size() == 0)
+            {
+                if(Globals::currentWaypoint.isDestination)
+                {
+                    // Alex kald ting her
+                }
+                Globals::NextDestination();
+                pathing::CreatePathToCurrentDestination();
+            }
+            std::cout << "                  path" << std::endl;
+
+            dir = wayController.getControlOutput().direction;
+            speed = wayController.getControlOutput().speed;
+        }
     }
 
     Move();
@@ -117,9 +125,17 @@ int Movement::HandleMovement()
 
 int Movement::HandleKeyboardInput()
 {
-    Globals::mutex.lock();
-    int key = cv::waitKey(1);
-    Globals::mutex.unlock();
+    int key = 0;
+    try
+    {
+        Globals::mutex.lock();
+        key = cv::waitKey(1);
+        Globals::mutex.unlock();
+    }
+    catch(std::exception e)
+    {
+        std::cout << "An error occurred:\n" << e.what() << std::endl;
+    }
 
     // Break out if esc pressed
     if (key == KEY_ESC)
@@ -181,6 +197,10 @@ int Movement::HandleKeyboardInput()
     else if(key == KEY_V && !testMode)
     {
         qLearn.PrintRoute();
+    }
+    else if(key == KEY_E)
+    {
+        pathing::CreatePathToCurrentDestination();
     }
 
     // Slow down if set to do so

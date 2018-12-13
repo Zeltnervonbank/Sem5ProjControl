@@ -17,12 +17,13 @@ void Globals::ClearWaypointQueue()
 
 void Globals::ClearDestinationQueue()
 {
-    std::queue<Waypoint> empty;
+    std::queue<Destination> empty;
     std::swap(destinationQueue, empty);
 }
 
 void Globals::NextDestination()
 {
+    previousDestination = currentDestination;
     currentDestination = destinationQueue.front();
     destinationQueue.pop();
 }

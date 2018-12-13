@@ -84,8 +84,14 @@ void pathing::TracePath(cell cellDetails[][COL], Pair dest)
     for(size_t i = 0; i < waypoints.size(); i++)
     {
         // Always include first and last points
-        if(i == 0 || i == waypoints.size() - 1)
+        if(i == 0)
         {
+            Globals::waypoints.push(waypoints[i]);
+            continue;
+        }        
+        else if(i == waypoints.size() - 1)
+        {
+            waypoints[i].isDestination = true;
             Globals::waypoints.push(waypoints[i]);
             continue;
         }
@@ -125,7 +131,7 @@ void pathing::TracePath(cell cellDetails[][COL], Pair dest)
 
     std::cout << std::endl;
     cv::namedWindow("scaled", CV_WINDOW_AUTOSIZE);
-    cv::imshow("scaled", image);
+    //cv::imshow("scaled", image);
 }
 
 bool pathing::GetCollinearity(Waypoint a, Waypoint b, Waypoint c)

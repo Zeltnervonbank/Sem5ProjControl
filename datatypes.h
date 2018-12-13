@@ -43,6 +43,16 @@ struct Waypoint
 {
     double x;
     double y;
+
+    bool isDestination;
+};
+
+struct Destination
+{
+    double x;
+    double y;
+
+    int index;
 };
 
 struct ControlOutput

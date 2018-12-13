@@ -21,10 +21,11 @@ public:
     static RobotPosition lastPosition;
     static std::queue<Waypoint> waypoints;
     static Waypoint currentWaypoint;
-    static Waypoint currentDestination;
+    static Destination currentDestination;
+    static Destination previousDestination;
 
     static std::vector<std::vector<int>> destinations;
-    static std::queue<Waypoint> destinationQueue;
+    static std::queue<Destination> destinationQueue;
 
     // Methods
     static double GetDistanceToWaypoint();

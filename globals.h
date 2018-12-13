@@ -6,6 +6,9 @@
 #include <gazebo/transport/transport.hh>
 
 #include "datatypes.h"
+#include "vector"
+
+
 
 class Globals
 {
@@ -19,6 +22,8 @@ public:
     static Waypoint CurrentWaypoint;
 
     static double GetDistanceToWaypoint();
+    static std::vector<std::vector<int>> destinations;
+    static std::queue<Waypoint> destinationQ;
 };
 
 #endif // GAZEBOGLOBALS_H

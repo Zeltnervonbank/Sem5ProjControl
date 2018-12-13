@@ -37,7 +37,8 @@ boost::mutex Globals::mutex;
 RobotPosition Globals::LastPosition;
 std::queue<Waypoint> Globals::waypoints;
 Waypoint Globals::CurrentWaypoint = {.x = 0.0, .y = 0.0};
-
+std::vector<std::vector<int>> Globals::destinations;
+std::queue<Waypoint> Globals::destinationQ;
 // Lidar
 bool lidar::marblesPresent = false;
 bool Camera::marbleClose = false;
@@ -177,6 +178,26 @@ void LoadImageIntoAStarGrid(char* path)
     }
 }
 
+void AddDestinations()
+{
+    Globals::destinations = {{-36, 22}, {-25, 22}, {-26, 11}, {-36, 10}, {-13, 11}, {-13, 22}, {7, 21}, {7, 10}, {-36, -1}, {-36, -23}, {-20, -22}};
+
+}
+void AddToDestQueue()
+{
+    for (int i = 0; i < Globals::destinations.size(); i++)
+    {
+        Waypoint w = {.x = Globals::destinations[i][0], .y = Globals::destinations[i][1]};
+        Globals::destinationQ.push(w);
+    }
+}
+
+void ShuffleDestinations()
+{
+    std::random_shuffle (Globals::destinations.begin(), Globals::destinations.end());
+    AddToDestQueue();
+}
+
 void SeedWaypointsWithAStar()
 {
     // Source is the middle point
@@ -199,6 +220,7 @@ void SeedWaypointsWithAStar()
 
 int main(int _argc, char **_argv)
 {
+
     // Load gazebo
     gazebo::client::setup(_argc, _argv);
 
@@ -299,6 +321,7 @@ int main(int _argc, char **_argv)
         }
 
     }    
+    pathing::newAStarSearch({0,0},{20,30});
 
     // Make sure to shut everything down.
     gazebo::client::shutdown();

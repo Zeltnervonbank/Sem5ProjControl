@@ -76,7 +76,7 @@ void Qlearning::chooseAction(int initialState, int marbles, double time){
     }
 }
 
-int Qlearning::maximum(int state, bool returnIndexOnly, bool temp){
+int Qlearning::maximum(int state, bool returnIndexOnly){
 // if returnIndexOnly = true, a Q matrix index is returned.
 // if returnIndexOnly = false, a Q matrix element is returned.
 
@@ -85,25 +85,6 @@ int Qlearning::maximum(int state, bool returnIndexOnly, bool temp){
     bool done = false;
 
     winner = 0;
-if(!temp){
-    do {
-        foundNewWinner = false;
-        for(int i = 0; i <= (rSize - 1); i++){
-            if((i < winner) || (i > winner)){     //Avoid self-comparison.
-                if(R[state][i] > R[state][winner]){
-                    winner = i;
-                    foundNewWinner = true;
-                }
-            }
-        } // i
-
-        if(foundNewWinner == false){
-            done = true;
-        }
-
-    } while(done == false);
-}
-else{
     do {
         foundNewWinner = false;
         for(int i = 0; i <= (rSize - 1); i++){
@@ -120,7 +101,6 @@ else{
         }
 
     } while(done = false);
-}
     //std::cout << "R" << R[state][winner] << std::endl;
 
     if(returnIndexOnly == true){
@@ -165,7 +145,7 @@ void Qlearning::printroute(){ //Print the most optimal route, based on past expe
     for(int i=0; i<rSize;i++){
         //printRtemp();
         //std::cout << "hej" << std::endl;
-        newState = maximum(currentState, true,true);
+        newState = maximum(currentState, true);
         for(int i = 0; i <= (rSize - 1); i++){
                 Ropt[i][newState] = -1;
             }
@@ -197,6 +177,15 @@ void Qlearning::readFromFile(){
       f >> R[i][j];
     }
     }
+}
+
+void Qlearning::updateReward(int currS, int prevS, int point, double time){
+    //Get reward
+    //std::cout << "her1" << std::endl;
+    //std::cout << gamma * R[currentState][possibleAction] << std::endl;
+    int rewardV=point/time;
+    std::cout << "reward" << rewardV << std::endl;
+    R[currS][prevS]=((rewardV + (gamma * R[currS][prevS]))/2);
 }
 
 

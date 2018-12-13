@@ -7,7 +7,7 @@ Camera::Camera()
 
 }
 
-void Camera::cameraCallback(ConstImageStampedPtr &msg){
+void Camera::CameraCallback(ConstImageStampedPtr &msg){
 
     cv::Mat kombi;
     cv::Mat mask;
@@ -48,7 +48,7 @@ void Camera::cameraCallback(ConstImageStampedPtr &msg){
     //Camera::getMarbelCenter(kombi);
 }
 
-MarbleLocation Camera::getMarbelCenter(cv::Mat im)
+MarbleLocation Camera::GetMarbleCenter(cv::Mat im)
 {
     cv::Mat cirkler;
     cv::Mat cirkler_gray;

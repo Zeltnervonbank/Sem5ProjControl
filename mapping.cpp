@@ -14,7 +14,7 @@ void mapping::UpdateMap(RobotPosition position)
         return;
     }
     // Make copy static rays vector TODO: Add lock
-    std::vector<LidarRay> rays = lidar::lidarRays;
+    std::vector<LidarRay> rays = Lidar::lidarRays;
 
     // Return if no rays
     if(rays.size() == 0)

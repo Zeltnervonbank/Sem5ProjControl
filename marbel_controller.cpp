@@ -1,11 +1,11 @@
 #include "marbel_controller.h"
 
-marbel_Controller::marbel_Controller()
+MarbleController::MarbleController()
 {
 
 }
 
-void marbel_Controller::buildController()
+void MarbleController::buildController()
 {
 
     //Create fuzzy
@@ -101,7 +101,7 @@ void marbel_Controller::buildController()
 }
 
 
-ControlOutput marbel_Controller::getControlOutput(float cent, float dist)
+ControlOutput MarbleController::getControlOutput(float cent, float dist)
 {
 
     marbleDirection->setValue(cent);

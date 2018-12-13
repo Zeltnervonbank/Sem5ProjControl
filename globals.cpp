@@ -2,8 +2,8 @@
 
 double Globals::GetDistanceToWaypoint()
 {
-    double xDisplacement = abs(LastPosition.posX - CurrentWaypoint.x);
-    double yDisplacement = abs(LastPosition.posY - CurrentWaypoint.y);
+    double xDisplacement = abs(LastPosition.posX - currentWaypoint.x);
+    double yDisplacement = abs(LastPosition.posY - currentWaypoint.y);
 
     // Uses pythagorean theorem to determine absolute distance to waypoint
     return sqrt(pow(xDisplacement, 2) + pow(yDisplacement, 2));
@@ -19,4 +19,16 @@ void Globals::ClearDestinationQueue()
 {
     std::queue<Waypoint> empty;
     std::swap(destinationQueue, empty);
+}
+
+void Globals::NextDestination()
+{
+    currentDestination = destinationQueue.front();
+    destinationQueue.pop();
+}
+
+void Globals::NextWaypoint()
+{
+    currentWaypoint = waypoints.front();
+    waypoints.pop();
 }

@@ -757,7 +757,7 @@ void pathing::aStarmulti(std::vector<int> src, std::vector<std::vector<int>> des
 void pathing::CreatePathToCurrentDestination()
 {
     // Convert current destination and current position to pair form
-    Pair destination = ConvertCoordsToPathingCoord(0, 0);
+    Pair destination = ConvertCoordsToPathingCoord(Globals::currentDestination.x, Globals::currentDestination.y);
     Pair currentPosition = ConvertCoordsToPathingCoord(Globals::LastPosition.posX, Globals::LastPosition.posY);
 
     // Clear current waypoints
@@ -767,9 +767,7 @@ void pathing::CreatePathToCurrentDestination()
     newAStarSearch(currentPosition, destination);
 
     // Set a new next waypoint
-    Globals::CurrentWaypoint = Globals::waypoints.front();
-    Globals::waypoints.pop();
-
+    Globals::NextWaypoint();
 }
 
 Pair pathing::ConvertCoordsToPathingCoord(double x, double y)

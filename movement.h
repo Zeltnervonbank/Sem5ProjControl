@@ -18,6 +18,7 @@
 #include "marbel_controller.h"
 #include "wall_controller.h"
 #include "waypointcontroller.h"
+#include "pathing.h"
 
 class Movement
 {

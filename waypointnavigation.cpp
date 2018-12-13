@@ -11,7 +11,7 @@ void WaypointNavigation::NavigateToNextWaypoint()
     if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
     {
         // Get the next waypoint from queue, and stop robot
-        Globals::CurrentWaypoint = Globals::waypoints.front();
+        Globals::currentWaypoint = Globals::waypoints.front();
         Globals::waypoints.pop();
         Movement::Move(0.0, 0.0);
     }
@@ -43,8 +43,8 @@ void WaypointNavigation::MoveTowardWaypoint()
     double yawY = sin(yaw);
 
     // Get displacement of waypoint in comparison to robot position
-    double xDisplacement = Globals::CurrentWaypoint.x - position.posX;
-    double yDisplacement = position.posY - Globals::CurrentWaypoint.y;
+    double xDisplacement = Globals::currentWaypoint.x - position.posX;
+    double yDisplacement = position.posY - Globals::currentWaypoint.y;
 
     // Get dot product of vectors
     double dot = yawX * xDisplacement + yawY * yDisplacement;
@@ -61,7 +61,7 @@ void WaypointNavigation::MoveTowardWaypoint()
 
     std::cout << "\033[2J\033[1;1H";
     // Print some data
-    std::cout << "Current waypoint: " << Globals::CurrentWaypoint.x << ", " << Globals::CurrentWaypoint.y << std::endl;
+    std::cout << "Current waypoint: " << Globals::currentWaypoint.x << ", " << Globals::currentWaypoint.y << std::endl;
     std::cout << "Current position: " << position.posX << ", " << position.posY << std::endl;
     std::cout << "Rotation offset: " << difference << " Distance: " << Globals::GetDistanceToWaypoint() << " Cross: " << cross << std::endl;
     std::cout << "Remaining waypoints: " << Globals::waypoints.size() << std::endl;

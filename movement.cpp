@@ -92,23 +92,24 @@ int Movement::HandleMovement()
     }
 
     // If no marbles are visible, use A* to move to next waypoint
-    else{
-    if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
+    else
     {
-        // Get the next waypoint from queue, and stop robot
-        Globals::CurrentWaypoint = Globals::waypoints.front();
-        Globals::waypoints.pop();
-        //Movement::Move(0.0, 0.0);
-    }
-    std::cout << "                  path" << std::endl;
+        if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
+        {
+            // Get the next waypoint from queue, and stop robot
+            Globals::NextWaypoint();
+            //Movement::Move(0.0, 0.0);
+        }
+        if(Globals::waypoints.size() == 0)
+        {
+            Globals::NextDestination();
+            pathing::CreatePathToCurrentDestination();
+        }
+        std::cout << "                  path" << std::endl;
+
         dir = wayController.getControlOutput().direction;
         speed = wayController.getControlOutput().speed;
     }
-
-        // TODO: Implement A* pathfollowing here
-        //dir = 0.0;
-        //speed = 0.7;
-
 
     Move();
 }

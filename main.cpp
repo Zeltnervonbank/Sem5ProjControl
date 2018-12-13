@@ -36,9 +36,11 @@ gazebo::transport::PublisherPtr Globals::movementPublisher;
 boost::mutex Globals::mutex;
 RobotPosition Globals::LastPosition;
 std::queue<Waypoint> Globals::waypoints;
-Waypoint Globals::CurrentWaypoint = {.x = 0.0, .y = 0.0};
+Waypoint Globals::currentWaypoint = {.x = 0.0, .y = 0.0};
+Waypoint Globals::currentDestination;
 std::vector<std::vector<int>> Globals::destinations;
 std::queue<Waypoint> Globals::destinationQueue;
+
 // Lidar
 bool lidar::marblesPresent = false;
 bool Camera::marbleClose = false;
@@ -101,6 +103,8 @@ void contactCallback(ConstContactSensorPtr &_msg)
             marblesCollected++;
             std::cout << "Marble point:                          " << Movement::marblePoint << std::endl;
             std::cout << "Marbles collected:                          " << marblesCollected << std::endl;
+
+            pathing::CreatePathToCurrentDestination();
         }
 
         tempC = startC;
@@ -181,7 +185,6 @@ void LoadImageIntoAStarGrid(char* path)
 void SetDestinations()
 {
     Globals::destinations = {{-36, 22}, {-25, 22}, {-26, 11}, {-36, 10}, {-13, 11}, {-13, 22}, {7, 21}, {7, 10}, {-36, -1}, {-36, -23}, {-20, -22}};
-
 }
 
 void AddDestinationToQueue(int index)
@@ -298,7 +301,10 @@ int main(int _argc, char **_argv)
 
     // Prepare A* grid
     LoadImageIntoAStarGrid("../Sem5ProjControl/floor_plan.png");
-    SeedWaypointsWithAStar();
+    Globals::NextDestination();
+    pathing::CreatePathToCurrentDestination();
+
+    //SeedWaypointsWithAStar();
     /*Waypoint p = {.x = -10.0, .y = 0.0};
     Globals::CurrentWaypoint = p;*/
 

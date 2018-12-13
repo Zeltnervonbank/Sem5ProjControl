@@ -16,17 +16,24 @@ public:
     static gazebo::transport::NodePtr node;
     static gazebo::transport::PublisherPtr movementPublisher;
     static boost::mutex mutex;
-    static RobotPosition LastPosition;
 
+    // Movement related
+    static RobotPosition lastPosition;
     static std::queue<Waypoint> waypoints;
-    static Waypoint CurrentWaypoint;
+    static Waypoint currentWaypoint;
+    static Waypoint currentDestination;
 
     static std::vector<std::vector<int>> destinations;
     static std::queue<Waypoint> destinationQueue;
 
+    // Methods
     static double GetDistanceToWaypoint();
+
     static void ClearWaypointQueue();
     static void ClearDestinationQueue();
+
+    static void NextDestination();
+    static void NextWaypoint();
 };
 
 #endif // GAZEBOGLOBALS_H

@@ -110,7 +110,7 @@ ControlOutput waypointController::getControlOutput()
 {
     /// Determine direction to next waypoint
     // Get the latest position
-    RobotPosition position = Globals::LastPosition;
+    RobotPosition position = Globals::lastPosition;
 
     // Calculate the yaw of the robot
     double yaw = fmod(2.0 * atan2(position.rotW, position.rotZ) + 3.0 * M_PI, 2.0 * M_PI);
@@ -120,8 +120,8 @@ ControlOutput waypointController::getControlOutput()
     double yawY = sin(yaw);
 
     // Get displacement of waypoint in comparison to robot position
-    double xDisplacement = Globals::CurrentWaypoint.x - position.posX;
-    double yDisplacement = position.posY - Globals::CurrentWaypoint.y;
+    double xDisplacement = Globals::currentWaypoint.x - position.posX;
+    double yDisplacement = position.posY - Globals::currentWaypoint.y;
 
     // Get dot product of vectors
     double dot = yawX * xDisplacement + yawY * yDisplacement;
@@ -155,7 +155,7 @@ ControlOutput waypointController::getControlOutput()
 
     std::cout << "output:" << out.direction << std::endl;
     std::cout << "speed:" << out.speed << std::endl;
-    std::cout << "point: " << Globals::CurrentWaypoint.x << " " << Globals::CurrentWaypoint.y << std::endl;
+    std::cout << "point: " << Globals::currentWaypoint.x << " " << Globals::currentWaypoint.y << std::endl;
 
 
     return out;

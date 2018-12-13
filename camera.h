@@ -23,8 +23,9 @@ class Camera
 public:
     Camera();
     static bool marbleClose;
-    static MarbleLocation getMarbelCenter(cv::Mat im);
-    static void cameraCallback(ConstImageStampedPtr &msg);
+
+    static MarbleLocation GetMarbleCenter(cv::Mat im);
+    static void CameraCallback(ConstImageStampedPtr &msg);
 };
 
 #endif // CAMERA_H

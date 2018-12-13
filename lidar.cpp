@@ -5,12 +5,12 @@
 
 static boost::mutex mutex;
 
-lidar::lidar()
+Lidar::Lidar()
 {
 
 }
 
-void lidar::lidarCallback(ConstLaserScanStampedPtr &msg)
+void Lidar::LidarCallback(ConstLaserScanStampedPtr &msg)
 {
     // Get timing
     int sec = msg->time().sec();
@@ -64,7 +64,7 @@ void lidar::lidarCallback(ConstLaserScanStampedPtr &msg)
     mutex.unlock();
 }
 
-std::vector<LidarRay> lidar::GetLidarPoints(ConstLaserScanStampedPtr &msg)
+std::vector<LidarRay> Lidar::GetLidarPoints(ConstLaserScanStampedPtr &msg)
 {
     // Get some basic information
     float angleMin = float(msg->scan().angle_min());
@@ -120,7 +120,7 @@ std::vector<LidarRay> lidar::GetLidarPoints(ConstLaserScanStampedPtr &msg)
     return detectedPoints;
 }
 
-cv::Mat lidar::DisplayLidarPoints(cv::Mat im, std::vector<LidarRay> points, bool displayMaxRange)
+cv::Mat Lidar::DisplayLidarPoints(cv::Mat im, std::vector<LidarRay> points, bool displayMaxRange)
 {
     for(size_t i = 0; i < points.size() - 1; i++)
     {
@@ -150,7 +150,7 @@ cv::Mat lidar::DisplayLidarPoints(cv::Mat im, std::vector<LidarRay> points, bool
 }
 
 /// Iffy method that I might remove at some point
-cv::Mat lidar::DisplayScanSegments(cv::Mat im, std::vector<lidar::ScanSegment> segments)
+cv::Mat Lidar::DisplayScanSegments(cv::Mat im, std::vector<Lidar::ScanSegment> segments)
 {
     for( size_t i = 0; i < segments.size(); i++)
     {
@@ -171,13 +171,13 @@ cv::Mat lidar::DisplayScanSegments(cv::Mat im, std::vector<lidar::ScanSegment> s
     return im;
 }
 
-std::vector<LidarMarble> lidar::ConvertCirclesToLidarMarbles(std::vector<cv::Vec3f> circles)
+std::vector<LidarMarble> Lidar::ConvertCirclesToLidarMarbles(std::vector<cv::Vec3f> circles)
 {
     // Declare return vector
     std::vector<LidarMarble> marbles;
 
     // Determine whether marbles have been detected
-    lidar::marblesPresent = circles.size() != 0;
+    Lidar::marblesPresent = circles.size() != 0;
     if(circles.size() == 0)
     {
         return marbles;
@@ -224,7 +224,7 @@ std::vector<LidarMarble> lidar::ConvertCirclesToLidarMarbles(std::vector<cv::Vec
     return marbles;
 }
 
-cv::Mat lidar::DisplayCircles(cv::Mat im, std::vector<cv::Vec3f> circles)
+cv::Mat Lidar::DisplayCircles(cv::Mat im, std::vector<cv::Vec3f> circles)
 {
     for( size_t i = 0; i < circles.size(); i++ )
     {
@@ -239,7 +239,7 @@ cv::Mat lidar::DisplayCircles(cv::Mat im, std::vector<cv::Vec3f> circles)
     return im;
 }
 
-cv::Mat lidar::DisplayLines(cv::Mat im, std::vector<cv::Vec4i> lines)
+cv::Mat Lidar::DisplayLines(cv::Mat im, std::vector<cv::Vec4i> lines)
 {
     for( size_t i = 0; i < lines.size(); i++)
     {
@@ -250,7 +250,7 @@ cv::Mat lidar::DisplayLines(cv::Mat im, std::vector<cv::Vec4i> lines)
     return im;
 }
 
-std::vector<lidar::ScanSegment> lidar::GetSegmentsOfScan(std::vector<LidarRay> points)
+std::vector<Lidar::ScanSegment> Lidar::GetSegmentsOfScan(std::vector<LidarRay> points)
 {
     std::vector<ScanSegment> segments;
     ScanSegment currentSegment;
@@ -271,7 +271,7 @@ std::vector<lidar::ScanSegment> lidar::GetSegmentsOfScan(std::vector<LidarRay> p
         cv::Point2f currentPoints [3] = {points[i].endPoint, points[i+1].endPoint, points[i+2].endPoint};
 
         // Determine collinearity of points
-        float collinearity = lidar::GetCollinearity(currentPoints);
+        float collinearity = Lidar::GetCollinearity(currentPoints);
 
         // Add current point to vector
         currentSegment.points.push_back(points[i]);
@@ -309,7 +309,7 @@ std::vector<lidar::ScanSegment> lidar::GetSegmentsOfScan(std::vector<LidarRay> p
     return segments;
 }
 
-float lidar::GetCollinearity(cv::Point2f points[3])
+float Lidar::GetCollinearity(cv::Point2f points[3])
 {
     cv::Point2f A = points[0];
     cv::Point2f B = points[1];

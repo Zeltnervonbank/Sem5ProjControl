@@ -104,7 +104,7 @@ int Qlearning::Maximum(int state, bool returnIndexOnly)
     do
     {
         foundNewWinner = false;
-        for(int i = 0; i <= (rSize - 1); i++)
+        for(int i = 1; i <= (rSize - 1); i++)
         {
             if((i < winner) || (i > winner))
             {     //Avoid self-comparison.
@@ -173,7 +173,9 @@ void Qlearning::PrintRoute()
         //printRtemp();
         //std::cout << "hej" << std::endl;
         newState = Maximum(currentState, true);
+        std::cout << "hej" << std::endl;
         for(int i = 0; i <= (rSize - 1); i++){
+            std::cout << "her" << std::endl;
                 Ropt[i][newState] = -1;
         }
         currentState = newState;
@@ -216,7 +218,8 @@ void Qlearning::UpdateReward(int currS, int prevS, int point, double time)
     //std::cout << gamma * R[currentState][possibleAction] << std::endl;
     int rewardV=point/time;
     std::cout << "reward" << rewardV << std::endl;
-    R[currS][prevS]=((rewardV + (gamma * R[currS][prevS]))/2);
+    R[prevS][currS]=((rewardV + (gamma * R[prevS][currS]))/2);
+    Qlearning::WriteToFile();
 }
 
 

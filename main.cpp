@@ -300,6 +300,7 @@ int main(int _argc, char **_argv)
     // Initialise Q learning system
     Movement::qLearn.Initialize();
     Movement::qLearn.ChooseAction(0, 0, 1);
+    Movement::qLearn.PrintRoute();
 
 
     // Prepare A* grid
@@ -320,8 +321,8 @@ int main(int _argc, char **_argv)
     // Apply settings for Movement class
     Movement::allowPassiveSlowing = true;
     Movement::printKeyPresses = false;
-    Movement::testMode = true;
-    Movement::enableAutomaticMovement = false;
+    Movement::testMode = false;
+    Movement::enableAutomaticMovement = true;
 
     // Set random seed - TODO: Refactor
     srand(time(NULL));
@@ -330,15 +331,15 @@ int main(int _argc, char **_argv)
     while (true)
     {
         // Insert slight delay between frames
-        try
-        {
+        //try
+        //{
             gazebo::common::Time::MSleep(10);
-        }
-        catch(std::exception e)
-        {
+        //}
+        //catch(std::exception e)
+/*        {
             std::cout << "An error occurred:\n" << e.what() << std::endl;
         }
-
+*/
         // If all marbles have been collected
         if(marblesCollected == 20)
         {

@@ -66,8 +66,8 @@ void WaypointNavigation::MoveTowardWaypoint()
     std::cout << "Rotation offset: " << difference << " Distance: " << Globals::GetDistanceToWaypoint() << " Cross: " << cross << std::endl;
     std::cout << "Remaining waypoints: " << Globals::waypoints.size() << std::endl;
 
-    try
-    {
+    //try
+    //{
     /// Output movement
     // Set rotation depending on sign of angle to waypoint
     double rotation = (double) difference;
@@ -77,10 +77,10 @@ void WaypointNavigation::MoveTowardWaypoint()
 
     // Send movement
     //Movement::Move(speed, rotation);
-    }
-    catch(std::exception e)
-    {
-        std::cout << e.what() << std::endl;
+    //}
+    //catch(std::exception e)
+    //{
+    //    std::cout << e.what() << std::endl;
         Movement::Move(0.0, 0.0);
-    }
+    //}
 }

@@ -54,7 +54,7 @@ int Movement::HandleMovement()
     {
         return -1;
     }
-
+/*
     if(enableAutomaticMovement)
     {
         // If a marble is close, move toward it
@@ -97,7 +97,7 @@ int Movement::HandleMovement()
         // If no marbles are visible, use A* to move to next waypoint
         else
         {
-            if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
+*/            if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
             {
                 // Get the next waypoint from queue, and stop robot
                 Globals::NextWaypoint();
@@ -112,9 +112,11 @@ int Movement::HandleMovement()
                     qLearn.UpdateReward(
                                 Globals::currentDestination.index,
                                 Globals::previousDestination.index,
-                                marblePoint
-                                ,diff.count());
+                                1000,
+                                diff.count());
+                    std::cout << Globals::currentDestination.index << Globals::previousDestination.index << std::endl;
                     qLearn.PrintR();
+
                 }
                 Globals::NextDestination();
                 pathing::CreatePathToCurrentDestination();
@@ -123,10 +125,10 @@ int Movement::HandleMovement()
 
             dir = wayController.getControlOutput().direction;
             speed = wayController.getControlOutput().speed;
-        }
+//        }
 
         std::cout << "dirr" << dir << "speed:" << speed << std::endl;
-    }
+    //}
 
     Move();
 }
@@ -135,16 +137,16 @@ int Movement::HandleMovement()
 int Movement::HandleKeyboardInput()
 {
     int key = 0;
-    try
-    {
+    //try
+    //{
         Globals::mutex.lock();
         key = cv::waitKey(1);
         Globals::mutex.unlock();
-    }
-    catch(std::exception e)
-    {
-        std::cout << "An error occurred:\n" << e.what() << std::endl;
-    }
+    //}
+    //catch(std::exception e)
+    //{
+    //    std::cout << "An error occurred:\n" << e.what() << std::endl;
+    //}
 
     // Break out if esc pressed
     if (key == KEY_ESC)

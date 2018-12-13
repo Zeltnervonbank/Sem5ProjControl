@@ -16,17 +16,18 @@ public:
 
     Qlearning();
     ~Qlearning();
-    void Run();
-    void ChooseAction(int initialState, int marbles, double time);
-    int GetRandomAction();
-    void Initialize();
-    int Maximum(int state, bool returnIndexOnly, bool temp);
-    int Reward(int marbles, double time);
-    void GetReward(int action);
-    void PrintR();
-    void PrintRoute();
-    void WriteToFile();
-    void ReadFromFile();
+    void run();
+    void chooseAction(int initialState, int marbles, double time);
+    int getRandomAction();
+    void initialize();
+    int maximum(int state, bool returnIndexOnly);
+    int reward(int action, int marbles, double time);
+    void getReward(int action);
+    void printR();
+    void printroute();
+    void writeToFile();
+    void readFromFile();
+    void updateReward(int currS, int prevS, int point, double time);
 
 
 private:

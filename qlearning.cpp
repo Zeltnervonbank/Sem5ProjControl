@@ -91,61 +91,23 @@ void Qlearning::ChooseAction(int initialState, int marbles, double time)
     }
 }
 
-int Qlearning::Maximum(int state, bool returnIndexOnly, bool temp)
-{
-    // if returnIndexOnly = true, a Q matrix index is returned.
-    // if returnIndexOnly = false, a Q matrix element is returned.
+int Qlearning::maximum(int state, bool returnIndexOnly){
+// if returnIndexOnly = true, a Q matrix index is returned.
+// if returnIndexOnly = false, a Q matrix element is returned.
 
     int winner;
     bool foundNewWinner;
     bool done = false;
 
     winner = 0;
-    if(!temp)
-    {
-        do
-        {
-            foundNewWinner = false;
-            for(int i = 0; i <= (rSize - 1); i++)
-            {
-                if((i < winner) || (i > winner))
-                {     //Avoid self-comparison.
-                    if(R[state][i] > R[state][winner])
-                    {
-                        winner = i;
-                        foundNewWinner = true;
-                    }
+    do {
+        foundNewWinner = false;
+        for(int i = 0; i <= (rSize - 1); i++){
+            if((i < winner) || (i > winner)){     //Avoid self-comparison.
+                if(Ropt[state][i] > Ropt[state][winner]){
+                    winner = i;
+                    foundNewWinner = true;
                 }
-            } // i
-
-            if(!foundNewWinner)
-            {
-                done = true;
-            }
-
-        }
-        while(!done);
-    }
-    else
-    {
-        do
-        {
-            foundNewWinner = false;
-            for(int i = 0; i <= (rSize - 1); i++)
-            {
-                if((i < winner) || (i > winner))
-                {     //Avoid self-comparison.
-                    if(Ropt[state][i] > Ropt[state][winner])
-                    {
-                        winner = i;
-                        foundNewWinner = true;
-                    }
-                }
-            } // i
-
-            if(!foundNewWinner)
-            {
-                done = true;
             }
 
         }
@@ -153,8 +115,10 @@ int Qlearning::Maximum(int state, bool returnIndexOnly, bool temp)
     }
         //std::cout << "R" << R[state][winner] << std::endl;
 
-    if(returnIndexOnly)
-    {
+    } while(done = false);
+    //std::cout << "R" << R[state][winner] << std::endl;
+
+    if(returnIndexOnly == true){
         return winner;
     }
     else
@@ -206,9 +170,8 @@ void Qlearning::PrintRoute()
     {
         //printRtemp();
         //std::cout << "hej" << std::endl;
-        newState = Maximum(currentState, true,true);
-        for(int i = 0; i <= (rSize - 1); i++)
-        {
+        newState = maximum(currentState, true);
+        for(int i = 0; i <= (rSize - 1); i++){
                 Ropt[i][newState] = -1;
         }
         currentState = newState;
@@ -243,3 +206,39 @@ void Qlearning::ReadFromFile()
         }
     }
 }
+
+void Qlearning::updateReward(int currS, int prevS, int point, double time){
+    //Get reward
+    //std::cout << "her1" << std::endl;
+    //std::cout << gamma * R[currentState][possibleAction] << std::endl;
+    int rewardV=point/time;
+    std::cout << "reward" << rewardV << std::endl;
+    R[currS][prevS]=((rewardV + (gamma * R[currS][prevS]))/2);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

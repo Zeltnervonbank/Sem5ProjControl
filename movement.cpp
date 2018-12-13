@@ -163,7 +163,7 @@ int Movement::HandleKeyboardInput()
     {
         if(visited >= 3)
         {
-            qLearn.un();
+            qLearn.Run();
             runs++;
             visited = 0;
             std::cout << "runs: " << runs << std::endl;

@@ -21,7 +21,7 @@ public:
     int GetRandomAction();
     void Initialize();
     int Maximum(int state, bool returnIndexOnly, bool temp);
-    int Reward(int action, int marbles, double time);
+    int Reward(int marbles, double time);
     void GetReward(int action);
     void PrintR();
     void PrintRoute();

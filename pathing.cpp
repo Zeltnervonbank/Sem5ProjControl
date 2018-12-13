@@ -757,7 +757,7 @@ void pathing::AStarMultiSearch(std::vector<int> src, std::vector<std::vector<int
 void pathing::CreatePathToCurrentDestination()
 {
     // Convert current destination and current position to pair form
-    Pair destination = ConvertCoordsToPathingCoord(Globals::currentDestination.x, Globals::currentDestination.y);
+    Pair destination = ConvertCoordsToPathingCoord(Globals::currentDestination.x, Globals::currentDestination   .y);
     Pair currentPosition = ConvertCoordsToPathingCoord(Globals::lastPosition.posX, Globals::lastPosition.posY);
 
     // Clear current waypoints

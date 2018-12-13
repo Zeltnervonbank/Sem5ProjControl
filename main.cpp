@@ -61,7 +61,7 @@ cv::Mat pathing::image = cv::imread("../Sem5ProjControl/floor_plan.png", CV_LOAD
 
 // Movement
 Qlearning Movement::qLearn;
-MarbleController Movement::marbleController;
+marbel_Controller Movement::marbleController;
 wall_Controller Movement::wallController;
 waypointController Movement::wayController;
 
@@ -156,7 +156,7 @@ std::vector<int> convertToPixelCoords(std::vector<int> pair)
     return retPair;
 }
 
-void LoadImageIntoAStarGrid(char* path)
+void LoadImageIntoAStarGrid(const char* path)
 {
     cv::Mat image = cv::imread(path, CV_8U);
 
@@ -189,13 +189,13 @@ void SetDestinations()
 
 void AddDestinationToQueue(int index)
 {
-    Waypoint w = {.x = Globals::destinations[index][0], .y = Globals::destinations[index][1]};
+    Waypoint w = {.x = (double)Globals::destinations[index][0], .y = (double)Globals::destinations[index][1]};
     Globals::destinationQueue.push(w);
 }
 
 void AddAllToDestinationQueue()
 {
-    for (int i = 0; i < Globals::destinations.size(); i++)
+    for (size_t i = 0; i < Globals::destinations.size(); i++)
     {
         AddDestinationToQueue(i);
     }
@@ -328,8 +328,14 @@ int main(int _argc, char **_argv)
         try
         {
             // Insert slight delay between frames
-            gazebo::common::Time::MSleep(10);
-
+            try
+            {
+                gazebo::common::Time::MSleep(10);
+            }
+            catch(std::exception e)
+            {
+                break;
+            }
             // If all marbles have been collected
             if(marblesCollected == 20)
             {
@@ -341,16 +347,13 @@ int main(int _argc, char **_argv)
             {
                 break;
             }
-
-            //WaypointNavigation::NavigateToNextWaypoint();
         }
         catch(std::exception e)
         {
             std::cout << e.what() << std::endl;
         }
 
-    }    
-    pathing::AStarSearch({0,0},{20,30});
+    }
 
     // Make sure to shut everything down.
     gazebo::client::shutdown();

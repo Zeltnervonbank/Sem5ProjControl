@@ -115,6 +115,9 @@ int Qlearning::Maximum(int state, bool returnIndexOnly)
                 }
             }
         }
+        if(!foundNewWinner){
+            done = true;
+        }
     }
     while(!done);
 
@@ -173,9 +176,7 @@ void Qlearning::PrintRoute()
         //printRtemp();
         //std::cout << "hej" << std::endl;
         newState = Maximum(currentState, true);
-        std::cout << "hej" << std::endl;
         for(int i = 0; i <= (rSize - 1); i++){
-            std::cout << "her" << std::endl;
                 Ropt[i][newState] = -1;
         }
         currentState = newState;

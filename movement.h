@@ -47,6 +47,7 @@ public:
     static void Move(double speed, double rotation);
     static int HandleMovement();
     static int HandleKeyboardInput();
+    static void AddDestinationToQueue(int index);
 };
 
 #endif // MOVEMENT_H

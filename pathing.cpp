@@ -131,7 +131,7 @@ void pathing::TracePath(cell cellDetails[][COL], Pair dest)
 
     std::cout << std::endl;
     cv::namedWindow("scaled", CV_WINDOW_AUTOSIZE);
-    //cv::imshow("scaled", image);
+    cv::imshow("scaled", image);
 }
 
 bool pathing::GetCollinearity(Waypoint a, Waypoint b, Waypoint c)

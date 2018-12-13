@@ -80,7 +80,8 @@ int Movement::HandleMovement()
                         ).speed;
         }
         // If we're about to move into an obstacle, don't
-        else if(Lidar::nearestPoint.range < 0.5 && abs(Lidar::nearestPoint.angle) <= 1.56)
+         else
+*/       if(Lidar::nearestPoint.range < 0.1 && abs(Lidar::nearestPoint.angle) <= 1.56)
         {
             std::cout << "                  wall" << std::endl;
             dir = wallController.getControlOutput(
@@ -97,7 +98,7 @@ int Movement::HandleMovement()
         // If no marbles are visible, use A* to move to next waypoint
         else
         {
-*/            if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
+           if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
             {
                 // Get the next waypoint from queue, and stop robot
                 Globals::NextWaypoint();
@@ -112,12 +113,14 @@ int Movement::HandleMovement()
                     qLearn.UpdateReward(
                                 Globals::currentDestination.index,
                                 Globals::previousDestination.index,
-                                1000,
+                                marblePoint,
                                 diff.count());
                     std::cout << Globals::currentDestination.index << Globals::previousDestination.index << std::endl;
                     qLearn.PrintR();
 
                 }
+                AddDestinationToQueue(qLearn.ChooseAction(Globals::currentDestination.index));
+                std::cout << "et nyt sted" << std::endl;
                 Globals::NextDestination();
                 pathing::CreatePathToCurrentDestination();
             }
@@ -125,7 +128,7 @@ int Movement::HandleMovement()
 
             dir = wayController.getControlOutput().direction;
             speed = wayController.getControlOutput().speed;
-//        }
+        }
 
         std::cout << "dirr" << dir << "speed:" << speed << std::endl;
     //}
@@ -199,7 +202,7 @@ int Movement::HandleKeyboardInput()
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> diff = end - start;
 
-        qLearn.ChooseAction(qLearn.currentState, marblePoint, diff.count());
+        qLearn.ChooseAction(Globals::currentDestination.index);
         qLearn.PrintR();
 
         marblePoint = 0;
@@ -222,4 +225,10 @@ int Movement::HandleKeyboardInput()
     }    
 
     return 0;
+}
+
+void Movement::AddDestinationToQueue(int index)
+{
+    Destination d = {.x = (double)Globals::destinations[index][0], .y = (double)Globals::destinations[index][1], .index = index};
+    Globals::destinationQueue.push(d);
 }

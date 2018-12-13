@@ -64,34 +64,34 @@ int Movement::HandleMovement()
             speed = 1.0;
         }
 
-    // If marbles are visible, and within a certain range, move toward it
-    else if(lidar::marblesPresent && lidar::nearestMarble.distance < 1000 && lidar::nearestMarble.angle<4)
-    {
-        std::cout << "                  marble" << std::endl;
+        // If marbles are visible, and within a certain range, move toward it
+        else if(Lidar::marblesPresent && Lidar::nearestMarble.distance < 1000 && Lidar::nearestMarble.angle<4)
+        {
+            std::cout << "                  marble" << std::endl;
 
-        dir = marbleController.getControlOutput(
-                    lidar::nearestMarble.angle,
-                    lidar::nearestMarble.distance
-                    ).direction;
+            dir = marbleController.getControlOutput(
+                        Lidar::nearestMarble.angle,
+                        Lidar::nearestMarble.distance
+                        ).direction;
 
-        speed = marbleController.getControlOutput(
-                    lidar::nearestMarble.angle,
-                    lidar::nearestMarble.distance
-                    ).speed;
-    }
-    // If we're about to move into an obstacle, don't
-    else if(lidar::nearestPoint.range < 0.5 && abs(lidar::nearestPoint.angle) <= 1.56)
-    {
-        std::cout << "                  wall" << std::endl;
-        dir = wallController.getControlOutput(
-                    lidar::nearestPoint.angle,
-                    lidar::nearestPoint.range
-                    ).direction;
-
-            speed = wallController.getControlOutput(
+            speed = marbleController.getControlOutput(
+                        Lidar::nearestMarble.angle,
+                        Lidar::nearestMarble.distance
+                        ).speed;
+        }
+        // If we're about to move into an obstacle, don't
+        else if(Lidar::nearestPoint.range < 0.5 && abs(Lidar::nearestPoint.angle) <= 1.56)
+        {
+            std::cout << "                  wall" << std::endl;
+            dir = wallController.getControlOutput(
                         Lidar::nearestPoint.angle,
                         Lidar::nearestPoint.range
-                        ).speed;
+                        ).direction;
+
+                speed = wallController.getControlOutput(
+                            Lidar::nearestPoint.angle,
+                            Lidar::nearestPoint.range
+                            ).speed;
         }
 
         // If no marbles are visible, use A* to move to next waypoint
@@ -117,13 +117,10 @@ int Movement::HandleMovement()
             dir = wayController.getControlOutput().direction;
             speed = wayController.getControlOutput().speed;
         }
-    }
-    std::cout << "                  path" << std::endl;
-        dir = wayController.getControlOutput().direction;
-        speed = wayController.getControlOutput().speed;
+
+        std::cout << "dirr" << dir << "speed:" << speed << std::endl;
     }
 
-    std::cout << "dirr" << dir << "speed:" << speed << std::endl;
     Move();
 }
 

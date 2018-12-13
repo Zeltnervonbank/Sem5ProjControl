@@ -27,7 +27,7 @@ public:
 
     static Qlearning qLearn;
     // Make marble controller (Marble collection)- TODO: Rename
-    static marbel_Controller marbleController;
+    static MarbleController marbleController;
     static wall_Controller wallController;
     static waypointController wayController;
 

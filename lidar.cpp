@@ -149,28 +149,6 @@ cv::Mat Lidar::DisplayLidarPoints(cv::Mat im, std::vector<LidarRay> points, bool
     return im;
 }
 
-/// Iffy method that I might remove at some point
-cv::Mat Lidar::DisplayScanSegments(cv::Mat im, std::vector<Lidar::ScanSegment> segments)
-{
-    for( size_t i = 0; i < segments.size(); i++)
-    {
-        ScanSegment segment = segments[i];
-        for(uint j = 0; j < segment.points.size() - 2; j++)
-        {
-            if(segment.type == STRAIGHT)
-            {
-                cv::line(im, segment.points[j].endPoint * 16, segment.points[j + 1].endPoint * 16, cv::Scalar(255, 255, 255, 255), 1, cv::LINE_AA, 4);
-            }
-            else if(segment.type == CURVED)
-            {
-                cv::line(im, segment.points[j].endPoint * 16, segment.points[j + 1].endPoint * 16, cv::Scalar(255, 255, 255, 255), 1, cv::LINE_AA, 4);
-            }
-        }
-    }
-
-    return im;
-}
-
 std::vector<LidarMarble> Lidar::ConvertCirclesToLidarMarbles(std::vector<cv::Vec3f> circles)
 {
     // Declare return vector
@@ -248,74 +226,4 @@ cv::Mat Lidar::DisplayLines(cv::Mat im, std::vector<cv::Vec4i> lines)
     }
 
     return im;
-}
-
-std::vector<Lidar::ScanSegment> Lidar::GetSegmentsOfScan(std::vector<LidarRay> points)
-{
-    std::vector<ScanSegment> segments;
-    ScanSegment currentSegment;
-    int segmentType = 0;
-
-    float threshold = 0.001f;
-
-    // Loop through points
-    for(uint i = 0; i < points.size(); i++)
-    {
-        // Break out before out of bounds exception
-        if(i == points.size() - 1)
-        {
-            break;
-        }
-
-        // Get three points needed for collinearity calculation
-        cv::Point2f currentPoints [3] = {points[i].endPoint, points[i+1].endPoint, points[i+2].endPoint};
-
-        // Determine collinearity of points
-        float collinearity = Lidar::GetCollinearity(currentPoints);
-
-        // Add current point to vector
-        currentSegment.points.push_back(points[i]);
-
-        // If these three points are collinear we're no longer in a curve, and should finish the segment
-        if(collinearity < threshold && segmentType == CURVED)
-        {
-            // Add the second point - the last non collinear point
-            currentSegment.points.push_back(points[i + 1]);
-            // Set the segment type
-            currentSegment.type = CURVED;
-            // Add the segment to the output
-            segments.push_back(currentSegment);
-
-            // Set the next segment type
-            segmentType = STRAIGHT;
-
-            // Clear the current segment
-            currentSegment.points.clear();
-        }
-
-        // If the points are not collinear, we're no longer on a straight section, and should finish the segment
-        else if(collinearity > threshold && segmentType == STRAIGHT)
-        {
-            currentSegment.points.push_back(points[i + 1]);
-            currentSegment.type = STRAIGHT;
-            segments.push_back(currentSegment);
-
-            segmentType = CURVED;
-
-            currentSegment.points.clear();
-        }
-    }
-
-    return segments;
-}
-
-float Lidar::GetCollinearity(cv::Point2f points[3])
-{
-    cv::Point2f A = points[0];
-    cv::Point2f B = points[1];
-    cv::Point2f C = points[2];
-
-    float area = A.x * (B.y - C.y) + B.x * (C.y - A.y) + C.x * (A.y - B.y);
-
-    return area;
 }

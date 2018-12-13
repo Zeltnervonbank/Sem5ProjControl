@@ -62,32 +62,32 @@ int Movement::HandleMovement()
     }
 
     // If marbles are visible, and within a certain range, move toward it
-    else if(lidar::marblesPresent && lidar::nearestMarble.distance < 1000)
+    else if(Lidar::marblesPresent && Lidar::nearestMarble.distance < 1000)
     {
         std::cout << "                  marble" << std::endl;
         dir = marbleController.getControlOutput(
-                    lidar::nearestMarble.angle,
-                    lidar::nearestMarble.distance
+                    Lidar::nearestMarble.angle,
+                    Lidar::nearestMarble.distance
                     ).direction;
 
         speed = marbleController.getControlOutput(
-                    lidar::nearestMarble.angle,
-                    lidar::nearestMarble.distance
+                    Lidar::nearestMarble.angle,
+                    Lidar::nearestMarble.distance
                     ).speed;
     }
 
     // If we're about to move into an obstacle, don't
-    else if(lidar::nearestPoint.range < 0.2 && abs(lidar::nearestPoint.angle) <= 1.56)
+    else if(Lidar::nearestPoint.range < 0.2 && abs(Lidar::nearestPoint.angle) <= 1.56)
     {
         std::cout << "                  wall" << std::endl;
         dir = wallController.getControlOutput(
-                    lidar::nearestPoint.angle,
-                    lidar::nearestPoint.range
+                    Lidar::nearestPoint.angle,
+                    Lidar::nearestPoint.range
                     ).direction;
 
         speed = wallController.getControlOutput(
-                    lidar::nearestPoint.angle,
-                    lidar::nearestPoint.range
+                    Lidar::nearestPoint.angle,
+                    Lidar::nearestPoint.range
                     ).speed;
     }
 
@@ -163,7 +163,7 @@ int Movement::HandleKeyboardInput()
     {
         if(visited >= 3)
         {
-            qLearn.run();
+            qLearn.un();
             runs++;
             visited = 0;
             std::cout << "runs: " << runs << std::endl;
@@ -172,15 +172,15 @@ int Movement::HandleKeyboardInput()
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> diff = end - start;
 
-        qLearn.chooseAction(qLearn.currentState, marblePoint, diff.count());
-        qLearn.printR();
+        qLearn.ChooseAction(qLearn.currentState, marblePoint, diff.count());
+        qLearn.PrintR();
 
         marblePoint = 0;
         visited++;
     }
     else if(key == KEY_V && !testMode)
     {
-        qLearn.printroute();
+        qLearn.PrintRoute();
     }
 
     // Slow down if set to do so

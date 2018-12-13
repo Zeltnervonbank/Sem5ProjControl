@@ -40,20 +40,20 @@ public:
     static int grid[ROW][COL];
     static cv::Mat image;
 
-    static void aStarSearch(Pair src, Pair dest);
-    static void newAStarSearch(Pair src, Pair dest);
-    static void aStarmulti(std::vector<int> src, std::vector<std::vector<int>> dest);
+    static void VerboseAStarSearch(Pair src, Pair dest);
+    static void AStarSearch(Pair src, Pair dest);
+    static void AStarMultiSearch(std::vector<int> src, std::vector<std::vector<int>> dest);
     static void CreatePathToCurrentDestination();
 
 private:
-    static bool isValid(int row, int col);
-    static bool isUnBlocked(int row, int col);
-    static bool isDestination(int row, int col, Pair dest);
+    static bool IsValid(int row, int col);
+    static bool IsUnBlocked(int row, int col);
+    static bool IsDestination(int row, int col, Pair dest);
 
-    static double calculateHValue(int row, int col, Pair dest);
+    static double CalculateHValue(int row, int col, Pair dest);
     static bool GetCollinearity(Waypoint a, Waypoint b, Waypoint c);
 
-    static void tracePath(cell cellDetails[][COL], Pair dest);
+    static void TracePath(cell cellDetails[][COL], Pair dest);
     static Pair ConvertCoordsToPathingCoord(double x, double y);
 };
 

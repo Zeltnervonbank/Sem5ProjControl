@@ -2,8 +2,8 @@
 
 double Globals::GetDistanceToWaypoint()
 {
-    double xDisplacement = abs(LastPosition.posX - currentWaypoint.x);
-    double yDisplacement = abs(LastPosition.posY - currentWaypoint.y);
+    double xDisplacement = abs(lastPosition.posX - currentWaypoint.x);
+    double yDisplacement = abs(lastPosition.posY - currentWaypoint.y);
 
     // Uses pythagorean theorem to determine absolute distance to waypoint
     return sqrt(pow(xDisplacement, 2) + pow(yDisplacement, 2));

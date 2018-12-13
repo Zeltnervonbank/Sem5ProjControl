@@ -10,12 +10,12 @@ Qlearning::~Qlearning()
 
 }
 
-void Qlearning::initialize(){
+void Qlearning::Initialize(){
 
     srand((unsigned)time(NULL));
 
-    Qlearning::readFromFile();//read R from external file
-    Qlearning::printR();
+    Qlearning::ReadFromFile();//read R from external file
+    Qlearning::PrintR();
     for(int i = 0; i <= (rSize - 1); i++){
         for(int j = 0; j <= (rSize - 1); j++){
             RTemp[i][j] = R[i][j];
@@ -30,7 +30,7 @@ void Qlearning::initialize(){
     }*/
 }
 
-void Qlearning::run(){
+void Qlearning::un(){
 //Reset the temp array to a new run.
     for(int i = 0; i <= (rSize - 1); i++){
         for(int j = 0; j <= (rSize - 1); j++){
@@ -40,7 +40,7 @@ void Qlearning::run(){
 
 }
 
-int Qlearning::getRandomAction(){
+int Qlearning::GetRandomAction(){
     int action;
     bool choiceIsValid = false;
     //printRtemp();
@@ -60,23 +60,23 @@ int Qlearning::getRandomAction(){
     return action;
 }
 
-void Qlearning::chooseAction(int initialState, int marbles, double time){
+void Qlearning::ChooseAction(int initialState, int marbles, double time){
 
     currentState=initialState;
 
-    possibleAction = getRandomAction();
+    possibleAction = GetRandomAction();
 
     if(R[currentState][possibleAction] >= 0){
         //std::cout << reward(possibleAction,marbles,itterations) << std::endl;
-        R[currentState][possibleAction] = reward(possibleAction,marbles,time); //Update reward of choosen action.
-        Qlearning::writeToFile(); //update external file with rewards
+        R[currentState][possibleAction] = Reward(possibleAction,marbles,time); //Update reward of choosen action.
+        Qlearning::WriteToFile(); //update external file with rewards
         //std::cout << reward(possibleAction) << std::endl;
         currentState = possibleAction;
         std::cout << "currentState:" << currentState << std::endl;
     }
 }
 
-int Qlearning::maximum(int state, bool returnIndexOnly, bool temp){
+int Qlearning::Maximum(int state, bool returnIndexOnly, bool temp){
 // if returnIndexOnly = true, a Q matrix index is returned.
 // if returnIndexOnly = false, a Q matrix element is returned.
 
@@ -130,7 +130,7 @@ else{
     }
 }
 
-int Qlearning::reward(int action, int marbles, double time){
+int Qlearning::Reward(int action, int marbles, double time){
     //Get reward
     //std::cout << "her1" << std::endl;
     //std::cout << gamma * R[currentState][possibleAction] << std::endl;
@@ -139,7 +139,7 @@ int Qlearning::reward(int action, int marbles, double time){
     return static_cast<int>((rewardV + (gamma * R[currentState][possibleAction]))/2);
 }
 
-void Qlearning::printR(){
+void Qlearning::PrintR(){
     //Print out R matrix.
     for(int i = 0; i <= (rSize - 1); i++){
         for(int j = 0; j <= (rSize - 1); j++){
@@ -153,7 +153,7 @@ void Qlearning::printR(){
     std::cout << "\n";
 }
 
-void Qlearning::printroute(){ //Print the most optimal route, based on past experience.
+void Qlearning::PrintRoute(){ //Print the most optimal route, based on past experience.
     for(int i = 0; i <= (rSize - 1); i++){
         for(int j = 0; j <= (rSize - 1); j++){
             Ropt[i][j] = R[i][j];
@@ -165,7 +165,7 @@ void Qlearning::printroute(){ //Print the most optimal route, based on past expe
     for(int i=0; i<rSize;i++){
         //printRtemp();
         //std::cout << "hej" << std::endl;
-        newState = maximum(currentState, true,true);
+        newState = Maximum(currentState, true,true);
         for(int i = 0; i <= (rSize - 1); i++){
                 Ropt[i][newState] = -1;
             }
@@ -176,7 +176,7 @@ void Qlearning::printroute(){ //Print the most optimal route, based on past expe
 
 }
 
-void Qlearning::writeToFile(){
+void Qlearning::WriteToFile(){
 
     std::ofstream f("matrix.txt");
     for (int i = 0; i < rSize; i++)
@@ -189,7 +189,7 @@ void Qlearning::writeToFile(){
     f.close();
 }
 
-void Qlearning::readFromFile(){
+void Qlearning::ReadFromFile(){
     std::ifstream f("matrix.txt");
 
     for (int i = 0; i < rSize; i++){

@@ -33,7 +33,7 @@ void WaypointNavigation::MoveTowardWaypoint()
 {
     /// Determine direction to next waypoint
     // Get the latest position
-    RobotPosition position = Globals::LastPosition;
+    RobotPosition position = Globals::lastPosition;
 
     // Calculate the yaw of the robot
     double yaw = fmod(2.0 * atan2(position.rotW, position.rotZ) + 3.0 * M_PI, 2.0 * M_PI);

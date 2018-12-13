@@ -7,7 +7,7 @@ pathing::~pathing()
 {}
 
 // A Function to check if a cell is valid or not
-bool pathing::isValid(int row, int col)
+bool pathing::IsValid(int row, int col)
 {
     // Returns true if row number and column number is inside the grid
 
@@ -20,20 +20,20 @@ bool pathing::isValid(int row, int col)
 }
 
 // A Function to check if a cell is blocked or not
-bool pathing::isUnBlocked(int row, int col)
+bool pathing::IsUnBlocked(int row, int col)
 {
     // Returns true if the cell is not blocked else false
     return grid[row][col] == 1;
 }
 
 // A function to check if the current posistion is the destination
-bool pathing::isDestination(int row, int col, Pair dest)
+bool pathing::IsDestination(int row, int col, Pair dest)
 {
     return row == dest.first && col == dest.second;
 }
 
 // A Function to calculate the heuristic.
-double pathing::calculateHValue(int row, int col, Pair dest)
+double pathing::CalculateHValue(int row, int col, Pair dest)
 {
     // Return the estimated distance from row and col to dest
     return ((double)sqrt ((row-dest.first)*(row-dest.first)
@@ -41,7 +41,7 @@ double pathing::calculateHValue(int row, int col, Pair dest)
 }
 
 // A function to track the path from the source to destination
-void pathing::tracePath(cell cellDetails[][COL], Pair dest)
+void pathing::TracePath(cell cellDetails[][COL], Pair dest)
 {
     cv::Mat image = cv::imread("../Sem5ProjControl/floor_plan.png", CV_LOAD_IMAGE_COLOR); //laptop location
     printf ("\nThe Path is ");
@@ -136,31 +136,31 @@ bool pathing::GetCollinearity(Waypoint a, Waypoint b, Waypoint c)
 
 // A Function to find the shortest path between a given source cell to a destination cell
 // A* Search Algorithm
-void pathing::aStarSearch(Pair src, Pair dest)
+void pathing::VerboseAStarSearch(Pair src, Pair dest)
 {
     // If the source is out of range
-    if (!isValid (src.first, src.second))
+    if (!IsValid (src.first, src.second))
     {
         printf ("Source is invalid\n");
         return;
     }
 
     // If the destination is out of range
-    if (!isValid (dest.first, dest.second))
+    if (!IsValid (dest.first, dest.second))
     {
         printf ("Destination is invalid\n");
         return;
     }
 
     // Either the source or the destination is blocked
-    if (!isUnBlocked(src.first, src.second) || !isUnBlocked(dest.first, dest.second))
+    if (!IsUnBlocked(src.first, src.second) || !IsUnBlocked(dest.first, dest.second))
     {
         printf ("Source or the destination is blocked\n");
         return;
     }
 
     // If the destination cell is the same as source cell
-    if (isDestination(src.first, src.second, dest) == true)
+    if (IsDestination(src.first, src.second, dest) == true)
     {
         printf ("We are already at the destination\n");
         return;
@@ -252,27 +252,27 @@ void pathing::aStarSearch(Pair src, Pair dest)
         //----------- 1st Successor (North) ------------
 
         // Only process this cell if this is a valid one
-        if (isValid(i - 1, j))
+        if (IsValid(i - 1, j))
         {
             // If the destination cell is the same as the
             // current successor
-            if (isDestination(i - 1, j, dest))
+            if (IsDestination(i - 1, j, dest))
             {
                 // Set the Parent of the destination cell
                 cellDetails[i - 1][j].parent_i = i;
                 cellDetails[i - 1][j].parent_j = j;
                 printf ("The destination cell is found\n");
-                tracePath (cellDetails, dest);
+                TracePath (cellDetails, dest);
                 foundDest = true;
                 return;
             }
             // If the successor is already on the closed
             // list or if it is blocked, then ignore it.
             // Else do the following
-            else if (!closedList[i - 1][j] && isUnBlocked(i - 1, j))
+            else if (!closedList[i - 1][j] && IsUnBlocked(i - 1, j))
             {
                 gNew = cellDetails[i][j].g + 1.0;
-                hNew = calculateHValue (i - 1, j, dest);
+                hNew = CalculateHValue (i - 1, j, dest);
                 fNew = gNew + hNew;
 
                 // If it isn’t on the open list, add it to
@@ -298,23 +298,23 @@ void pathing::aStarSearch(Pair src, Pair dest)
         }
 
         //----------- 2nd Successor (South) ------------
-        if (isValid(i + 1, j))
+        if (IsValid(i + 1, j))
         {
-            if (isDestination(i + 1, j, dest))
+            if (IsDestination(i + 1, j, dest))
             {
                 cellDetails[i + 1][j].parent_i = i;
                 cellDetails[i + 1][j].parent_j = j;
                 printf("The destination cell is found\n");
-                tracePath(cellDetails, dest);
+                TracePath(cellDetails, dest);
                 foundDest = true;
                 return;
             }
 
-            else if (!closedList[i + 1][j] && isUnBlocked(i + 1, j))
+            else if (!closedList[i + 1][j] && IsUnBlocked(i + 1, j))
             {
                 gNew = cellDetails[i][j].g + 1.0;
                 cellDetails[i + 1][j].h = hNew;
-                hNew = calculateHValue(i + 1, j, dest);
+                hNew = CalculateHValue(i + 1, j, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i + 1][j].f == FLT_MAX || cellDetails[i + 1][j].f > fNew)
@@ -331,22 +331,22 @@ void pathing::aStarSearch(Pair src, Pair dest)
         }
 
         //----------- 3rd Successor (East) ------------
-        if (isValid (i, j + 1))
+        if (IsValid (i, j + 1))
         {
-            if (isDestination(i, j + 1, dest))
+            if (IsDestination(i, j + 1, dest))
             {
                 cellDetails[i][j + 1].parent_i = i;
                 cellDetails[i][j + 1].parent_j = j;
                 printf("The destination cell is found\n");
-                tracePath(cellDetails, dest);
+                TracePath(cellDetails, dest);
                 foundDest = true;
                 return;
             }
 
-            else if (!closedList[i][j + 1] && isUnBlocked (i, j + 1))
+            else if (!closedList[i][j + 1] && IsUnBlocked (i, j + 1))
             {
                 gNew = cellDetails[i][j].g + 1.0;
-                hNew = calculateHValue (i, j + 1, dest);
+                hNew = CalculateHValue (i, j + 1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i][j + 1].f == FLT_MAX || cellDetails[i][j + 1].f > fNew)
@@ -363,22 +363,22 @@ void pathing::aStarSearch(Pair src, Pair dest)
         }
 
         //----------- 4th Successor (West) ------------
-        if (isValid(i, j - 1))
+        if (IsValid(i, j - 1))
         {
-            if (isDestination(i, j - 1, dest))
+            if (IsDestination(i, j - 1, dest))
             {
                 cellDetails[i][j - 1].parent_i = i;
                 cellDetails[i][j - 1].parent_j = j;
                 printf("The destination cell is found\n");
-                tracePath(cellDetails, dest);
+                TracePath(cellDetails, dest);
                 foundDest = true;
                 return;
             }
 
-            else if (!closedList[i][j - 1] && isUnBlocked(i, j - 1))
+            else if (!closedList[i][j - 1] && IsUnBlocked(i, j - 1))
             {
                 gNew = cellDetails[i][j].g + 1.0;
-                hNew = calculateHValue(i, j - 1, dest);
+                hNew = CalculateHValue(i, j - 1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i][j - 1].f == FLT_MAX || cellDetails[i][j - 1].f > fNew)
@@ -395,22 +395,22 @@ void pathing::aStarSearch(Pair src, Pair dest)
         }
 
         //----------- 5th Successor (North-East) ------------
-        if (isValid(i - 1, j + 1))
+        if (IsValid(i - 1, j + 1))
         {
-            if (isDestination(i - 1, j + 1, dest))
+            if (IsDestination(i - 1, j + 1, dest))
             {
                 cellDetails[i - 1][j + 1].parent_i = i;
                 cellDetails[i - 1][j + 1].parent_j = j;
                 printf ("The destination cell is found\n");
-                tracePath (cellDetails, dest);
+                TracePath (cellDetails, dest);
                 foundDest = true;
                 return;
             }
 
-            else if (!closedList[i - 1][j + 1] && isUnBlocked(i - 1, j + 1))
+            else if (!closedList[i - 1][j + 1] && IsUnBlocked(i - 1, j + 1))
             {
                 gNew = cellDetails[i][j].g + 1.414;
-                hNew = calculateHValue(i - 1, j + 1, dest);
+                hNew = CalculateHValue(i - 1, j + 1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i - 1][j + 1].f == FLT_MAX || cellDetails[i - 1][j + 1].f > fNew)
@@ -427,22 +427,22 @@ void pathing::aStarSearch(Pair src, Pair dest)
         }
 
         //----------- 6th Successor (North-West) ------------
-        if (isValid (i - 1, j - 1))
+        if (IsValid (i - 1, j - 1))
         {
-            if (isDestination (i - 1, j - 1, dest))
+            if (IsDestination (i - 1, j - 1, dest))
             {
                 cellDetails[i - 1][j - 1].parent_i = i;
                 cellDetails[i - 1][j - 1].parent_j = j;
                 printf ("The destination cell is found\n");
-                tracePath (cellDetails, dest);
+                TracePath (cellDetails, dest);
                 foundDest = true;
                 return;
             }
 
-            else if (!closedList[i - 1][j - 1] && isUnBlocked(i - 1, j - 1))
+            else if (!closedList[i - 1][j - 1] && IsUnBlocked(i - 1, j - 1))
             {
                 gNew = cellDetails[i][j].g + 1.414;
-                hNew = calculateHValue(i - 1, j - 1, dest);
+                hNew = CalculateHValue(i - 1, j - 1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i - 1][j - 1].f == FLT_MAX || cellDetails[i - 1][j - 1].f > fNew)
@@ -457,22 +457,22 @@ void pathing::aStarSearch(Pair src, Pair dest)
                 }
             }
         }
-        if (isValid (i + 1, j - 1))
+        if (IsValid (i + 1, j - 1))
         {
-            if (isDestination(i + 1, j - 1, dest))
+            if (IsDestination(i + 1, j - 1, dest))
             {
                 cellDetails[i + 1][j - 1].parent_i = i;
                 cellDetails[i + 1][j - 1].parent_j = j;
                 printf("The destination cell is found\n");
-                tracePath(cellDetails, dest);
+                TracePath(cellDetails, dest);
                 foundDest = true;
                 return;
             }
 
-            else if (!closedList[i + 1][j - 1] && isUnBlocked(i + 1, j - 1))
+            else if (!closedList[i + 1][j - 1] && IsUnBlocked(i + 1, j - 1))
             {
                 gNew = cellDetails[i][j].g + 1.414;
-                hNew = calculateHValue(i + 1, j - 1, dest);
+                hNew = CalculateHValue(i + 1, j - 1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i + 1][j - 1].f == FLT_MAX || cellDetails[i + 1][j - 1].f > fNew)
@@ -488,23 +488,23 @@ void pathing::aStarSearch(Pair src, Pair dest)
             }
         }
         //----------- 7th Successor (South-East) ------------
-        if (isValid(i + 1, j + 1))
+        if (IsValid(i + 1, j + 1))
         {
-            if (isDestination(i + 1, j + 1, dest))
+            if (IsDestination(i + 1, j + 1, dest))
             {
                 cellDetails[i + 1][j + 1].parent_i = i;
                 cellDetails[i + 1][j + 1].parent_j = j;
                 printf ("The destination cell is found\n");
-                tracePath (cellDetails, dest);
+                TracePath (cellDetails, dest);
                 foundDest = true;
                 return;
             }
 
             else if (!closedList[i + 1][j + 1] &&
-                    isUnBlocked(i + 1, j + 1))
+                    IsUnBlocked(i + 1, j + 1))
             {
                 gNew = cellDetails[i][j].g + 1.414;
-                hNew = calculateHValue(i + 1, j + 1, dest);
+                hNew = CalculateHValue(i + 1, j + 1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i + 1][j + 1].f == FLT_MAX || cellDetails[i + 1][j + 1].f > fNew)
@@ -521,22 +521,22 @@ void pathing::aStarSearch(Pair src, Pair dest)
         }
 
         //----------- 8th Successor (South-West) ------------
-        if (isValid (i + 1, j - 1))
+        if (IsValid (i + 1, j - 1))
         {
-            if (isDestination(i + 1, j - 1, dest))
+            if (IsDestination(i + 1, j - 1, dest))
             {
                 cellDetails[i + 1][j - 1].parent_i = i;
                 cellDetails[i + 1][j - 1].parent_j = j;
                 printf("The destination cell is found\n");
-                tracePath(cellDetails, dest);
+                TracePath(cellDetails, dest);
                 foundDest = true;
                 return;
             }
 
-            else if (!closedList[i + 1][j - 1] && isUnBlocked(i + 1, j - 1))
+            else if (!closedList[i + 1][j - 1] && IsUnBlocked(i + 1, j - 1))
             {
                 gNew = cellDetails[i][j].g + 1.414;
-                hNew = calculateHValue(i + 1, j - 1, dest);
+                hNew = CalculateHValue(i + 1, j - 1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i + 1][j - 1].f == FLT_MAX || cellDetails[i + 1][j - 1].f > fNew)
@@ -564,32 +564,32 @@ void pathing::aStarSearch(Pair src, Pair dest)
 }
 
 // Does the same as aStarSearch, but is less verbose
-void pathing::newAStarSearch(Pair src, Pair dest)
+void pathing::AStarSearch(Pair src, Pair dest)
 {
 
     // If the source is out of range
-    if (!isValid (src.first, src.second))
+    if (!IsValid (src.first, src.second))
     {
         printf ("Source is invalid\n");
         return;
     }
 
     // If the destination is out of range
-    if (!isValid (dest.first, dest.second))
+    if (!IsValid (dest.first, dest.second))
     {
         printf ("Destination is invalid\n");
         return;
     }
 
     // Either the source or the destination is blocked
-    if (!isUnBlocked(src.first, src.second) || !isUnBlocked(dest.first, dest.second))
+    if (!IsUnBlocked(src.first, src.second) || !IsUnBlocked(dest.first, dest.second))
     {
         printf ("Source or the destination is blocked\n");
         return;
     }
 
     // If the destination cell is the same as source cell
-    if (isDestination(src.first, src.second, dest) == true)
+    if (IsDestination(src.first, src.second, dest) == true)
     {
         printf ("We are already at the destination\n");
         return;
@@ -695,22 +695,22 @@ void pathing::newAStarSearch(Pair src, Pair dest)
 
             double gNew, hNew, fNew;
 
-            if (isValid (nI, nJ))
+            if (IsValid (nI, nJ))
             {
-                if (isDestination(nI, nJ, dest))
+                if (IsDestination(nI, nJ, dest))
                 {
                     cellDetails[nI][nJ].parent_i = i;
                     cellDetails[nI][nJ].parent_j = j;
                     printf("The destination cell is found\n");
-                    tracePath(cellDetails, dest);
+                    TracePath(cellDetails, dest);
                     foundDest = true;
                     return;
                 }
 
-                else if (!closedList[nI][nJ] && isUnBlocked(nI, nJ))
+                else if (!closedList[nI][nJ] && IsUnBlocked(nI, nJ))
                 {
                     gNew = cellDetails[i][j].g + addValue;
-                    hNew = calculateHValue(nI, nJ, dest);
+                    hNew = CalculateHValue(nI, nJ, dest);
                     fNew = gNew + hNew;
 
                     if (cellDetails[nI][nJ].f == FLT_MAX || cellDetails[nI][nJ].f > fNew)
@@ -737,7 +737,7 @@ void pathing::newAStarSearch(Pair src, Pair dest)
     }
 }
 
-void pathing::aStarmulti(std::vector<int> src, std::vector<std::vector<int>> dest)
+void pathing::AStarMultiSearch(std::vector<int> src, std::vector<std::vector<int>> dest)
 {
     Pair start = std::make_pair(src[0], src[1]);
     Pair goal = std::make_pair(dest[0][0], dest[0][1]);
@@ -750,7 +750,7 @@ void pathing::aStarmulti(std::vector<int> src, std::vector<std::vector<int>> des
             goal = std::make_pair(dest[i][0], dest[i][1]);
         }
 
-        newAStarSearch(start, goal);
+        AStarSearch(start, goal);
     }
 }
 
@@ -758,13 +758,13 @@ void pathing::CreatePathToCurrentDestination()
 {
     // Convert current destination and current position to pair form
     Pair destination = ConvertCoordsToPathingCoord(Globals::currentDestination.x, Globals::currentDestination.y);
-    Pair currentPosition = ConvertCoordsToPathingCoord(Globals::LastPosition.posX, Globals::LastPosition.posY);
+    Pair currentPosition = ConvertCoordsToPathingCoord(Globals::lastPosition.posX, Globals::lastPosition.posY);
 
     // Clear current waypoints
     Globals::ClearWaypointQueue();
 
     // Make a new path
-    newAStarSearch(currentPosition, destination);
+    AStarSearch(currentPosition, destination);
 
     // Set a new next waypoint
     Globals::NextWaypoint();

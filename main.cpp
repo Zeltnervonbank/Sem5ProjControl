@@ -34,7 +34,7 @@ gazebo::transport::PublisherPtr Globals::movementPublisher;
 // Initialise static variables in classes:
 // Globals
 boost::mutex Globals::mutex;
-RobotPosition Globals::LastPosition;
+RobotPosition Globals::lastPosition;
 std::queue<Waypoint> Globals::waypoints;
 Waypoint Globals::currentWaypoint = {.x = 0.0, .y = 0.0};
 Waypoint Globals::currentDestination;
@@ -42,12 +42,12 @@ std::vector<std::vector<int>> Globals::destinations;
 std::queue<Waypoint> Globals::destinationQueue;
 
 // Lidar
-bool lidar::marblesPresent = false;
+bool Lidar::marblesPresent = false;
 bool Camera::marbleClose = false;
-std::vector<LidarMarble> lidar::detectedMarbles;
-LidarMarble lidar::nearestMarble;
-std::vector<LidarRay> lidar::lidarRays;
-LidarRay lidar::nearestPoint;
+std::vector<LidarMarble> Lidar::detectedMarbles;
+LidarMarble Lidar::nearestMarble;
+std::vector<LidarRay> Lidar::lidarRays;
+LidarRay Lidar::nearestPoint;
 
 // Mapping
 int mapping::map[MAP_SIDE_LENGTH][MAP_SIDE_LENGTH] = {};
@@ -61,7 +61,7 @@ cv::Mat pathing::image = cv::imread("../Sem5ProjControl/floor_plan.png", CV_LOAD
 
 // Movement
 Qlearning Movement::qLearn;
-marbel_Controller Movement::marbleController;
+MarbleController Movement::marbleController;
 wall_Controller Movement::wallController;
 waypointController Movement::wayController;
 
@@ -127,7 +127,7 @@ void poseCallback(ConstPosesStampedPtr &_msg)
                 _msg->pose(i).orientation().z()                
             };
 
-            Globals::LastPosition = pos;
+            Globals::lastPosition = pos;
             mapping::UpdateMap(pos);
         }
     }
@@ -237,7 +237,7 @@ void SeedWaypointsWithAStar()
         pixelDest.push_back(convertToPixelCoords(dest[i]));
     }
 
-    pathing::aStarmulti(src, pixelDest);
+    pathing::AStarMultiSearch(src, pixelDest);
 }
 
 int main(int _argc, char **_argv)
@@ -254,9 +254,9 @@ int main(int _argc, char **_argv)
 
     gazebo::transport::SubscriberPtr poseSubscriber = Globals::node->Subscribe("~/pose/info", poseCallback);
 
-    gazebo::transport::SubscriberPtr lidarSubscriber = Globals::node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidar::lidarCallback);
+    gazebo::transport::SubscriberPtr lidarSubscriber = Globals::node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", Lidar::LidarCallback);
 
-    gazebo::transport::SubscriberPtr cameraSubscriber = Globals::node->Subscribe("~/pioneer2dx/camera/link/camera/image", Camera::cameraCallback);
+    gazebo::transport::SubscriberPtr cameraSubscriber = Globals::node->Subscribe("~/pioneer2dx/camera/link/camera/image", Camera::CameraCallback);
 
     gazebo::transport::SubscriberPtr marble_clone_0 = Globals::node->Subscribe("~/marble_clone_0/marble/link/marble_contact/contacts", contactCallback);
     gazebo::transport::SubscriberPtr marble_clone_1 = Globals::node->Subscribe("~/marble_clone_1/marble/link/marble_contact/contacts", contactCallback);
@@ -296,8 +296,8 @@ int main(int _argc, char **_argv)
     RandomOrderAddAllDestinationsToQueue();
 
     // Initialise Q learning system
-    Movement::qLearn.initialize();
-    Movement::qLearn.chooseAction(0, 0, 1);
+    Movement::qLearn.Initialize();
+    Movement::qLearn.ChooseAction(0, 0, 1);
 
     // Prepare A* grid
     LoadImageIntoAStarGrid("../Sem5ProjControl/floor_plan.png");
@@ -350,7 +350,7 @@ int main(int _argc, char **_argv)
         }
 
     }    
-    pathing::newAStarSearch({0,0},{20,30});
+    pathing::AStarSearch({0,0},{20,30});
 
     // Make sure to shut everything down.
     gazebo::client::shutdown();

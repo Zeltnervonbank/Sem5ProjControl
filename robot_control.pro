@@ -8,7 +8,13 @@ SOURCES += main.cpp \
     camera.cpp \
     lidar.cpp \
     mapping.cpp \
-    movement.cpp
+    movement.cpp \
+    waypointnavigation.cpp \
+    pathing.cpp \
+    wall_controller.cpp \
+    qlearning.cpp \
+    waypointcontroller.cpp \
+    globals.cpp
 
 CONFIG += link_pkgconfig
 PKGCONFIG += gazebo
@@ -29,7 +35,12 @@ HEADERS += \
     lidar.h \
     mapping.h \
     movement.h \
-    globals.h
+    waypointnavigation.h \
+    globals.h \
+    pathing.h \
+    wall_controller.h \
+    qlearning.h \
+    waypointcontroller.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../fuzzylite-6.0-linux64/fuzzylite-6.0/fuzzylite/release/bin/release/ -lfuzzylite
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../fuzzylite-6.0-linux64/fuzzylite-6.0/fuzzylite/release/bin/debug/ -lfuzzylite

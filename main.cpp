@@ -9,25 +9,38 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <queue>
+
 #include "camera.h"
 #include "marbel_controller.h"
 #include "datatypes.h"
 #include "lidar.h"
+#include "wall_controller.h"
+#include "qlearning.h"
+#include <chrono>
 #include "mapping.h"
-#include "globals.h"
+#include "waypointnavigation.h"
 #include "movement.h"
+#include "globals.h"
+#include "pathing.h"
+#include "movement.h"
+#include "waypointcontroller.h"
 
 
 // Initialise Gazebo node and publishers
 gazebo::transport::NodePtr Globals::node(new gazebo::transport::Node());
 gazebo::transport::PublisherPtr Globals::movementPublisher;
 
-// Declare mutex
-boost::mutex Globals::mutex;
-
 // Initialise static variables in classes:
+// Globals
+boost::mutex Globals::mutex;
+RobotPosition Globals::LastPosition;
+std::queue<Waypoint> Globals::waypoints;
+Waypoint Globals::CurrentWaypoint = {.x = 0.0, .y = 0.0};
+
 // Lidar
 bool lidar::marblesPresent = false;
+bool Camera::marbleClose = false;
 std::vector<LidarMarble> lidar::detectedMarbles;
 LidarMarble lidar::nearestMarble;
 std::vector<LidarRay> lidar::lidarRays;
@@ -37,13 +50,60 @@ LidarRay lidar::nearestPoint;
 int mapping::map[MAP_SIDE_LENGTH][MAP_SIDE_LENGTH] = {};
 cv::Mat mapping::img = cv::Mat(MAP_SIDE_LENGTH, MAP_SIDE_LENGTH, CV_8U);
 bool mapping::mappingEnabled = false;
+static boost::mutex mutex;
 
+// Pathfinding
+int pathing::grid[ROW][COL] = {};
+cv::Mat pathing::image = cv::imread("../Sem5ProjControl/floor_plan.png", CV_LOAD_IMAGE_COLOR);
+
+// Movement
+Qlearning Movement::qLearn;
+marbel_Controller Movement::marbleController;
+wall_Controller Movement::wallController;
+waypointController Movement::wayController;
+
+int Movement::visited;
+int Movement::runs;
+int Movement::marblePoint = 0;
+
+std::chrono::_V2::steady_clock::time_point Movement::start = std::chrono::steady_clock::now();
+bool Movement::testMode;
+bool Movement::allowPassiveSlowing;
+bool Movement::printKeyPresses;
+
+// Marble collection
+int marblesCollected = 0;
+auto tempC = Movement::start;
+int cent;
+int radius;
+
+// Callbacks
 void statCallback(ConstWorldStatisticsPtr &_msg)
 {
       (void)_msg;
       // Dump the message contents to stdout.
       //std::cout << _msg->DebugString();
       //std::cout << std::flush;
+}
+
+void contactCallback(ConstContactSensorPtr &_msg)
+{
+    auto startC = std::chrono::steady_clock::now();
+
+    if(_msg->ByteSize() > 300)
+    {
+        std::chrono::duration<double> diffC = startC - tempC;
+
+        if(diffC.count() >= 0.20)
+        {
+            Movement::marblePoint += 100;
+            marblesCollected++;
+            std::cout << "Marble point:                          " << Movement::marblePoint << std::endl;
+            std::cout << "Marbles collected:                          " << marblesCollected << std::endl;
+        }
+
+        tempC = startC;
+     }
 }
 
 void poseCallback(ConstPosesStampedPtr &_msg)
@@ -62,6 +122,7 @@ void poseCallback(ConstPosesStampedPtr &_msg)
                 _msg->pose(i).orientation().z()                
             };
 
+            Globals::LastPosition = pos;
             mapping::UpdateMap(pos);
         }
     }
@@ -80,6 +141,62 @@ void cameraCallback(ConstImageStampedPtr &msg)
     Globals::mutex.unlock();
 }
 
+std::vector<int> convertToPixelCoords(std::vector<int> pair)
+{
+    std::vector<int> retPair;
+
+    retPair.push_back(pair[0] * 4 + 200);
+    retPair.push_back(200 - pair[1] * 4);
+
+    return retPair;
+}
+
+void LoadImageIntoAStarGrid(char* path)
+{
+    cv::Mat image = cv::imread(path, CV_8U);
+
+    // Convert image file to A* grid
+    for(int y = 0; y < 400; y++)
+    {
+        for(int x = 0; x < 400; x++)
+        {
+            auto i = image.at<uchar>(x, y);
+            if(i == 255)
+            {
+                std::cout << "1";
+                pathing::grid[y][x] = 1;
+
+            }
+            else
+            {
+                std::cout << "0";
+                pathing::grid[y][x] = 0;
+            }
+        }
+        std::cout << std::endl;
+    }
+}
+
+void SeedWaypointsWithAStar()
+{
+    // Source is the middle point
+    std::vector<int> src = convertToPixelCoords({0, 0});
+
+    // List of points we want to go to
+    std::vector<std::vector<int>> dest = {{-36, 22}, {-25, 22}, {-26, 11}, {-36, 10}, {-13, 11}, {-13, 22}, {7, 21}, {7, 10}, {-36, -1}, {-36, -23}, {-20, -22}};
+
+    // Output points
+    std::vector<std::vector<int>> pixelDest;
+
+    // I wish C++ had LINQ ;_;
+    for(size_t i = 0 ; i < dest.size(); i++)
+    {
+        pixelDest.push_back(convertToPixelCoords(dest[i]));
+    }
+
+    pathing::aStarmulti(src, pixelDest);
+}
+
 int main(int _argc, char **_argv)
 {
     // Load gazebo
@@ -95,7 +212,28 @@ int main(int _argc, char **_argv)
 
     gazebo::transport::SubscriberPtr lidarSubscriber = Globals::node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidar::lidarCallback);
 
-    gazebo::transport::SubscriberPtr cameraSubscriber = Globals::node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
+    gazebo::transport::SubscriberPtr cameraSubscriber = Globals::node->Subscribe("~/pioneer2dx/camera/link/camera/image", Camera::cameraCallback);
+
+    gazebo::transport::SubscriberPtr marble_clone_0 = Globals::node->Subscribe("~/marble_clone_0/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_1 = Globals::node->Subscribe("~/marble_clone_1/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_2 = Globals::node->Subscribe("~/marble_clone_2/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_3 = Globals::node->Subscribe("~/marble_clone_3/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_4 = Globals::node->Subscribe("~/marble_clone_4/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_5 = Globals::node->Subscribe("~/marble_clone_5/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_6 = Globals::node->Subscribe("~/marble_clone_6/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_7 = Globals::node->Subscribe("~/marble_clone_7/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_8 = Globals::node->Subscribe("~/marble_clone_8/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_9 = Globals::node->Subscribe("~/marble_clone_9/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_10 = Globals::node->Subscribe("~/marble_clone_10/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_11 = Globals::node->Subscribe("~/marble_clone_11/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_12 = Globals::node->Subscribe("~/marble_clone_12/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_13 = Globals::node->Subscribe("~/marble_clone_13/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_14 = Globals::node->Subscribe("~/marble_clone_14/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_15 = Globals::node->Subscribe("~/marble_clone_15/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_16 = Globals::node->Subscribe("~/marble_clone_16/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_17 = Globals::node->Subscribe("~/marble_clone_17/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_18 = Globals::node->Subscribe("~/marble_clone_18/marble/link/marble_contact/contacts", contactCallback);
+    gazebo::transport::SubscriberPtr marble_clone_19 = Globals::node->Subscribe("~/marble_clone_19/marble/link/marble_contact/contacts", contactCallback);
 
     // Publish to the robot vel_cmd topic
     Globals::movementPublisher = Globals::node->Advertise<gazebo::msgs::Pose>("~/pioneer2dx/vel_cmd");
@@ -108,24 +246,59 @@ int main(int _argc, char **_argv)
     worldPublisher->WaitForConnection();
     worldPublisher->Publish(controlMessage);
 
-    // Set static variables in classes
-    mapping::img.setTo(0);
+    /// Main code
+    // Initialise Q learning system
+    Movement::qLearn.initialize();
+    Movement::qLearn.chooseAction(0, 0, 1);
+
+    // Prepare A* grid
+    LoadImageIntoAStarGrid("../Sem5ProjControl/floor_plan.png");
+    SeedWaypointsWithAStar();
+    /*Waypoint p = {.x = -10.0, .y = 0.0};
+    Globals::CurrentWaypoint = p;*/
+
+
+    // Build fuzzy controllers
+    Movement::marbleController.buildController();
+    Movement::wallController.buildController();
+    Movement::wayController.buildController();
+
+    // Apply settings for Movement class
+    Movement::allowPassiveSlowing = false;
+    Movement::printKeyPresses = false;
+    Movement::testMode = false;
+
+    // Set random seed - TODO: Refactor
+    srand(time(NULL));
 
     // Loop
     while (true)
     {
-        // Insert slight delay between frames
-        gazebo::common::Time::MSleep(10);
-
-        // Handle keyboard input and quit if esc key is pressed
-        if(Movement::HandleKeyboardInput() == -1)
+        try
         {
-            break;
+            // Insert slight delay between frames
+            gazebo::common::Time::MSleep(10);
+
+            // If all marbles have been collected
+            if(marblesCollected == 20)
+            {
+                std::cout << "ya done son" << std::endl;
+            }
+
+            // Handle movement and quit if esc key is pressed
+            if(Movement::HandleMovement() == -1)
+            {
+                break;
+            }
+
+            //WaypointNavigation::NavigateToNextWaypoint();
+        }
+        catch(std::exception e)
+        {
+            std::cout << e.what() << std::endl;
         }
 
-        // Apparently this has to be here, or opencv windows break ¯\_(ツ)_/¯
-        cv::waitKey(1);
-    }
+    }    
 
     // Make sure to shut everything down.
     gazebo::client::shutdown();

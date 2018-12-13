@@ -5,27 +5,22 @@
 #include "camera.h"
 
 
-struct ControlOutput
-{
-    float direction;
-    float speed;
-};
+
 
 class marbel_Controller
 {
 public:
     marbel_Controller();
     virtual ~marbel_Controller() = default;
-    virtual float buildController(int cent);
-    virtual ControlOutput getControlOutput(int cent);
+    virtual void buildController();
+    virtual ControlOutput getControlOutput(float cent, float dist);
 protected:
-    //LaserScanner*        m_pcLaserScanner;
 
-    fl::Engine*          m_pcFLEngine;
-    fl::InputVariable*   m_pflObstacleDirection;
-    fl::InputVariable*   m_pflObstacleDistance;
-    fl::OutputVariable*  m_pflSteerDirection;
-    fl::OutputVariable*  m_pflSpeed;
+    fl::Engine*          marbleEngine;
+    fl::InputVariable*   marbleDirection;
+    fl::InputVariable*   marbleDistance;
+    fl::OutputVariable*  SteerDirection;
+    fl::OutputVariable*  Speed;
     float center;
 };
 

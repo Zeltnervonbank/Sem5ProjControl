@@ -10,15 +10,41 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include <chrono>
+
 #include "globals.h"
 #include "mapping.h"
+#include "qlearning.h"
+#include "marbel_controller.h"
+#include "wall_controller.h"
+#include "waypointcontroller.h"
 
 class Movement
 {
 public:
     Movement();
+
+    static Qlearning qLearn;
+    // Make marble controller (Marble collection)- TODO: Rename
+    static marbel_Controller marbleController;
+    static wall_Controller wallController;
+    static waypointController wayController;
+
+
+    static int runs;
+    static int visited;
+    static int marblePoint;
+    static std::chrono::_V2::steady_clock::time_point start;
+
+    static bool testMode;
+    static bool allowPassiveSlowing;
+    static bool printKeyPresses;
+
     static void PublishPose(ignition::math::Pose3d pose);
-    static int HandleKeyboardInput(bool printKey = false);
+    static void Move();
+    static void Move(double speed, double rotation);
+    static int HandleMovement();
+    static int HandleKeyboardInput();
 };
 
 #endif // MOVEMENT_H

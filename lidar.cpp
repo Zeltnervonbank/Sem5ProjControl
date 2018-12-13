@@ -46,7 +46,7 @@ void lidar::lidarCallback(ConstLaserScanStampedPtr &msg)
 
     // Use Hough transform to find circles in the image
     std::vector<cv::Vec3f> circles;
-    cv::HoughCircles(im_gray, circles, cv::HOUGH_GRADIENT, 1, im_gray.rows/8, 40, 8, 4, 8);
+    cv::HoughCircles(im_gray, circles, cv::HOUGH_GRADIENT, 1, im_gray.rows/8, 45, 11, 10.5, 10.6);
     //std::cout << "There are: " << circles.size() << " circles." << std::endl;
 
     ConvertCirclesToLidarMarbles(circles);
@@ -58,9 +58,9 @@ void lidar::lidarCallback(ConstLaserScanStampedPtr &msg)
 
     // Display images
     mutex.lock();
-    cv::imshow("Lidar", im);
+    //cv::imshow("Lidar", im);
     //cv::imshow("Gray", im_gray);
-    //cv::imshow("CV", cvMat);
+    cv::imshow("CV", cvMat);
     mutex.unlock();
 }
 
@@ -187,7 +187,7 @@ std::vector<LidarMarble> lidar::ConvertCirclesToLidarMarbles(std::vector<cv::Vec
     detectedMarbles.clear();
 
     // Sets nearestMarble to high value
-    nearestMarble.distance = 100.0f;
+    nearestMarble.distance = 1000.0f;
 
     // Loop through detected circles
     for(size_t i = 0; i < circles.size(); i++)
@@ -230,6 +230,7 @@ cv::Mat lidar::DisplayCircles(cv::Mat im, std::vector<cv::Vec3f> circles)
     {
        cv::Point2f center(circles[i][0], circles[i][1]);
        float radius = circles[i][2];
+       //std::cout << "radius" << radius << std::endl;
 
        // Circle outline
        cv::circle( im, center, radius, cv::Scalar(255, 0, 0), 2, 8, 0 );

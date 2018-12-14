@@ -101,7 +101,7 @@ void contactCallback(ConstContactSensorPtr &_msg)
 
         if(diffC.count() >= 0.20)
         {
-            Movement::marblePoint += 100;
+            Movement::marblePoint += 1000;
             marblesCollected++;
             //std::cout << "Marble point:                          " << Movement::marblePoint << std::endl;
             //std::cout << "Marbles collected:                          " << marblesCollected << std::endl;
@@ -190,17 +190,13 @@ void SetDestinations()
     Globals::destinations = {{-36, 22}, {-25, 22}, {-26, 11}, {-36, 10}, {-13, 11}, {-13, 22}, {7, 21}, {7, 10}, {-36, -1}, {-36, -23}, {-20, -22}};
 }
 
-void AddDestinationToQueue(int index)
-{
-    Destination d = {.x = (double)Globals::destinations[index][0], .y = (double)Globals::destinations[index][1], .index = index};
-    Globals::destinationQueue.push(d);
-}
+
 
 void AddAllToDestinationQueue()
 {
     for (size_t i = 0; i < Globals::destinations.size(); i++)
     {
-        AddDestinationToQueue(i);
+        Movement::AddDestinationToQueue(i);
     }
 }
 
@@ -219,7 +215,7 @@ void RandomOrderAddAllDestinationsToQueue()
     // Add each destination to queue
     for(size_t i = 0; i < shuffledIndexes.size(); i++)
     {
-        AddDestinationToQueue(shuffledIndexes[i]);
+         Movement::AddDestinationToQueue(shuffledIndexes[i]);
     }
 }
 
@@ -229,7 +225,7 @@ void SeedWaypointsWithAStar()
     std::vector<int> src = convertToPixelCoords({0, 0});
 
     // List of points we want to go to
-    std::vector<std::vector<int>> dest = {{-36, 22}, {-25, 22}, {-26, 11}, {-36, 10}, {-13, 11}, {-13, 22}, {7, 21}, {7, 10}, {-36, -1}, {-36, -23}, {-20, -22}};
+    std::vector<std::vector<int>> dest = {{-25, 22}, {-26, 11}, {-36, 10}, {-13, 11}, {-13, 22}, {7, 21}, {7, 10}, {-36, -1}, {-36, 22}, {-36, -23}, {-20, -22}};
 
     // Output points
     std::vector<std::vector<int>> pixelDest;
@@ -296,11 +292,13 @@ int main(int _argc, char **_argv)
     /// Main code
     // Prepare destinations
     SetDestinations();
-    RandomOrderAddAllDestinationsToQueue();
+    //RandomOrderAddAllDestinationsToQueue();
 
     // Initialise Q learning system
     Movement::qLearn.Initialize();
-    Movement::qLearn.ChooseAction(0, 0, 1);
+    Movement::AddDestinationToQueue(Movement::qLearn.ChooseAction(0));
+    //Movement::qLearn.PrintRoute();
+
 
     // Prepare A* grid
     LoadImageIntoAStarGrid("../Sem5ProjControl/floor_plan.png");
@@ -322,7 +320,7 @@ int main(int _argc, char **_argv)
     Movement::allowPassiveSlowing = true;
     Movement::printKeyPresses = false;
     Movement::testMode = false;
-    Movement::enableAutomaticMovement = false;
+    Movement::enableAutomaticMovement = true;
 
     // Set random seed - TODO: Refactor
     srand(time(NULL));
@@ -334,15 +332,15 @@ int main(int _argc, char **_argv)
         std::cout << "\033[2J\033[1;1H";
 
         // Insert slight delay between frames
-        try
-        {
+        //try
+        //{
             gazebo::common::Time::MSleep(10);
-        }
-        catch(std::exception e)
-        {
+        //}
+        //catch(std::exception e)
+/*        {
             std::cout << "An error occurred:\n" << e.what() << std::endl;
         }
-
+*/
         // If all marbles have been collected
         if(marblesCollected == 20)
         {

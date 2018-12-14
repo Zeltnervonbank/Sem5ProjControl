@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <fstream>
+#include "globals.h"
 
 
 class Qlearning
@@ -17,8 +18,9 @@ public:
     Qlearning();
     ~Qlearning();
     void Run();
-    void ChooseAction(int initialState, int marbles, double time);
+    int ChooseAction(int initialState);
     int GetRandomAction();
+    int GetBestAction();
     void Initialize();
     int Maximum(int state, bool returnIndexOnly);
     int Reward(int marbles, double time);
@@ -31,15 +33,16 @@ public:
 
 
 private:
-    int R[23][23];
-    int initialStates[23] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 10, 20, 21, 22};
+    int R[12][12];
+    int initialStates[12] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     int possibleAction;
-    int rSize = 23;
+    int rSize = 12;
 
     const double gamma = 0.8;
+    const double alpha = 0.5;
     int newState = 0;
-    int RTemp[23][23];
-    int Ropt[23][23];
+    int RTemp[12][12];
+
 };
 
 #endif // QLEARNING_H

@@ -49,7 +49,7 @@ int Qlearning::GetRandomAction()
 {
     int action;
     bool choiceIsValid = false;
-    //printRtemp();
+    //printRTemp();
 
     do
     {
@@ -64,22 +64,38 @@ int Qlearning::GetRandomAction()
     }
     while(!choiceIsValid);
 
+    return action;
+}
+
+int Qlearning::GetBestAction(){
+
+    int action = Maximum(currentState, true);
+    return action;
+}
+
+int Qlearning::ChooseAction(int currstate)
+{
+    currentState = currstate;
+
+    int var = (rand() % 100);
+    std::cout << var << std::endl;
+
+    if(var<=50)
+    {
+        possibleAction = GetRandomAction();
+    }
+    else
+    {
+       possibleAction = GetBestAction();
+    }
+
     // Fill temp matrix with "-1" to avoid selecting it again.
     for(int i = 0; i <= (rSize - 1); i++)
     {
         RTemp[currentState][i] = -1;
     }
 
-    return action;
-}
-
-void Qlearning::ChooseAction(int initialState, int marbles, double time)
-{
-    currentState = initialState;
-
-    possibleAction = GetRandomAction();
-
-    if(R[currentState][possibleAction] >= 0)
+    /*if(R[currentState][possibleAction] >= 0)
     {
         //std::cout << reward(possibleAction,marbles,itterations) << std::endl;
         R[currentState][possibleAction] = Reward(marbles, time); //Update reward of choosen action.
@@ -89,6 +105,8 @@ void Qlearning::ChooseAction(int initialState, int marbles, double time)
         currentState = possibleAction;
         std::cout << "currentState:" << currentState << std::endl;
     }
+    */
+    return possibleAction;
 }
 
 int Qlearning::Maximum(int state, bool returnIndexOnly)
@@ -104,16 +122,19 @@ int Qlearning::Maximum(int state, bool returnIndexOnly)
     do
     {
         foundNewWinner = false;
-        for(int i = 0; i <= (rSize - 1); i++)
+        for(int i = 1; i <= (rSize - 1); i++)
         {
             if((i < winner) || (i > winner))
             {     //Avoid self-comparison.
-                if(Ropt[state][i] > Ropt[state][winner])
+                if(RTemp[state][i] > RTemp[state][winner])
                 {
                     winner = i;
                     foundNewWinner = true;
                 }
             }
+        }
+        if(!foundNewWinner){
+            done = true;
         }
     }
     while(!done);
@@ -137,7 +158,7 @@ int Qlearning::Reward(int marbles, double time)
     //std::cout << gamma * R[currentState][possibleAction] << std::endl;
     int rewardV = marbles / time;
     std::cout << "reward" << rewardV << std::endl;
-    return static_cast<int>((rewardV + (gamma * R[currentState][possibleAction])) / 2);
+    return static_cast<int>(R[currentState][possibleAction]+gamma*(rewardV + Qlearning::Maximum(possibleAction,false) - R[currentState][possibleAction]));
 }
 
 void Qlearning::PrintR(){
@@ -163,19 +184,18 @@ void Qlearning::PrintRoute()
     {
         for(int j = 0; j <= (rSize - 1); j++)
         {
-            Ropt[i][j] = R[i][j];
+            RTemp[i][j] = R[i][j];
         }
     }
-
     currentState = initialStates[0];
     std::cout << "Optimal path:  " << std::endl;
     for(int i = 0; i < rSize; i++)
     {
-        //printRtemp();
+        //printRTemp();
         //std::cout << "hej" << std::endl;
         newState = Maximum(currentState, true);
         for(int i = 0; i <= (rSize - 1); i++){
-                Ropt[i][newState] = -1;
+                RTemp[i][newState] = -1;
         }
         currentState = newState;
         std::cout << currentState << ", ";
@@ -217,7 +237,12 @@ void Qlearning::UpdateReward(int currS, int prevS, int point, double time)
     //std::cout << gamma * R[currentState][possibleAction] << std::endl;
     int rewardV=point/time;
     std::cout << "reward" << rewardV << std::endl;
-    R[currS][prevS]=((rewardV + (gamma * R[currS][prevS]))/2);
+    R[prevS][currS]=R[prevS][currS]+alpha*(rewardV + gamma*(Qlearning::Maximum(currS,false)) - R[prevS][currS]);
+
+    for(int i = 0; i <= (rSize - 1); i++){
+            RTemp[i][currS] = -1;
+    }
+    Qlearning::WriteToFile();
 }
 
 

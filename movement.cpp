@@ -54,7 +54,7 @@ int Movement::HandleMovement()
     {
         return -1;
     }
-
+/*
     if(enableAutomaticMovement)
     {
         // If a marble is close, move toward it
@@ -97,7 +97,7 @@ int Movement::HandleMovement()
         // If no marbles are visible, use A* to move to next waypoint
         else
         {
-            if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
+           if(Globals::GetDistanceToWaypoint() < 0.1 && Globals::waypoints.size() > 0)
             {
                 // Get the next waypoint from queue, and stop robot
                 Globals::NextWaypoint();
@@ -107,13 +107,10 @@ int Movement::HandleMovement()
             {
                 if(Globals::currentWaypoint.isDestination)
                 {
-                    Globals::NextDestination();
                     // Alex kald ting her
                 }
-                if(!Globals::currentWaypoint.isMarble)
-                {
-                    pathing::CreatePathToCurrentDestination();
-                }
+                Globals::NextDestination();
+                pathing::CreatePathToCurrentDestination();
             }
             std::cout << "                  path" << std::endl;
 
@@ -121,6 +118,7 @@ int Movement::HandleMovement()
             speed = wayController.getControlOutput().speed;
         }
 
+        std::cout << "dirr" << dir << "speed:" << speed << std::endl;
     }
 
     std::cout << "dirr" << dir << "speed:" << speed << std::endl;
@@ -142,16 +140,16 @@ int Movement::HandleMovement()
 int Movement::HandleKeyboardInput()
 {
     int key = 0;
-    try
-    {
+    //try
+    //{
         Globals::mutex.lock();
         key = cv::waitKey(1);
         Globals::mutex.unlock();
-    }
-    catch(std::exception e)
-    {
-        std::cout << "An error occurred:\n" << e.what() << std::endl;
-    }
+    //}
+    //catch(std::exception e)
+    //{
+    //    std::cout << "An error occurred:\n" << e.what() << std::endl;
+    //}
 
     // Break out if esc pressed
     if (key == KEY_ESC)
@@ -204,7 +202,7 @@ int Movement::HandleKeyboardInput()
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> diff = end - start;
 
-        qLearn.ChooseAction(qLearn.currentState, marblePoint, diff.count());
+        qLearn.ChooseAction(Globals::currentDestination.index);
         qLearn.PrintR();
 
         marblePoint = 0;
@@ -227,4 +225,10 @@ int Movement::HandleKeyboardInput()
     }    
 
     return 0;
+}
+
+void Movement::AddDestinationToQueue(int index)
+{
+    Destination d = {.x = (double)Globals::destinations[index][0], .y = (double)Globals::destinations[index][1], .index = index};
+    Globals::destinationQueue.push(d);
 }

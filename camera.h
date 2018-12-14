@@ -16,6 +16,7 @@
 #include <stdlib.h>
 
 #include "marbel_controller.h"
+#include "globals.h"
 
 
 class Camera

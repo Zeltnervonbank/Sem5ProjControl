@@ -42,11 +42,11 @@ void Lidar::LidarCallback(ConstLaserScanStampedPtr &msg)
     cvMat = DisplayLines(cvMat, lines);
 
     // Add a little blur
-    GaussianBlur(im_gray, im_gray, cv::Size(3, 3), 2, 2);
+    GaussianBlur(im_gray, im_gray, cv::Size(9, 9), 2, 2);
 
     // Use Hough transform to find circles in the image
     std::vector<cv::Vec3f> circles;
-    cv::HoughCircles(im_gray, circles, cv::HOUGH_GRADIENT, 1, im_gray.rows/8, 20, 11, 4, 10);
+    cv::HoughCircles(im_gray, circles, cv::HOUGH_GRADIENT, 1, im_gray.rows/8, 75, 22, 10, 10);
     //std::cout << "There are: " << circles.size() << " circles." << std::endl;
 
     ConvertCirclesToLidarMarbles(circles);
@@ -54,14 +54,14 @@ void Lidar::LidarCallback(ConstLaserScanStampedPtr &msg)
 
     // Add robot location and time overlay
     //cv::circle(im, cv::Point(300, 300), 2, cv::Scalar(0, 0, 255));
-    //cv::putText(im, std::to_string(sec) + ":" + std::to_string(nsec), cv::Point(10, 20), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(255, 0, 0));
+    //cv::putText(im, std::to_string(sec) + ":" + std::to_stri ng(nsec), cv::Point(10, 20), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(255, 0, 0));
 
     // Display images
-    mutex.lock();
+    Globals::mutex.lock();
     //cv::imshow("Lidar", im);
     cv::imshow("Gray", im_gray);
     cv::imshow("CV", cvMat);
-    mutex.unlock();
+    Globals::mutex.unlock();
 }
 
 std::vector<LidarRay> Lidar::GetLidarPoints(ConstLaserScanStampedPtr &msg)
@@ -172,14 +172,14 @@ std::vector<LidarMarble> Lidar::ConvertCirclesToLidarMarbles(std::vector<cv::Vec
     {
         // Get relevant points
         cv::Point center(circles[i][0], circles[i][1]);
-        cv::Point robPos(300, 300); // Manually set based on image size
-        cv::Point diffPoint = center - robPos;
+        int xDisplacement = center.x - 300;
+        int yDisplacement = 300 - center.y;
 
         // Get euclidean distance from center to the center of the circle
-        float distance = sqrt(pow(diffPoint.x, 2.0) + pow(diffPoint.y, 2.0));
+        double distance = sqrt(pow(xDisplacement, 2.0) + pow(yDisplacement, 2.0));
 
-        // Get the angle between the robot's forward axis and the center of the circle,
-        float angle = atan2(diffPoint.x, diffPoint.y) - 90.0f * M_PI/180.0f;
+        // Get the angle between the robot's forward axis and the center of the circle
+        double angle = atan2(yDisplacement, xDisplacement);
 
         // Print distance and angle
         //std::cout << "Distance to Marble: " << i << " - " << distance << std::endl;
@@ -197,6 +197,45 @@ std::vector<LidarMarble> Lidar::ConvertCirclesToLidarMarbles(std::vector<cv::Vec
         // Add that object to return vector and static vector
         marbles.push_back(marble);
         detectedMarbles.push_back(marble);
+    }
+
+
+    // Get distance to marble in real coordinate distance
+    double coordDistance = nearestMarble.distance / 20.0;
+
+    double yaw = Globals::GetRobotYaw();
+
+    double worldToYawAngle = Globals::AngleBetweenVectors(0.0, 1.0, Globals::GetRobotYaw(), 1.0);
+
+    double offsetAngle = worldToYawAngle + nearestMarble.angle;
+
+    // Calculate x and y offsets from current position
+    double marbleXCoord = coordDistance * cos(offsetAngle) + Globals::lastPosition.posX;
+    double marbleYcoord = coordDistance * sin(offsetAngle) + Globals::lastPosition.posY;
+    std::cout << "Yaw angle: " << worldToYawAngle << " yaw -> marble angle: " << nearestMarble.angle << std::endl;
+    std::cout << "Marblepos: " << marbleXCoord << " " << marbleYcoord << std::endl;
+
+    // If the calculated point is sufficiently far from the current waypoint
+    if(sqrt(pow(abs(Globals::currentWaypoint.x - marbleXCoord), 2) + pow(abs(Globals::currentWaypoint.y - marbleYcoord), 2)) > 1)
+    {
+        // Clear current waypoint queue
+        Globals::ClearWaypointQueue();
+
+        RobotPosition p = Globals::lastPosition;
+        pathing::AStarSearch(pathing::ConvertCoordsToPathingCoord(p.posX, p.posY), pathing::ConvertCoordsToPathingCoord(marbleXCoord, marbleYcoord), 2);
+
+        // Make waypoint from this data and push it into the queue
+        /*Waypoint w = {.x = marbleXCoord, .y = marbleYcoord, .isDestination = false, .isMarble = true};
+        Globals::waypoints.push(w);
+        Globals::waypoints.push(Globals::currentWaypoint);
+        */
+        Globals::NextWaypoint();
+
+        //std::cout << "Added point: " << marbleXCoord << " " << marbleYcoord << std::endl;
+    }
+    else
+    {
+        //std::cout << "" << std::endl;
     }
 
     return marbles;

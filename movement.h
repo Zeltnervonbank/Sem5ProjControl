@@ -19,6 +19,7 @@
 #include "wall_controller.h"
 #include "waypointcontroller.h"
 #include "pathing.h"
+#include "lidar.h"
 
 class Movement
 {

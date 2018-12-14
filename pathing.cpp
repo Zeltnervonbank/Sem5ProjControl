@@ -41,7 +41,7 @@ double pathing::CalculateHValue(int row, int col, Pair dest)
 }
 
 // A function to track the path from the source to destination
-void pathing::TracePath(cell cellDetails[][COL], Pair dest)
+void pathing::TracePath(cell cellDetails[][COL], Pair dest, int destType)
 {
     cv::Mat image = cv::imread("../Sem5ProjControl/floor_plan.png", CV_LOAD_IMAGE_COLOR); //laptop location
     printf ("\nThe Path is ");
@@ -75,6 +75,7 @@ void pathing::TracePath(cell cellDetails[][COL], Pair dest)
             .x = (p.first - (ROW / 2.0)) * 0.25,
             .y = -(p.second - (COL / 2.0)) * 0.25
         };
+        wp.isMarble = destType == 2;
         waypoints.push_back(wp);
 
         image.at<cv::Vec3b>(p.second, p.first) = 255;
@@ -91,7 +92,11 @@ void pathing::TracePath(cell cellDetails[][COL], Pair dest)
         }        
         else if(i == waypoints.size() - 1)
         {
-            waypoints[i].isDestination = true;
+            if(destType == 1)
+            {
+                waypoints[i].isDestination = true;
+            }
+
             Globals::waypoints.push(waypoints[i]);
             continue;
         }
@@ -129,9 +134,9 @@ void pathing::TracePath(cell cellDetails[][COL], Pair dest)
         }*/
     }
 
-    std::cout << std::endl;
+    //std::cout << std::endl;
     cv::namedWindow("scaled", CV_WINDOW_AUTOSIZE);
-    //cv::imshow("scaled", image);
+    cv::imshow("scaled", image);
 }
 
 bool pathing::GetCollinearity(Waypoint a, Waypoint b, Waypoint c)
@@ -268,7 +273,7 @@ void pathing::VerboseAStarSearch(Pair src, Pair dest)
                 cellDetails[i - 1][j].parent_i = i;
                 cellDetails[i - 1][j].parent_j = j;
                 printf ("The destination cell is found\n");
-                TracePath (cellDetails, dest);
+                TracePath (cellDetails, dest, 1);
                 foundDest = true;
                 return;
             }
@@ -311,7 +316,7 @@ void pathing::VerboseAStarSearch(Pair src, Pair dest)
                 cellDetails[i + 1][j].parent_i = i;
                 cellDetails[i + 1][j].parent_j = j;
                 printf("The destination cell is found\n");
-                TracePath(cellDetails, dest);
+                TracePath(cellDetails, dest, 1);
                 foundDest = true;
                 return;
             }
@@ -344,7 +349,7 @@ void pathing::VerboseAStarSearch(Pair src, Pair dest)
                 cellDetails[i][j + 1].parent_i = i;
                 cellDetails[i][j + 1].parent_j = j;
                 printf("The destination cell is found\n");
-                TracePath(cellDetails, dest);
+                TracePath(cellDetails, dest, 1);
                 foundDest = true;
                 return;
             }
@@ -376,7 +381,7 @@ void pathing::VerboseAStarSearch(Pair src, Pair dest)
                 cellDetails[i][j - 1].parent_i = i;
                 cellDetails[i][j - 1].parent_j = j;
                 printf("The destination cell is found\n");
-                TracePath(cellDetails, dest);
+                TracePath(cellDetails, dest, 1);
                 foundDest = true;
                 return;
             }
@@ -408,7 +413,7 @@ void pathing::VerboseAStarSearch(Pair src, Pair dest)
                 cellDetails[i - 1][j + 1].parent_i = i;
                 cellDetails[i - 1][j + 1].parent_j = j;
                 printf ("The destination cell is found\n");
-                TracePath (cellDetails, dest);
+                TracePath (cellDetails, dest, 1);
                 foundDest = true;
                 return;
             }
@@ -440,7 +445,7 @@ void pathing::VerboseAStarSearch(Pair src, Pair dest)
                 cellDetails[i - 1][j - 1].parent_i = i;
                 cellDetails[i - 1][j - 1].parent_j = j;
                 printf ("The destination cell is found\n");
-                TracePath (cellDetails, dest);
+                TracePath (cellDetails, dest, 1);
                 foundDest = true;
                 return;
             }
@@ -470,7 +475,7 @@ void pathing::VerboseAStarSearch(Pair src, Pair dest)
                 cellDetails[i + 1][j - 1].parent_i = i;
                 cellDetails[i + 1][j - 1].parent_j = j;
                 printf("The destination cell is found\n");
-                TracePath(cellDetails, dest);
+                TracePath(cellDetails, dest, 1);
                 foundDest = true;
                 return;
             }
@@ -501,7 +506,7 @@ void pathing::VerboseAStarSearch(Pair src, Pair dest)
                 cellDetails[i + 1][j + 1].parent_i = i;
                 cellDetails[i + 1][j + 1].parent_j = j;
                 printf ("The destination cell is found\n");
-                TracePath (cellDetails, dest);
+                TracePath (cellDetails, dest, 1);
                 foundDest = true;
                 return;
             }
@@ -534,7 +539,7 @@ void pathing::VerboseAStarSearch(Pair src, Pair dest)
                 cellDetails[i + 1][j - 1].parent_i = i;
                 cellDetails[i + 1][j - 1].parent_j = j;
                 printf("The destination cell is found\n");
-                TracePath(cellDetails, dest);
+                TracePath(cellDetails, dest, 1);
                 foundDest = true;
                 return;
             }
@@ -570,7 +575,7 @@ void pathing::VerboseAStarSearch(Pair src, Pair dest)
 }
 
 // Does the same as aStarSearch, but is less verbose
-void pathing::AStarSearch(Pair src, Pair dest)
+void pathing::AStarSearch(Pair src, Pair dest, int destType)
 {
 
     // If the source is out of range
@@ -707,8 +712,8 @@ void pathing::AStarSearch(Pair src, Pair dest)
                 {
                     cellDetails[nI][nJ].parent_i = i;
                     cellDetails[nI][nJ].parent_j = j;
-                    printf("The destination cell is found\n");
-                    TracePath(cellDetails, dest);
+                    //printf("The destination cell is found\n");
+                    TracePath(cellDetails, dest, destType);
                     foundDest = true;
                     return;
                 }
@@ -756,24 +761,24 @@ void pathing::AStarMultiSearch(std::vector<int> src, std::vector<std::vector<int
             goal = std::make_pair(dest[i][0], dest[i][1]);
         }
 
-        AStarSearch(start, goal);
+        AStarSearch(start, goal, 1);
     }
 }
 
 void pathing::CreatePathToCurrentDestination()
 {
     // Convert current destination and current position to pair form
-    Pair destination = ConvertCoordsToPathingCoord(Globals::currentDestination.x, Globals::currentDestination   .y);
+    Pair destination = ConvertCoordsToPathingCoord(Globals::currentDestination.x, Globals::currentDestination.y);
     Pair currentPosition = ConvertCoordsToPathingCoord(Globals::lastPosition.posX, Globals::lastPosition.posY);
 
     // Clear current waypoints
     Globals::ClearWaypointQueue();
 
     // Make a new path
-    AStarSearch(currentPosition, destination);
+    AStarSearch(currentPosition, destination, 1);
 
     // Set a new next waypoint
-    Globals::NextWaypoint();
+    //Globals::NextWaypoint();
 }
 
 Pair pathing::ConvertCoordsToPathingCoord(double x, double y)

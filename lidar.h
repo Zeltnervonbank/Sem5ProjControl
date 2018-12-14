@@ -10,8 +10,11 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include "datatypes.h"
 #include <cmath>
+
+#include "datatypes.h"
+#include "globals.h"
+#include "pathing.h"
 
 #ifndef LIDAR_H
 #define LIDAR_H

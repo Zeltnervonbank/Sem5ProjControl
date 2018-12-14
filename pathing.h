@@ -41,9 +41,10 @@ public:
     static cv::Mat image;
 
     static void VerboseAStarSearch(Pair src, Pair dest);
-    static void AStarSearch(Pair src, Pair dest);
+    static void AStarSearch(Pair src, Pair dest, int destType);
     static void AStarMultiSearch(std::vector<int> src, std::vector<std::vector<int>> dest);
     static void CreatePathToCurrentDestination();
+    static Pair ConvertCoordsToPathingCoord(double x, double y);
 
 private:
     static bool IsValid(int row, int col);
@@ -53,8 +54,7 @@ private:
     static double CalculateHValue(int row, int col, Pair dest);
     static bool GetCollinearity(Waypoint a, Waypoint b, Waypoint c);
 
-    static void TracePath(cell cellDetails[][COL], Pair dest);
-    static Pair ConvertCoordsToPathingCoord(double x, double y);
+    static void TracePath(cell cellDetails[][COL], Pair dest, int destType);
 };
 
 

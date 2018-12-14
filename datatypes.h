@@ -14,9 +14,9 @@ struct MarbleLocation
 
 struct LidarMarble
 {
-    float distance;
-    float angle;
-    float radius;
+    double distance;
+    double angle;
+    double radius;
 };
 
 struct LidarRay
@@ -45,6 +45,7 @@ struct Waypoint
     double y;
 
     bool isDestination;
+    bool isMarble;
 };
 
 struct Destination

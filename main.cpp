@@ -103,10 +103,11 @@ void contactCallback(ConstContactSensorPtr &_msg)
         {
             Movement::marblePoint += 100;
             marblesCollected++;
-            std::cout << "Marble point:                          " << Movement::marblePoint << std::endl;
-            std::cout << "Marbles collected:                          " << marblesCollected << std::endl;
+            //std::cout << "Marble point:                          " << Movement::marblePoint << std::endl;
+            //std::cout << "Marbles collected:                          " << marblesCollected << std::endl;
 
             pathing::CreatePathToCurrentDestination();
+            Globals::NextWaypoint();
         }
 
         tempC = startC;
@@ -170,17 +171,17 @@ void LoadImageIntoAStarGrid(const char* path)
             auto i = image.at<uchar>(x, y);
             if(i == 255)
             {
-                std::cout << "1";
+                //std::cout << "1";
                 pathing::grid[y][x] = 1;
 
             }
             else
             {
-                std::cout << "0";
+                //std::cout << "0";
                 pathing::grid[y][x] = 0;
             }
         }
-        std::cout << std::endl;
+        //std::cout << std::endl;
     }
 }
 
@@ -305,6 +306,7 @@ int main(int _argc, char **_argv)
     LoadImageIntoAStarGrid("../Sem5ProjControl/floor_plan.png");
     Globals::NextDestination();
     pathing::CreatePathToCurrentDestination();
+    Globals::NextWaypoint();
 
     //SeedWaypointsWithAStar();
     /*Waypoint p = {.x = -10.0, .y = 0.0};
@@ -328,6 +330,9 @@ int main(int _argc, char **_argv)
     // Loop
     while (true)
     {
+        // Clear console
+        std::cout << "\033[2J\033[1;1H";
+
         // Insert slight delay between frames
         try
         {

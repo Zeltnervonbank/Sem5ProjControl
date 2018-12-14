@@ -35,6 +35,9 @@ public:
 
     static void NextDestination();
     static void NextWaypoint();
+
+    static double GetRobotYaw();
+    static double AngleBetweenVectors(double angleA, double magnitudeA, double angleB, double magnitudeB);
 };
 
 #endif // GAZEBOGLOBALS_H

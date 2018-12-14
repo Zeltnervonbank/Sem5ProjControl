@@ -133,7 +133,7 @@ ControlOutput waypointController::getControlOutput()
     // Calculate angle between vectors
     double difference = cross < 0 ? -acos(dot / distance) : acos(dot / distance);
 
-    std::cout << difference << " " << distance << std::endl;
+    //std::cout << difference << " " << distance << std::endl;
 
 
     waypointDirection->setValue(difference);

@@ -65,7 +65,7 @@ int Movement::HandleMovement()
         }
 
         // If marbles are visible, and within a certain range, move toward it
-        else if(Lidar::marblesPresent && Lidar::nearestMarble.distance < 1000 && Lidar::nearestMarble.angle<4)
+        /*else if(Lidar::marblesPresent && Lidar::nearestMarble.distance < 1000 && Lidar::nearestMarble.angle<4)
         {
             std::cout << "                  marble" << std::endl;
 
@@ -78,9 +78,9 @@ int Movement::HandleMovement()
                         Lidar::nearestMarble.angle,
                         Lidar::nearestMarble.distance
                         ).speed;
-        }
+        }*/
         // If we're about to move into an obstacle, don't
-        else if(Lidar::nearestPoint.range < 0.5 && abs(Lidar::nearestPoint.angle) <= 1.56)
+        else if(Lidar::nearestPoint.range < 0.2 && abs(Lidar::nearestPoint.angle) <= 1.56)
         {
             std::cout << "                  wall" << std::endl;
             dir = wallController.getControlOutput(
@@ -88,10 +88,10 @@ int Movement::HandleMovement()
                         Lidar::nearestPoint.range
                         ).direction;
 
-                speed = wallController.getControlOutput(
-                            Lidar::nearestPoint.angle,
-                            Lidar::nearestPoint.range
-                            ).speed;
+            speed = wallController.getControlOutput(
+                        Lidar::nearestPoint.angle,
+                        Lidar::nearestPoint.range
+                        ).speed;
         }
 
         // If no marbles are visible, use A* to move to next waypoint
@@ -107,10 +107,13 @@ int Movement::HandleMovement()
             {
                 if(Globals::currentWaypoint.isDestination)
                 {
+                    Globals::NextDestination();
                     // Alex kald ting her
                 }
-                Globals::NextDestination();
-                pathing::CreatePathToCurrentDestination();
+                if(!Globals::currentWaypoint.isMarble)
+                {
+                    pathing::CreatePathToCurrentDestination();
+                }
             }
             std::cout << "                  path" << std::endl;
 
@@ -118,8 +121,19 @@ int Movement::HandleMovement()
             speed = wayController.getControlOutput().speed;
         }
 
-        std::cout << "dirr" << dir << "speed:" << speed << std::endl;
     }
+
+    std::cout << "dirr" << dir << "speed:" << speed << std::endl;
+    std::cout << "Current position: " << Globals::lastPosition.posX << " " << Globals::lastPosition.posY << std::endl;
+    std::cout << "Current destination: " << Globals::currentDestination.x << " " << Globals::currentDestination.y << std::endl;
+    std::cout <<
+        "Target: " << Globals::currentWaypoint.x <<
+        " " << Globals::currentWaypoint.y <<
+        " D: " << Globals::currentWaypoint.isDestination <<
+        " M:" << Globals::currentWaypoint.isMarble
+        << std::endl;
+    std::cout << "Waypoints remaining: " << Globals::waypoints.size() << std::endl;
+    std::cout << "Marbles found: " << Lidar::detectedMarbles.size() << std::endl;
 
     Move();
 }

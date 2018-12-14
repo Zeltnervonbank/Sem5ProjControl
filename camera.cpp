@@ -41,9 +41,9 @@ void Camera::CameraCallback(ConstImageStampedPtr &msg){
 
     cv::cvtColor(kombi, kombi, CV_HSV2RGB);
 
-    mutex.lock();
+    Globals::mutex.lock();
     cv::imshow("camera", im);
-    mutex.unlock();
+    Globals::mutex.unlock();
 
     //Camera::getMarbelCenter(kombi);
 }

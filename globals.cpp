@@ -23,9 +23,12 @@ void Globals::ClearDestinationQueue()
 
 void Globals::NextDestination()
 {
-    previousDestination = currentDestination;
-    currentDestination = destinationQueue.front();
-    destinationQueue.pop();
+    if(destinationQueue.size() > 0)
+    {
+        previousDestination = currentDestination;
+        currentDestination = destinationQueue.front();
+        destinationQueue.pop();
+    }
 }
 
 void Globals::NextWaypoint()

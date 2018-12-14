@@ -54,7 +54,7 @@ int Movement::HandleMovement()
     {
         return -1;
     }
-/*
+
     if(enableAutomaticMovement)
     {
         // If a marble is close, move toward it
